@@ -1,0 +1,16 @@
+#ifndef PRICES_H
+#define PRICES_H
+
+// +Firo9 WEAPON PRICES
+#define PDW_PRICE	1300
+#define PDW_AMMO_PRICE	20
+
+#define DEAGLE_PRICE	700
+#define DEAGLE_AMMO_PRICE	20
+
+#define ARMOR1_PRICE	750
+#define ARMOR2_PRICE	1250
+#define ARMOR3_PRICE	1750
+//-Firo9 WEAPON PRICES
+
+#endif 

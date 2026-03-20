@@ -1,0 +1,44 @@
+void CBaseMonster::MoveExecute( CBaseEntity *pTargetEnt, const Vector &vecDir, float flInterval )
+{
+//	float flYaw = UTIL_VecToYaw ( m_Route[ m_iRouteIndex ].vecLocation - pev->origin );// build a yaw that points to the goal.
+//	WALK_MOVE( ENT(pev), flYaw, m_flGroundSpeed * flInterval, WALKMOVE_NORMAL );
+	if ( m_IdealActivity != m_movementActivity )
+		m_IdealActivity = m_movementActivity;
+
+	float flTotal = m_flGroundSpeed * pev->framerate * flInterval;
+	float flStep;
+  vec3_t tmp;
+  TraceResult tr;
+	while (flTotal > 0.001)
+	{
+		// don't walk more than 16 units or stairs stop working
+		flStep = min( 16.0, flTotal );
+    vec3_t dir = ( m_Route[ m_iRouteIndex ].vecLocation - pev->origin ).Normalize( );
+    UTIL_TraceLine( pev->origin, pev->origin + dir * 20, ignore_monsters, ENT( pev ), &tr );
+    if( tr.flFraction < 1.0 && tr.pHit->v.solid == SOLID_BSP )
+    {
+      vec3_t targ = tr.vecEndPos + dir * 20;
+      UTIL_TraceLine( Vector( targ.x, targ.y, targ.z + 50 ), targ, ignore_monsters, ENT( pev ), &tr );
+      targ.z -= 20;
+      if( tr.flFraction < 1.0 && tr.pHit->v.solid == SOLID_BSP )
+      {
+        pev->origin = tr.vecEndPos;
+        pev->origin.z -= 10;
+        flStep = 20;
+      }
+      else
+        pev->origin =  targ;
+      ChangeSchedule( GetScheduleOfType( SCHED_CHASE_ENEMY ) );
+   }
+    //tmp = pev->origin;
+    else
+      UTIL_MoveToOrigin ( ENT(pev), m_Route[ m_iRouteIndex ].vecLocation, flStep, MOVE_NORMAL );
+    /*if( ( pev->origin - tmp ).Length( ) < flStep )
+    {
+      ChangeSchedule( GetScheduleOfType( SCHED_CHASE_ENEMY ) );
+      pev->origin.z += 10;
+    }*/
+		flTotal -= flStep;
+	}
+	// ALERT( at_console, "dist %f\n", m_flGroundSpeed * pev->framerate * flInterval );
+}

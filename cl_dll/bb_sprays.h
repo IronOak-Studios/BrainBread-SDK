@@ -1,0 +1,13 @@
+#ifndef BB_SPRAYS_H
+#define BB_SPRAYS_H
+
+#define SPRAY_BLOOD 1
+#define SPRAY_BLOODHEAD 2
+#define SPRAY_BURN 3
+#define SPRAY_DUST 4
+#define SPRAY_TANK 5
+#define SPRAY_PLRBLOOD 6
+#define SPRAY_PLRBLOODBIG 7
+#define SPRAY_PLRBLOODSTREAM 8
+
+#endif //BB_SPRAYS_H
