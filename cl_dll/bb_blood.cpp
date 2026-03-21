@@ -1,5 +1,9 @@
 #include "hud.h"
 #include "cl_util.h"
+// Undefine min/max macros before any C++ standard library or Windows SDK
+// headers to prevent macro interference with <cstdlib> and <algorithm>
+#undef min
+#undef max
 #include "string.h"
 #include "bb_blood.h"
 #include "triangleapi.h"
@@ -10,8 +14,6 @@
 #include "r_studioint.h"
 #include <gl/gl.h>
 #include <gl/glext.h>
-#undef min
-#undef max
 #include <list>
 using namespace std;
 #ifndef max

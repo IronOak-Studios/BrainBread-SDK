@@ -214,7 +214,7 @@ public:
 	int MsgFunc_Train(const char *pszName, int iSize, void *pbuf);
 
 private:
-	cldll::HSPRITE m_hSprite;
+	HSPRITE m_hSprite;
 	int m_iPos;
 
 };
@@ -414,8 +414,8 @@ public:
 	int	  m_iBat;	
 	
 private:
-	cldll::HSPRITE m_hSprite1;
-	cldll::HSPRITE m_hSprite2;
+	HSPRITE m_hSprite1;
+	HSPRITE m_hSprite2;
 	wrect_t *m_prc1;
 	wrect_t *m_prc2;
 	float m_fFade;
@@ -437,9 +437,9 @@ public:
 	int MsgFunc_FlashBat(const char *pszName,  int iSize, void *pbuf );
 	
 private:
-	cldll::HSPRITE m_hSprite1;
-	cldll::HSPRITE m_hSprite2;
-	cldll::HSPRITE m_hBeam;
+	HSPRITE m_hSprite1;
+	HSPRITE m_hSprite2;
+	HSPRITE m_hBeam;
 	wrect_t *m_prc1;
 	wrect_t *m_prc2;
 	wrect_t *m_prcBeam;
@@ -551,7 +551,7 @@ private:
 	typedef struct
 	{
 		char szSpriteName[MAX_ICONSPRITENAME_LENGTH];
-		cldll::HSPRITE spr;
+		HSPRITE spr;
 		wrect_t rc;
 		unsigned char r, g, b;
 	} icon_sprite_t;
@@ -662,7 +662,7 @@ public:
  } m_sCounters[10];
  int m_iNumCnts;
  float m_flRoundTime, m_fCntDown, m_fStep, m_fCntTotal;
- cldll::HSPRITE m_hSprite;
+ HSPRITE m_hSprite;
  int m_HUD_cross;
  int m_bDrawCntDown, m_bInitCntDown, m_iProgress;
  float m_fRStart, m_fGStart, m_fGStep;
@@ -716,7 +716,7 @@ public:
     int MsgFunc_NVGActive(const char *pszName, int iSize, void *pbuf);
 
 public:
-    cldll::HSPRITE m_hFlackern;
+    HSPRITE m_hFlackern;
 
     int m_iNVG;
     int m_iOn;
@@ -823,7 +823,7 @@ public:
 	//radar_ent_s rad_ent[50];
 	
 public:
-	cldll::HSPRITE m_hSprite[15];
+	HSPRITE m_hSprite[15];
 
 
 
@@ -853,7 +853,7 @@ class CHud
 {
 private:
 	HUDLIST						*m_pHudList;
-	cldll::HSPRITE						m_hsprLogo;
+	HSPRITE						m_hsprLogo;
 	int							m_iLogo;
 	client_sprite_t				*m_pSpriteList;
 	int							m_iSpriteCount;
@@ -863,7 +863,7 @@ private:
 
 public:
 
-	cldll::HSPRITE						m_hsprCursor;
+	HSPRITE						m_hsprCursor;
 	float m_flTime;	   // the current client time
 	float m_fOldTime;  // the time at which the HUD was last redrawn
 	double m_flTimeDelta; // the difference between flTime and fOldTime
@@ -888,13 +888,13 @@ public:
 private:
 	// the memory for these arrays are allocated in the first call to CHud::VidInit(), when the hud.txt and associated sprites are loaded.
 	// freed in ~CHud()
-	cldll::HSPRITE *m_rghSprites;	/*[HUD_SPRITE_COUNT]*/			// the sprites loaded from hud.txt
+	HSPRITE *m_rghSprites;	/*[HUD_SPRITE_COUNT]*/			// the sprites loaded from hud.txt
 	wrect_t *m_rgrcRects;	/*[HUD_SPRITE_COUNT]*/
 	char *m_rgszSpriteNames; /*[HUD_SPRITE_COUNT][MAX_SPRITE_NAME_LENGTH]*/
 
 	//struct cvar_s *default_fov;
 public:
-	cldll::HSPRITE GetSprite( int index ) 
+	HSPRITE GetSprite( int index ) 
 	{
 		return (index < 0) ? 0 : m_rghSprites[index];
 	}

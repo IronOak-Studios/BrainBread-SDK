@@ -91,7 +91,7 @@ public:
 
 	int CountAmmo( int iId );
 
-	cldll::HSPRITE* GetAmmoPicFromWeapon( int iAmmoId, wrect_t& rect );
+	HSPRITE* GetAmmoPicFromWeapon( int iAmmoId, wrect_t& rect );
 };
 
 extern WeaponsResource gWR;

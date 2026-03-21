@@ -1,5 +1,7 @@
 #include "hud.h"
 #include "cl_util.h"
+#undef min
+#undef max
 #include "demo.h"
 #include "demo_api.h"
 #include "parsemsg.h"
@@ -8,8 +10,6 @@
 #include "pe_rain.h"
 #include "bb_blood.h"
 #include "bb_sprays.h"
-#undef min
-#undef max
 #include <list>
 using namespace std;
 #ifndef max

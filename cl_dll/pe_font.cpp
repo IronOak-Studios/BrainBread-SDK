@@ -3,9 +3,9 @@
 
 #include "pe_font.h"
 
-//typedef int cldll::HSPRITE;
+//typedef int HSPRITE;
 extern void ScaleColors( int &r, int &g, int &b, int a );
-extern cldll::HSPRITE LoadSprite( const char *pszName );
+extern HSPRITE LoadSprite( const char *pszName );
 
 cPEFontMgr *g_font = NULL;
 

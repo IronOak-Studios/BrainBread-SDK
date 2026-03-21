@@ -232,7 +232,7 @@ WEAPON* WeaponsResource :: GetNextActivePos( int iSlot, int iSlotPos )
 
 int giBucketHeight, giBucketWidth, giABHeight, giABWidth; // Ammo Bar width and height
 
-cldll::HSPRITE ghsprBuckets;					// Sprite for top row of weapons menu
+HSPRITE ghsprBuckets;					// Sprite for top row of weapons menu
 
 DECLARE_MESSAGE(m_Ammo, CurWeapon );	// Current weapon and clip
 DECLARE_MESSAGE(m_Ammo, WeaponList);	// new weapon type
@@ -404,7 +404,7 @@ void CHudAmmo::Think(void)
 // Helper function to return a Ammo pointer from id
 //
 
-cldll::HSPRITE* WeaponsResource :: GetAmmoPicFromWeapon( int iAmmoId, wrect_t& rect )
+HSPRITE* WeaponsResource :: GetAmmoPicFromWeapon( int iAmmoId, wrect_t& rect )
 {
 	for ( int i = 0; i < MAX_WEAPONS; i++ )
 	{
