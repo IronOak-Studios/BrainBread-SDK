@@ -403,6 +403,7 @@ public:
 
 	void		ClearButtonsOfArmedState( void );
 
+	void		RemoveAllButtons( void );
 
 	bool		KeyInput( int keyNum );
 
@@ -611,6 +612,7 @@ public:
 	int MsgFunc_TargHlth( const char *pszName, int iSize, void *pbuf );
 	int MsgFunc_RecoilRatio( const char *pszName, int iSize, void *pbuf );
 	int MsgFunc_Special( const char *pszName, int iSize, void *pbuf );
+	int MsgFunc_ResetFade( const char *pszName, int iSize, void *pbuf );
 //	int MsgFunc_Fog( const char *pszName, int iSize, void *pbuf );
 	int MsgFunc_Rain( const char *pszName, int iSize, void *pbuf );
 
@@ -639,6 +641,8 @@ public:
 	// + Spin
 	CEquip		*m_pEquip;
 	// - Spin
+
+	void UpdatePlayerMenu( int menuIndex );
 };
 
 //============================================================
@@ -721,6 +725,24 @@ public:
 	}
 
 	virtual void actionPerformed(Panel* panel);
+};
+
+class CMenuHandler_SpectateFollow : public ActionSignal
+{
+protected:
+	char	m_szplayer[MAX_COMMAND_SIZE];
+public:
+	CMenuHandler_SpectateFollow( char *player )
+	{
+		strncpy( m_szplayer, player, MAX_COMMAND_SIZE);
+		m_szplayer[MAX_COMMAND_SIZE-1] = '\0';
+	}
+
+	virtual void actionPerformed(Panel* panel)
+	{
+		gHUD.m_Spectator.FindPlayer(m_szplayer);
+		gViewPort->HideCommandMenu();
+	}
 };
 
 class CMenuHandler_PopupSubMenuInput : public InputSignal

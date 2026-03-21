@@ -340,6 +340,12 @@ void CCommandMenu::ClearButtonsOfArmedState( void )
 	}
 }
 
+void CCommandMenu::RemoveAllButtons( void )
+{
+	removeAllChildren();
+	m_iButtons = 0;
+}
+
 //-----------------------------------------------------------------------------
 // Purpose: 
 // Input  : *pSubMenu - 
@@ -669,6 +675,21 @@ TeamFortressViewport::TeamFortressViewport(int x,int y,int wide,int tall) : Pane
 	m_StandardMenu = CreateCommandMenu("commandmenu.txt", 0, CMENU_TOP, false, CMENU_SIZE_X, BUTTON_SIZE_Y, 0 );
 	m_SpectatorOptionsMenu = CreateCommandMenu("spectatormenu.txt", 1, YRES(32), true, CMENU_SIZE_X, BUTTON_SIZE_Y / 2, 0 );	// above bottom bar, flat design
 	m_SpectatorCameraMenu = CreateCommandMenu("spectcammenu.txt", 1, YRES(32), true, XRES( 200 ), BUTTON_SIZE_Y / 2, ScreenWidth - ( XRES ( 200 ) + 15 ) );	// above bottom bar, flat design
+
+	m_PlayerMenu = m_iNumMenus;
+	m_iNumMenus++;
+
+	float flLabelSize = ( (ScreenWidth - (XRES_HD( CAMOPTIONS_BUTTON_X ) + 15)) - XRES_HD( 24 + 15 ) ) - XRES_HD( (15 + OPTIONS_BUTTON_X + 15) + 38 );
+
+	m_pCommandMenus[m_PlayerMenu] = new CCommandMenu(NULL, 1,
+									XRES_HD( ( 15 + OPTIONS_BUTTON_X + 15 ) + 31 ), YRES_HD( PANEL_HEIGHT ), flLabelSize, 300);
+	m_pCommandMenus[m_PlayerMenu]->setParent(this);
+	m_pCommandMenus[m_PlayerMenu]->setVisible(false);
+	m_pCommandMenus[m_PlayerMenu]->m_flButtonSizeY = BUTTON_SIZE_Y / 2;
+	m_pCommandMenus[m_PlayerMenu]->m_iSpectCmdMenu = 1;
+
+	UpdatePlayerMenu(m_PlayerMenu);
+
 	CreateServerBrowser();
 }
 
@@ -1368,6 +1389,11 @@ void TeamFortressViewport::HideCommandMenu()
 		m_pCommandMenus[m_SpectatorCameraMenu]->ClearButtonsOfArmedState();
 	}
 
+	if ( m_pCommandMenus[m_PlayerMenu] )
+	{
+		m_pCommandMenus[m_PlayerMenu]->ClearButtonsOfArmedState();
+	}
+
 	m_flMenuOpenTime = 0.0f;
 	SetCurrentCommandMenu( NULL );
 	UpdateCursorState();
@@ -1458,8 +1484,44 @@ void TeamFortressViewport::SetCurrentCommandMenu( CCommandMenu *pNewMenu )
 
 void TeamFortressViewport::UpdateCommandMenu(int menuIndex)
 {
+	if ( menuIndex == m_PlayerMenu )
+	{
+		m_pCommandMenus[m_PlayerMenu]->RemoveAllButtons();
+		UpdatePlayerMenu(m_PlayerMenu);
+	}
+
 	m_pCommandMenus[menuIndex]->RecalculateVisibles( 0, false );
 	m_pCommandMenus[menuIndex]->RecalculatePositions( 0 );
+}
+
+void TeamFortressViewport::UpdatePlayerMenu( int menuIndex )
+{
+	cl_entity_t *pEnt = NULL;
+	float flLabelSize = ( (ScreenWidth - (XRES_HD( CAMOPTIONS_BUTTON_X ) + 15)) - XRES_HD( 24 + 15 ) ) - XRES_HD( (15 + OPTIONS_BUTTON_X + 15) + 38 );
+	gViewPort->GetAllPlayersInfo();
+
+	for ( int i = 1; i < MAX_PLAYERS; i++ )
+	{
+		pEnt = gEngfuncs.GetEntityByIndex( i );
+
+		if ( !gHUD.m_Spectator.IsActivePlayer( pEnt ) )
+			continue;
+
+		SpectButton *pButton = new SpectButton( 1, g_PlayerInfoList[pEnt->index].name,
+							XRES_HD( ( 15 + OPTIONS_BUTTON_X + 15 ) + 31 ), YRES_HD( PANEL_HEIGHT ) + (i - 1) * CMENU_SIZE_X, flLabelSize, BUTTON_SIZE_Y / 2 );
+
+		pButton->setBoundKey( (char)255 );
+		pButton->setContentAlignment( vgui::Label::a_center );
+		m_pCommandMenus[menuIndex]->AddButton( pButton );
+		pButton->setParentMenu( m_pCommandMenus[menuIndex] );
+
+		// Override font in CommandMenu
+		pButton->setFont( Scheme::sf_primary3 );
+
+		pButton->addActionSignal( new CMenuHandler_SpectateFollow( g_PlayerInfoList[pEnt->index].name ) );
+		// Create an input signal that'll popup the current menu
+		pButton->addInputSignal( new CMenuHandler_PopupSubMenuInput( pButton, m_pCommandMenus[menuIndex] ) );
+	}
 }
 
 void COM_FileBase ( const char *in, char *out);
@@ -2622,6 +2684,12 @@ int TeamFortressViewport::MsgFunc_Special( const char *pszName, int iSize, void 
 
 	return 1;
 }
+
+int TeamFortressViewport::MsgFunc_ResetFade( const char *pszName, int iSize, void *pbuf )
+{
+	return 0;
+}
+
 #include "triangleapi.h"
 
 /*int TeamFortressViewport::MsgFunc_Fog( const char *pszName, int iSize, void *pbuf )
