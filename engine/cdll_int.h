@@ -34,6 +34,10 @@ extern "C" {
 // this file is included by both the engine and the client-dll,
 // so make sure engine declarations aren't done twice
 
+#ifdef _WIN32
+#include <windows.h>
+#endif
+
 typedef int HANDLE_SPRITE;	// handle to a graphic
 #define HSPRITE HANDLE_SPRITE
 
