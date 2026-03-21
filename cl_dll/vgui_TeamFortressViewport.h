@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2002, Valve LLC, All rights reserved. ============
+//========= Copyright ï¿½ 1996-2002, Valve LLC, All rights reserved. ============
 //
 // Purpose: 
 //
@@ -407,6 +407,73 @@ public:
 	bool		KeyInput( int keyNum );
 
 	virtual void paintBackground();
+};
+
+//==============================================================================
+// Command menu root button (drop down box style)
+
+class DropDownButton : public ColorButton
+{
+private:
+	CImageLabel *m_pOpenButton;
+
+public:
+
+		DropDownButton( const char* text,int x,int y,int wide,int tall, bool bNoHighlight, bool bFlat ) : 
+						ColorButton( text, x, y, wide, tall, bNoHighlight, bFlat  ) 
+	  {
+			// Put a > to show it's a submenu
+			m_pOpenButton = new CImageLabel( "arrowup", XRES( CMENU_SIZE_X-2 ) , YRES( BUTTON_SIZE_Y-2 ) );
+			m_pOpenButton->setParent(this);
+	
+			int textwide, texttall;
+			getSize( textwide, texttall);
+		
+			// Reposition
+			m_pOpenButton->setPos( textwide-(m_pOpenButton->getImageWide()+6), -2 /*(tall - m_pOpenButton->getImageTall()*2) / 2*/ );
+			m_pOpenButton->setVisible(true);
+
+	  }
+
+	virtual void   setVisible(bool state)
+	{
+		m_pOpenButton->setVisible(state);
+		ColorButton::setVisible(state);
+	}
+	
+
+};
+
+//==============================================================================
+// Button with image instead of text
+
+class CImageButton : public ColorButton
+{
+private:
+	CImageLabel *m_pOpenButton;
+
+public:
+
+		CImageButton( const char* text,int x,int y,int wide,int tall, bool bNoHighlight, bool bFlat ) : 
+						ColorButton( " ", x, y, wide, tall, bNoHighlight, bFlat  ) 
+	  {
+			m_pOpenButton = new CImageLabel( text,1,1,wide-2 , tall-2 );
+			m_pOpenButton->setParent(this);
+	
+			// Reposition
+		//	m_pOpenButton->setPos( x+1,y+1 );
+		//	m_pOpenButton->setSize(wide-2,tall-2);
+
+			m_pOpenButton->setVisible(true);
+	  }
+
+	virtual void   setVisible(bool state)
+	{
+		m_pOpenButton->setVisible(state);
+		ColorButton::setVisible(state);
+	}
+	
+
 };
 
 //==============================================================================

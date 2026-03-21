@@ -35,6 +35,9 @@ extern "C" {
 // so make sure engine declarations aren't done twice
 
 #ifdef _WIN32
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
 #include <windows.h>
 #endif
 
