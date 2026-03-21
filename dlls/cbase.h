@@ -57,6 +57,7 @@ CBaseEntity
 
 // C functions for external declarations that call the appropriate C++ methods
 
+#undef EXPORT
 #ifdef _WIN32
 #define EXPORT	_declspec( dllexport )
 #else
@@ -104,9 +105,11 @@ typedef void (CBaseEntity::*USEPTR)( CBaseEntity *pActivator, CBaseEntity *pCall
 #define CLASS_PLAYER_ALLY		11
 #define CLASS_PLAYER_BIOWEAPON	12 // hornets and snarks.launched by players
 #define CLASS_ALIEN_BIOWEAPON	13 // hornets and snarks.launched by the alien menace
+#define CLASS_VEHICLE			14
 #define	CLASS_BARNACLE			99 // special because no one pays attention to it, and it eats a wide cross-section of creatures.
 
 class CBaseEntity;
+class CBaseToggle;
 class CBaseMonster;
 class CBasePlayerItem;
 class CSquadMonster;
@@ -199,6 +202,7 @@ public:
 	virtual BOOL    IsTriggered( CBaseEntity *pActivator ) {return TRUE;}
 	virtual CBaseMonster *MyMonsterPointer( void ) { return NULL;}
 	virtual CSquadMonster *MySquadMonsterPointer( void ) { return NULL;}
+	virtual CBaseToggle *MyTogglePointer( void ) { return NULL;}
 	virtual	int		GetToggleState( void ) { return TS_AT_TOP; }
 	virtual void	AddPoints( int score, BOOL bAllowNegativeScore ) {}
 	virtual void	AddPointsToTeam( int score, BOOL bAllowNegativeScore ) {}
@@ -584,10 +588,16 @@ public:
 	static float		AxisDelta( int flags, const Vector &angle1, const Vector &angle2 );
 
 	string_t m_sMaster;		// If this button has a master switch, this is the targetname.
-							// A master switch must be of the multisource type. If all 
-							// of the switches in the multisource have been triggered, then
-							// the button will be allowed to operate. Otherwise, it will be
-							// deactivated.
+						// A master switch must be of the multisource type. If all 
+						// of the switches in the multisource have been triggered, then
+						// the button will be allowed to operate. Otherwise, it will be
+						// deactivated.
+
+	virtual int		CanPlaySentence( BOOL fDisregardState ) { return IsAlive(); }
+	virtual void	PlaySentence( const char *pszSentence, float duration, float volume, float attenuation );
+	virtual void	PlayScriptedSentence( const char *pszSentence, float duration, float volume, float attenuation, BOOL bConcurrent, CBaseEntity *pListener );
+	virtual void	SentenceStop( void );
+	virtual BOOL	IsAllowedToSpeak( void ) { return IsAlive(); }
 };
 #define SetMoveDone( a ) m_pfnCallWhenMoveDone = static_cast <void (CBaseToggle::*)(void)> (a)
 
@@ -739,6 +749,7 @@ public:
 	static	TYPEDESCRIPTION m_SaveData[];
 	// Buttons that don't take damage can be IMPULSE used
 	virtual int	ObjectCaps( void ) { return (CBaseToggle:: ObjectCaps() & ~FCAP_ACROSS_TRANSITION) | (pev->takedamage?0:FCAP_IMPULSE_USE); }
+	virtual BOOL	IsAllowedToSpeak( void ) { return TRUE; }
 
 	BOOL	m_fStayPushed;	// button stays pushed in until touched again?
 	BOOL	m_fRotating;		// a rotating button?  default is a sliding button.

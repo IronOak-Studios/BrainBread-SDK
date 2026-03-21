@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2002, Valve LLC, All rights reserved. ============
+//========= Copyright ï¿½ 1996-2002, Valve LLC, All rights reserved. ============
 //
 // Purpose: 
 //
@@ -180,7 +180,8 @@ void UTIL_StringToVector( float * pVector, const char *pString )
 	char *pstr, *pfront, tempString[128];
 	int	j;
 
-	strcpy( tempString, pString );
+	strncpy( tempString, pString, sizeof(tempString) );
+	tempString[ sizeof(tempString) - 1 ] = 0;
 	pstr = pfront = tempString;
 	
 	for ( j = 0; j < 3; j++ )		
@@ -1076,7 +1077,7 @@ void CHudSpectator::DrawOverviewLayer()
 	if ( hasMapImage)
 	{
 		i = m_MapSprite->numframes / (4*3);
-		i = (int)sqrt((double)i);
+		i = (int)sqrt((float)i);
 		xTiles = i*4;
 		yTiles = i*3;
 	}

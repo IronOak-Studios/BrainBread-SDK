@@ -87,6 +87,7 @@ static CHLVoiceStatusHelper g_VoiceStatusHelper;
 extern client_sprite_t *GetSpriteList(client_sprite_t *pList, const char *psz, int iRes, int iCount);
 
 extern cvar_t *sensitivity;
+extern float IN_GetMouseSensitivity( void );
 cvar_t *cl_lw = NULL;
 
 void ShutdownInput (void);
@@ -732,7 +733,7 @@ int CHud::MsgFunc_SetFOV(const char *pszName,  int iSize, void *pbuf)
 	else
 	{  
 		// set a new sensitivity that is proportional to the change from the FOV default
-		m_flMouseSensitivity = sensitivity->value * ((float)newfov / (float)def_fov) * CVAR_GET_FLOAT("zoom_sensitivity_ratio");
+		m_flMouseSensitivity = IN_GetMouseSensitivity() * ((float)newfov / (float)def_fov) * CVAR_GET_FLOAT("zoom_sensitivity_ratio");
 	}
 
 	return 1;

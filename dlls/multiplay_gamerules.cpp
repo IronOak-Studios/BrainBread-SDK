@@ -302,6 +302,11 @@ BOOL CHalfLifeMultiplay::IsCoOp( void )
 //=========================================================
 BOOL CHalfLifeMultiplay::FShouldSwitchWeapon( CBasePlayer *pPlayer, CBasePlayerItem *pWeapon )
 {
+	if ( pPlayer->m_iAutoWepSwitch == 0 )
+	{
+		return FALSE;
+	}
+
 	if ( !pWeapon->CanDeploy() )
 	{
 		// that weapon can't deploy anyway.
@@ -650,6 +655,7 @@ void CHalfLifeMultiplay :: PlayerKilled( CBasePlayer *pVictim, entvars_t *pKille
 
 	pVictim->m_iDeaths += 1;
 
+	pVictim->pev->solid = SOLID_NOT;
 
 	FireTargets( "game_playerdie", pVictim, pVictim, USE_TOGGLE, 0 );
 	CBasePlayer *peKiller = NULL;

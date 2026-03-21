@@ -40,7 +40,9 @@
 #define NOSERVICE
 #define NOMCX
 #define NOIME
+#include "winsani_in.h"
 #include "windows.h"
+#include "winsani_out.h"
 
 #else // _WIN32
 #define FALSE 0
@@ -56,13 +58,7 @@ typedef int BOOL;
 #include <stdarg.h>
 #include <string.h>
 
-#ifndef min
-#define min(a,b)  (((a) < (b)) ? (a) : (b))
-#endif
 
-#ifndef max
-#define max(a,b)  (((a) > (b)) ? (a) : (b))
-#endif
 
 #define itoa(a,b,c) sprintf(b, "%d", a) 
 #define _snprintf snprintf
@@ -72,6 +68,10 @@ typedef int BOOL;
 // Misc C-runtime library headers
 #include "stdio.h"
 #include "stdlib.h"
+#include "minmax.h"
+#ifndef _WIN32
+# define _vsnprintf(a,b,c,d) vsnprintf(a,b,c,d)
+#endif
 #include "math.h"
 
 // Header file containing definition of globalvars_t and entvars_t

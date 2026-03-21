@@ -519,6 +519,12 @@ void CBasePlayerItem::FallThink ( void )
 {
 	pev->nextthink = gpGlobals->time + 0.1;
 
+	if ( m_pPlayer )
+	{
+		// weapon already picked up, stop thinking
+		return;
+	}
+
 	if ( pev->flags & FL_ONGROUND )
 	{
 		// clatter if we have an owner (i.e., dropped by someone)
@@ -1395,7 +1401,7 @@ void CBasePlayerAmmo :: DefaultTouch( CBaseEntity *pOther )
 //=========================================================
 int CBasePlayerWeapon::ExtractAmmo( CBasePlayerWeapon *pWeapon )
 {
-	int			iReturn;
+	int			iReturn = 0;
 
 	if ( pszAmmo1() != NULL )
 	{

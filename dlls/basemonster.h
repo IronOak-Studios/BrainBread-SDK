@@ -95,6 +95,7 @@ public:
 	int					m_failSchedule;				// Schedule type to choose if current schedule fails
 
 	float				m_flHungryTime;// set this is a future time to stop the monster from eating for a while. 
+	float				m_flLastYawTime;
 
 	float				m_flDistTooFar;	// if enemy farther away than this, bits_COND_ENEMY_TOOFAR set in CheckEnemy
 	float				m_flDistLook;	// distance monster sees (Default 2048)
@@ -185,7 +186,7 @@ public:
 		virtual void ScheduleChange( void ) {}
 		// virtual int CanPlaySequence( void ) { return ((m_pCine == NULL) && (m_MonsterState == MONSTERSTATE_NONE || m_MonsterState == MONSTERSTATE_IDLE || m_IdealMonsterState == MONSTERSTATE_IDLE)); }
 		virtual int CanPlaySequence( BOOL fDisregardState, int interruptLevel );
-		virtual int CanPlaySentence( BOOL fDisregardState ) { return IsAlive(); }
+		virtual int CanPlaySentence( BOOL fDisregardState ) { return IsAllowedToSpeak(); }
 		virtual void PlaySentence( const char *pszSentence, float duration, float volume, float attenuation );
 		virtual void PlayScriptedSentence( const char *pszSentence, float duration, float volume, float attenuation, BOOL bConcurrent, CBaseEntity *pListener );
 

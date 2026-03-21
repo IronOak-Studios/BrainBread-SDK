@@ -602,6 +602,13 @@ void ClientCommand( edict_t *pEntity )
 		strncpy( command, pcmd, 127 );
 		command[127] = '\0';
 
+		// Remove '%' to prevent format string exploits
+		char *pPercent = command;
+		while ( pPercent = strchr( pPercent, '%' ) )
+		{
+			*pPercent = ' ';
+		}
+
 		// tell the user they entered an unknown command
 		ClientPrint( &pEntity->v, HUD_PRINTCONSOLE, UTIL_VarArgs( "Unknown command: %s\n", command ) );
 	}
@@ -1235,6 +1242,11 @@ int AddToFullPack( struct entity_state_s *state, int e, edict_t *ent, edict_t *h
 	state->rendercolor.r = ent->v.rendercolor.x;
 	state->rendercolor.g = ent->v.rendercolor.y;
 	state->rendercolor.b = ent->v.rendercolor.z;
+
+	if ( ent->v.classname && ent->v.flags & FL_MONSTER )
+	{
+		state->eflags |= EFLAG_FLESH_SOUND;
+	}
 
 	state->aiment = 0;
 	if ( ent->v.aiment )

@@ -138,6 +138,10 @@ int CHudMenu :: Draw( float flTime )
 		}
 	}
 
+	SCREENINFO screenInfo;
+	screenInfo.iSize = sizeof(SCREENINFO);
+	gEngfuncs.pfnGetScreenInfo(&screenInfo);
+
 	// don't draw the menu if the scoreboard is being shown
 	if ( gViewPort && gViewPort->IsScoreBoardVisible() )
 		return 1;
@@ -153,8 +157,10 @@ int CHudMenu :: Draw( float flTime )
 			nlc++;
 	}
 
+	int nFontHeight = max(12, screenInfo.iCharHeight);
+
 	// center it
-	int y = (ScreenHeight/2) - ((nlc/2)*12) - 40; // make sure it is above the say text
+	int y = (ScreenHeight / 2) - ((nlc / 2) * nFontHeight) - (3 * nFontHeight + nFontHeight / 3); // make sure it is above the say text
 
 	menu_r		= 255;
 	menu_g		= 255;
@@ -174,7 +180,7 @@ int CHudMenu :: Draw( float flTime )
 		{
 			menu_ralign	 = FALSE;
 			menu_x		 = 20;
-			y			+= (12);
+			y			+= nFontHeight;
 			
 			sptr++;
 		}
@@ -257,12 +263,14 @@ int CHudMenu :: MsgFunc_ShowMenu( const char *pszName, int iSize, void *pbuf )
 
 		if ( !NeedMore )
 		{  // we have the whole string, so we can localise it now
-			strcpy( g_szMenuString, gHUD.m_TextMessage.BufferedLocaliseTextString( g_szPrelocalisedMenuString ) );
+			strncpy( g_szMenuString, gHUD.m_TextMessage.BufferedLocaliseTextString( g_szPrelocalisedMenuString ), MAX_MENU_STRING );
+			g_szMenuString[MAX_MENU_STRING - 1] = '\0';
 
 			// Swap in characters
 			if ( KB_ConvertString( g_szMenuString, &temp ) )
 			{
-				strcpy( g_szMenuString, temp );
+				strncpy( g_szMenuString, temp, MAX_MENU_STRING );
+				g_szMenuString[MAX_MENU_STRING - 1] = '\0';
 				free( temp );
 			}
 		}

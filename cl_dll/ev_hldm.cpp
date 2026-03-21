@@ -182,13 +182,22 @@ float EV_HLDM_PlayTextureSound( int idx, pmtrace_t *ptr, float *vecSrc, float *v
 
 	chTextureType = 0;
 
-	// Player
+	// Player or NPC with flesh sound flag
 	if ( entity >= 1 && entity <= gEngfuncs.GetMaxClients() )
 	{
 		// hit body
 		chTextureType = CHAR_TEX_FLESH;
 	}
-	else if ( entity == 0 )
+	else if ( entity > 0 )
+	{
+		cl_entity_t *cl_ent = gEngfuncs.GetEntityByIndex( entity );
+		if ( cl_ent && ( cl_ent->curstate.eflags & EFLAG_FLESH_SOUND ) )
+		{
+			chTextureType = CHAR_TEX_FLESH;
+		}
+	}
+	
+	if ( chTextureType == 0 && entity == 0 )
 	{
 		// get texture from entity or world (world is ent(0))
 		pTextureName = (char *)gEngfuncs.pEventAPI->EV_TraceTexture( ptr->ent, vecSrc, vecEnd );
@@ -418,7 +427,7 @@ int EV_HLDM_CheckTracer( int idx, float *vecSrc, float *end, float *forward, flo
 	return tracer;
 }
 
-///// übernommen... wird aus nem tut sein...
+///// ï¿½bernommen... wird aus nem tut sein...
 /////
 void EV_HLDM_SmokePuff( pmtrace_t *pTrace, float *vecSrc, float *vecEnd )
 {
@@ -713,7 +722,7 @@ void EV_HLDM_FireBullets( int idx, float *forward, float *right, float *up, int 
 		gEngfuncs.pEventAPI->EV_SetSolidPlayers ( idx - 1 );	
 
 		gEngfuncs.pEventAPI->EV_SetTraceHull( 2 );
-		gEngfuncs.pEventAPI->EV_PlayerTrace( vecSrc, vecEnd, PM_STUDIO_BOX, -1, &tr );
+		gEngfuncs.pEventAPI->EV_PlayerTrace( vecSrc, vecEnd, PM_NORMAL, -1, &tr );
 
 		tracer = EV_HLDM_CheckTracer( idx, vecSrc, tr.endpos, forward, right, iBulletType, iTracerFreq, tracerCount );
 

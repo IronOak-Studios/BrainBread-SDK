@@ -2364,7 +2364,7 @@ Schedule_t* CHGrunt :: GetScheduleOfType ( int Type )
 // repelling down a line.
 //=========================================================
 
-class CHGruntRepel : public CBaseMonster
+class CHGruntRepel : public CBaseMonster 
 {
 public:
 	void Spawn( void );

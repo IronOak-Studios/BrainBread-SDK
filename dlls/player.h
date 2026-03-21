@@ -295,6 +295,8 @@ public:
 	int					m_iDeaths;
 	float				m_iRespawnFrames;	// used in PlayerDeathThink() to make sure players can always respawn
 
+	int					m_iAutoWepSwitch;	// auto weapon switch preference (0=never, 1=always, 2=if-better)
+
 	int m_lastx, m_lasty;  // These are the previous update's crosshair angles, DON"T SAVE/RESTORE
 
 	int m_nCustomSprayFrames;// Custom clan logo frames for this player
@@ -304,6 +306,7 @@ public:
 
 	virtual void Spawn( void );
 	void Pain( void );
+	void SetPrefsFromUserinfo( char *infobuffer );
 
 //	virtual void Think( void );
 	virtual void Jump( void );
@@ -368,6 +371,7 @@ public:
 	BOOL RemovePlayerItem( CBasePlayerItem *pItem );
 	void DropPlayerItem ( char *pszItemName );
 	BOOL HasPlayerItem( CBasePlayerItem *pCheckItem );
+	BOOL HasPlayerItemFromID( int weaponID );
 	BOOL HasNamedPlayerItem( const char *pszItemName );
 	BOOL HasWeapons( void );// do I have ANY weapons?
 	void SelectPrevItem( int iItem );

@@ -903,9 +903,9 @@ public:
 	void EXPORT DelayThink( void );
 	int	 ObjectCaps( void ) { return (CBaseToggle :: ObjectCaps() & ~FCAP_ACROSS_TRANSITION); }
 
-	CBaseMonster *FindEntity( void );
-	BOOL AcceptableSpeaker( CBaseMonster *pMonster );
-	BOOL StartSentence( CBaseMonster *pTarget );
+	CBaseToggle *FindEntity( void );
+	BOOL AcceptableSpeaker( CBaseToggle *pMonster );
+	BOOL StartSentence( CBaseToggle *pTarget );
 
 
 private:
@@ -1025,7 +1025,7 @@ void CScriptedSentence :: Spawn( void )
 
 void CScriptedSentence :: FindThink( void )
 {
-	CBaseMonster *pMonster = FindEntity();
+	CBaseToggle *pMonster = FindEntity();
 	if ( pMonster )
 	{
 		StartSentence( pMonster );
@@ -1053,7 +1053,7 @@ void CScriptedSentence :: DelayThink( void )
 }
 
 
-BOOL CScriptedSentence :: AcceptableSpeaker( CBaseMonster *pMonster )
+BOOL CScriptedSentence :: AcceptableSpeaker( CBaseToggle *pMonster )
 {
 	if ( pMonster )
 	{
@@ -1074,10 +1074,10 @@ BOOL CScriptedSentence :: AcceptableSpeaker( CBaseMonster *pMonster )
 }
 
 
-CBaseMonster *CScriptedSentence :: FindEntity( void )
+CBaseToggle *CScriptedSentence :: FindEntity( void )
 {
 	edict_t *pentTarget;
-	CBaseMonster *pMonster;
+	CBaseToggle *pMonster;
 
 
 	pentTarget = FIND_ENTITY_BY_TARGETNAME(NULL, STRING(m_iszEntity));
@@ -1085,7 +1085,8 @@ CBaseMonster *CScriptedSentence :: FindEntity( void )
 
 	while (!FNullEnt(pentTarget))
 	{
-		pMonster = GetMonsterPointer( pentTarget );
+		CBaseEntity *pEntity = CBaseEntity::Instance( pentTarget );
+		pMonster = ( pEntity != NULL ) ? pEntity->MyTogglePointer() : NULL;
 		if ( pMonster != NULL )
 		{
 			if ( AcceptableSpeaker( pMonster ) )
@@ -1102,7 +1103,7 @@ CBaseMonster *CScriptedSentence :: FindEntity( void )
 		{
 			if ( FBitSet( pEntity->pev->flags, FL_MONSTER ))
 			{
-				pMonster = pEntity->MyMonsterPointer( );
+				pMonster = pEntity->MyTogglePointer( );
 				if ( AcceptableSpeaker( pMonster ) )
 					return pMonster;
 			}
@@ -1113,7 +1114,7 @@ CBaseMonster *CScriptedSentence :: FindEntity( void )
 }
 
 
-BOOL CScriptedSentence :: StartSentence( CBaseMonster *pTarget )
+BOOL CScriptedSentence :: StartSentence( CBaseToggle *pTarget )
 {
 	if ( !pTarget )
 	{

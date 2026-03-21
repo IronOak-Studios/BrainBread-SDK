@@ -20,6 +20,7 @@
 
 #include "hud.h"
 #include "cl_util.h"
+#include "commonmacros.h"
 #include <string.h>
 #include <stdio.h>
 #include "parsemsg.h"
@@ -58,6 +59,7 @@ void CHudMessage::Reset( void )
  	memset( m_pMessages, 0, sizeof( m_pMessages[0] ) * maxHUDMessages );
 	memset( m_startTime, 0, sizeof( m_startTime[0] ) * maxHUDMessages );
 	
+	m_bEndAfterMessage = false;
 	m_gameTitleTime = 0;
 	m_pGameTitle = NULL;
 }
@@ -286,7 +288,7 @@ void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time )
 	{
 		m_parms.lineLength = 0;
 		m_parms.width = 0;
-		while ( *pText && *pText != '\n' )
+		while ( *pText && *pText != '\n' && m_parms.lineLength < ARRAYSIZE( line ) - 1 )
 		{
 			unsigned char c = *pText;
 			line[m_parms.lineLength] = c;
@@ -403,6 +405,12 @@ int CHudMessage::Draw( float fTime )
 			{
 				// The message is over
 				m_pMessages[i] = NULL;
+
+				if (m_bEndAfterMessage)
+				{
+					// leave game
+					gEngfuncs.pfnClientCmd("wait\nwait\nwait\nwait\nwait\nwait\nwait\ndisconnect\n");
+				}
 			}
 		}
 	}
@@ -487,6 +495,14 @@ int CHudMessage::MsgFunc_HudText( const char *pszName,  int iSize, void *pbuf )
 	BEGIN_READ( pbuf, iSize );
 
 	char *pString = READ_STRING();
+
+	bool bIsEnding = false;
+	const char *HL1_ENDING_STR = "END3";
+
+	if (strlen(pString) == strlen(HL1_ENDING_STR) && strcmp(HL1_ENDING_STR, pString) == 0)
+	{
+		m_bEndAfterMessage = true;
+	}
 
 	MessageAdd( pString, gHUD.m_flTime );
 	// Remember the time -- to fix up level transitions

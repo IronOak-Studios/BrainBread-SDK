@@ -1962,7 +1962,7 @@ void CBaseMonster::MoveExecute( CBaseEntity *pTargetEnt, const Vector &vecDir, f
   while (flTotal > 0.001)
 	{
 		// don't walk more than 16 units or stairs stop working
-		flStep = min( 16.0, flTotal );
+		flStep = min( 16.0f, flTotal );
     if( step && Distance( tr.vecEndPos, pev->origin ) <= 20 )
     {
         m_Route[ m_iRouteIndex ].vecLocation = tr2.vecEndPos + dir * 8;
@@ -2518,7 +2518,9 @@ float CBaseMonster::ChangeYaw ( int yawSpeed )
 	ideal = pev->ideal_yaw;
 	if (current != ideal)
 	{
-		speed = (float)yawSpeed * gpGlobals->frametime * 10;
+		float delta = min( gpGlobals->time - m_flLastYawTime, 0.25f );
+		m_flLastYawTime = gpGlobals->time;
+		speed = (float)yawSpeed * delta * 10;
 		move = ideal - current;
 
 		if (ideal > current)
@@ -3213,28 +3215,7 @@ BOOL CBaseMonster :: FCanActiveIdle ( void )
 }
 
 
-void CBaseMonster::PlaySentence( const char *pszSentence, float duration, float volume, float attenuation )
-{
-	if ( pszSentence && IsAlive() )
-	{
-		if ( pszSentence[0] == '!' )
-			EMIT_SOUND_DYN( edict(), CHAN_VOICE, pszSentence, volume, attenuation, 0, PITCH_NORM );
-		else
-			SENTENCEG_PlayRndSz( edict(), pszSentence, volume, attenuation, 0, PITCH_NORM );
-	}
-}
-
-
-void CBaseMonster::PlayScriptedSentence( const char *pszSentence, float duration, float volume, float attenuation, BOOL bConcurrent, CBaseEntity *pListener )
-{ 
-	PlaySentence( pszSentence, duration, volume, attenuation );
-}
-
-
-void CBaseMonster::SentenceStop( void )
-{
-	EMIT_SOUND( edict(), CHAN_VOICE, "common/null.wav", 1.0, ATTN_IDLE );
-}
+// PlaySentence, PlayScriptedSentence, SentenceStop moved to CBaseToggle in subs.cpp
 
 
 void CBaseMonster::CorpseFallThink( void )

@@ -38,7 +38,7 @@ extern BOOL g_fGameOver;
 //=========================================================
 // MonsterMaker - this ent creates monsters during the game.
 //=========================================================
-class CMonsterMaker : public CBaseMonster
+class CMonsterMaker : public CBaseMonster 
 {
 public:
 	float GetDelay( );
