@@ -106,10 +106,9 @@
 #include "in_defs.h"
 #include "parsemsg.h"
 #include "pm_shared.h"
-#include "../engine/keydefs.h"
+#include "keydefs.h"
 #include "demo.h"
 #include "demo_api.h"
-#include "event_api.h"
 
 #include "vgui_int.h"
 #include "vgui_TeamFortressViewport.h"
