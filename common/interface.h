@@ -68,15 +68,22 @@ public:
 //
 // A single class can support multiple interfaces through multiple inheritance
 //
-#define EXPOSE_INTERFACE_FN(functionName, interfaceName, versionName) static InterfaceReg __g_Create##className##_reg(functionName, versionName);
+#define EXPOSE_INTERFACE_FN(functionName, interfaceName, versionName) \
+	static InterfaceReg __g_Create##className##_reg(functionName, versionName);
 
-#define EXPOSE_INTERFACE(className, interfaceName, versionName) static IBaseInterface* __Create##className##_interface() {return (interfaceName *)new className;} static InterfaceReg __g_Create##className##_reg(__Create##className##_interface, versionName );
+#define EXPOSE_INTERFACE(className, interfaceName, versionName) \
+	static IBaseInterface* __Create##className##_interface() {return (interfaceName *)new className;}\
+	static InterfaceReg __g_Create##className##_reg(__Create##className##_interface, versionName );
 
 // Use this to expose a singleton interface with a global variable you've created.
-#define EXPOSE_SINGLE_INTERFACE_GLOBALVAR(className, interfaceName, versionName, globalVarName) static IBaseInterface* __Create##className##interfaceName##_interface() {return (interfaceName *)&globalVarName;} static InterfaceReg __g_Create##className##interfaceName##_reg(__Create##className##interfaceName##_interface, versionName);
+#define EXPOSE_SINGLE_INTERFACE_GLOBALVAR(className, interfaceName, versionName, globalVarName) \
+	static IBaseInterface* __Create##className##interfaceName##_interface() {return (interfaceName *)&globalVarName;}\
+	static InterfaceReg __g_Create##className##interfaceName##_reg(__Create##className##interfaceName##_interface, versionName);
 
 // Use this to expose a singleton interface. This creates the global variable for you automatically.
-#define EXPOSE_SINGLE_INTERFACE(className, interfaceName, versionName) static className __g_##className##_singleton; EXPOSE_SINGLE_INTERFACE_GLOBALVAR(className, interfaceName, versionName, __g_##className##_singleton)
+#define EXPOSE_SINGLE_INTERFACE(className, interfaceName, versionName) \
+	static className __g_##className##_singleton;\
+	EXPOSE_SINGLE_INTERFACE_GLOBALVAR(className, interfaceName, versionName, __g_##className##_singleton)
 
 
 #ifdef WIN32

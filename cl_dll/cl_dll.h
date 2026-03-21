@@ -30,10 +30,12 @@ typedef unsigned short word;
 typedef float vec_t;
 typedef int (*pfnUserMsgHook)(const char *pszName, int iSize, void *pbuf);
 
-#ifndef SERV_CALL
 #include "util_vector.h"
-#endif
+#ifdef _WIN32
 #define EXPORT	_declspec( dllexport )
+#else
+#define EXPORT	__attribute__ ((visibility("default")))
+#endif
 
 #include "../engine/cdll_int.h"
 #include "../dlls/cdll_dll.h"

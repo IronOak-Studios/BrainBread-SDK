@@ -1,6 +1,6 @@
 /***
 *
-*	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
+*	Copyright (c) 1996-2001, Valve LLC. All rights reserved.
 *	
 *	This product contains software technology licensed from Id 
 *	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
@@ -33,8 +33,8 @@ public:
 	virtual void	Spawn( void );
 	void	Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 
-	//virtual int		Save( CSave &save );
-	//virtual int		Restore( CRestore &restore );
+	virtual int		Save( CSave &save );
+	virtual int		Restore( CRestore &restore );
 	
 	static	TYPEDESCRIPTION m_SaveData[];
 
@@ -44,6 +44,13 @@ private:
 };
 LINK_ENTITY_TO_CLASS( light, CLight );
 
+TYPEDESCRIPTION	CLight::m_SaveData[] = 
+{
+	DEFINE_FIELD( CLight, m_iStyle, FIELD_INTEGER ),
+	DEFINE_FIELD( CLight, m_iszPattern, FIELD_STRING ),
+};
+
+IMPLEMENT_SAVERESTORE( CLight, CPointEntity );
 
 
 //

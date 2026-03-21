@@ -5,11 +5,7 @@
 #define AFX_ServerCtrl_H__E2974CA6_EF9F_11D3_A4D9_00105A1727F3__INCLUDED_
 
 #if _MSC_VER > 1000
-#ifdef _WIN32
-#ifndef __MINGW32__
 #pragma once
-#endif /* not __MINGW32__ */
-#endif
 #endif // _MSC_VER > 1000
 
 #ifndef __AFXWIN_H__

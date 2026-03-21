@@ -8,16 +8,10 @@
 // Purpose: 
 //
 // $Workfile:     $
-// $Date: 2004/07/31 09:28:37 $
+// $Date:         $
 //
 //-----------------------------------------------------------------------------
-// $Log: vgui_MOTDWindow.cpp,v $
-// Revision 1.1  2004/07/31 09:28:37  spin
-// - rein damit
-//
-// Revision 1.1  2004/06/19 16:41:53  spin
-// - Spin commited pe source
-//
+// $Log: $
 //
 // $NoKeywords: $
 //=============================================================================
@@ -105,7 +99,7 @@ CMessageWindowPanel::CMessageWindowPanel( const char *szMOTD, const char *szTitl
 	pSchemes->getBgColor( hTitleScheme, r, g, b, a );
 	pLabel->setBgColor( r, g, b, a );
 	pLabel->setContentAlignment( vgui::Label::a_west );
-	pLabel->setText(szTitle);
+	pLabel->setText( "%s", szTitle);
 
 	// Create the Scroll panel
 	ScrollPanel *pScrollPanel = new CTFScrollPanel( iXPos + XRES(16), iYPos + MOTD_TITLE_Y*2 + YRES(16), iXSize - XRES(32), iYSize - (YRES(48) + BUTTON_SIZE_Y*2) );
@@ -126,7 +120,7 @@ CMessageWindowPanel::CMessageWindowPanel( const char *szMOTD, const char *szTitl
 	pText->setFgColor( r, g, b, a );
 	pSchemes->getBgColor( hMOTDText, r, g, b, a );
 	pText->setBgColor( r, g, b, a );
-	pText->setText(szMOTD);
+	pText->setText( szMOTD);
 
 	// Get the total size of the MOTD text and resize the text panel
 	int iScrollSizeX, iScrollSizeY;

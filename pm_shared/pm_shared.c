@@ -30,8 +30,13 @@
 #ifdef CLIENT_DLL
 	// Spectator Mode
 	int		iJumpSpectator;
+#ifndef DISABLE_JUMP_ORIGIN
 	float	vJumpOrigin[3];
 	float	vJumpAngles[3];
+#else
+	extern float	vJumpOrigin[3];
+	extern float	vJumpAngles[3];
+#endif
 #endif
 
 static int pm_shared_initialized = 0;
@@ -68,18 +73,18 @@ typedef struct hull_s
 } hull_t;
 
 // Ducking time
-#define TIME_TO_DUCK	0.4
+#define TIME_TO_DUCK		0.4
 #define VEC_DUCK_HULL_MIN	-18
 #define VEC_DUCK_HULL_MAX	18
 #define VEC_DUCK_VIEW		8
 #define PM_DEAD_VIEWHEIGHT	-8
-#define MAX_CLIMB_SPEED	200
-#define STUCK_MOVEUP 1
-#define STUCK_MOVEDOWN -1
+#define MAX_CLIMB_SPEED		200
+#define STUCK_MOVEUP		1
+#define STUCK_MOVEDOWN		-1
 #define VEC_HULL_MIN		-36
 #define VEC_HULL_MAX		36
 #define VEC_VIEW			21
-#define	STOP_EPSILON	0.1
+#define	STOP_EPSILON		0.1
 
 #define CTEXTURESMAX		512			// max number of textures loaded
 #define CBTEXTURENAMEMAX	13			// only load first n chars of name
@@ -113,6 +118,8 @@ typedef struct hull_s
 #define PLAYER_FALL_PUNCH_THRESHHOLD (float)350 // won't punch player's screen/make scrape noise unless player falling at least this fast.
 
 #define PLAYER_LONGJUMP_SPEED 350 // how fast we longjump
+
+#define PLAYER_DUCKING_MULTIPLIER 0.333
 
 // double to float warning
 #pragma warning(disable : 4244)
@@ -161,53 +168,6 @@ void PM_SwapTextures( int i, int j )
 	grgchTextureType[ j ] = chTemp;
 }
 
-typedef struct 
-{
-	unsigned long key;
-	int value;
-} s_hashitem;
-
-unsigned long PM_ElfHash( const char *name )
-{
-        unsigned long h = 0, g;
-        while( *name )
-        {
-                h = (h << 4) + *name++;
-                if( g = h & 0xF0000000 )
-                        h ^= g >> 24;
-                h &= ~g;
-        }
-        return h;
-}
-
-
-s_hashitem *hashlist = NULL;
-int listlen = 0;
-
-int BuildHashList( const char first[512][13], int num )
-{
-  int i = 0, o = 0;
-  char newtext[13];
-  if( hashlist )
-  {
-	  free( hashlist );
-	  hashlist = NULL;
-  }
-	hashlist = malloc( sizeof(s_hashitem) * num );
-
-	for( i = 0; i < num; i++ )
-	{
-    for( o = 0; o < 13; o++ )
-    {
-      newtext[o] = tolower( first[i][o] );
-    }
-		hashlist[i].key = PM_ElfHash( (const char*)newtext );
-		hashlist[i].value = i;
-	}
-  listlen = num;
-	return num;
-}
-
 void PM_SortTextures( void )
 {
 	// Bubble sort, yuck, but this only occurs at startup and it's only 512 elements...
@@ -226,7 +186,6 @@ void PM_SortTextures( void )
 			}
 		}
 	}
-  BuildHashList( grgszTextureName, gcTextures );
 }
 
 void PM_InitTextureTypes()
@@ -300,23 +259,34 @@ void PM_InitTextureTypes()
 
 char PM_FindTextureType( char *name )
 {
-	unsigned long val;
-  int i;
+	int left, right, pivot;
+	int val;
 
 	assert( pm_shared_initialized );
-  if( !listlen )
-    return CHAR_TEX_CONCRETE;
 
-  val = PM_ElfHash( name );
- 
-  for( i = 0; i < listlen; i++ )
-  {
-	if( hashlist[i].key == val )
-    {
-			return grgchTextureType[ hashlist[i].value ];
-    }
-  }
-  return CHAR_TEX_CONCRETE;
+	left = 0;
+	right = gcTextures - 1;
+
+	while ( left <= right )
+	{
+		pivot = ( left + right ) / 2;
+
+		val = strnicmp( name, grgszTextureName[ pivot ], CBTEXTURENAMEMAX-1 );
+		if ( val == 0 )
+		{
+			return grgchTextureType[ pivot ];
+		}
+		else if ( val > 0 )
+		{
+			left = pivot + 1;
+		}
+		else if ( val < 0 )
+		{
+			right = pivot - 1;
+		}
+	}
+
+	return CHAR_TEX_CONCRETE;
 }
 
 void PM_PlayStepSound( int step, float fvol )
@@ -1812,7 +1782,7 @@ void PM_SpectatorMove (void)
 			iJumpSpectator	= 0;
 			return;
 		}
-		#endif
+#endif
 		// Move around in normal spectator method
 
 		speed = Length (pmove->velocity);
@@ -2025,9 +1995,9 @@ void PM_Duck( void )
 
 	if ( pmove->flags & FL_DUCKING || pmove->cmd.buttons & IN_DUCK )
 	{
-		pmove->cmd.forwardmove *= 0.333;
-		pmove->cmd.sidemove    *= 0.333;
-		pmove->cmd.upmove      *= 0.333;
+		pmove->cmd.forwardmove *= PLAYER_DUCKING_MULTIPLIER;
+		pmove->cmd.sidemove    *= PLAYER_DUCKING_MULTIPLIER;
+		pmove->cmd.upmove      *= PLAYER_DUCKING_MULTIPLIER;
 	}
 
 	if ( ( pmove->cmd.buttons & IN_DUCK ) || ( pmove->bInDuck ) || ( pmove->flags & FL_DUCKING ) )
@@ -2096,6 +2066,12 @@ void PM_LadderMove( physent_t *pLadder )
 
 	if ( pmove->movetype == MOVETYPE_NOCLIP )
 		return;
+	
+#if defined( _TFC )
+	// this is how TFC freezes players, so we don't want them climbing ladders
+	if ( pmove->maxspeed <= 1.0 )
+		return;
+#endif
 
 	pmove->PM_GetModelBounds( pLadder->model, modelmins, modelmaxs );
 
@@ -2120,16 +2096,36 @@ void PM_LadderMove( physent_t *pLadder )
 	{
 		float forward = 0, right = 0;
 		vec3_t vpn, v_right;
+		float flSpeed = MAX_CLIMB_SPEED;
+
+		// they shouldn't be able to move faster than their maxspeed
+		if ( flSpeed > pmove->maxspeed )
+		{
+			flSpeed = pmove->maxspeed;
+		}
+
+		if ( pmove->flags & FL_DUCKING )
+		{
+			flSpeed *= PLAYER_DUCKING_MULTIPLIER;
+		}
 
 		AngleVectors( pmove->angles, vpn, v_right, NULL );
 		if ( pmove->cmd.buttons & IN_BACK )
-			forward -= MAX_CLIMB_SPEED;
+		{
+			forward -= flSpeed;
+		}
 		if ( pmove->cmd.buttons & IN_FORWARD )
-			forward += MAX_CLIMB_SPEED;
+		{
+			forward += flSpeed;
+		}
 		if ( pmove->cmd.buttons & IN_MOVELEFT )
-			right -= MAX_CLIMB_SPEED;
+		{
+			right -= flSpeed;
+		}
 		if ( pmove->cmd.buttons & IN_MOVERIGHT )
-			right += MAX_CLIMB_SPEED;
+		{
+			right += flSpeed;
+		}
 
 		if ( pmove->cmd.buttons & IN_JUMP )
 		{
@@ -3035,11 +3031,13 @@ void PM_PlayerMove ( qboolean server )
 		}
 	}
 
+#if !defined( _TFC )
 	// Slow down, I'm pulling it! (a box maybe) but only when I'm standing on ground
 	if ( ( pmove->onground != -1 ) && ( pmove->cmd.buttons & IN_USE) )
 	{
 		VectorScale( pmove->velocity, 0.3, pmove->velocity );
 	}
+#endif
 
 	// Handle movement
 	switch ( pmove->movetype )

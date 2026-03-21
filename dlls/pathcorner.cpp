@@ -1,6 +1,6 @@
 /***
 *
-*	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
+*	Copyright (c) 1996-2001, Valve LLC. All rights reserved.
 *	
 *	This product contains software technology licensed from Id 
 *	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
@@ -29,8 +29,8 @@ public:
 	void KeyValue( KeyValueData* pkvd );
 	float GetDelay( void ) { return m_flWait; }
 //	void Touch( CBaseEntity *pOther );
-	//virtual int		Save( CSave &save );
-	//virtual int		Restore( CRestore &restore );
+	virtual int		Save( CSave &save );
+	virtual int		Restore( CRestore &restore );
 	
 	static	TYPEDESCRIPTION m_SaveData[];
 
@@ -39,6 +39,14 @@ private:
 };
 
 LINK_ENTITY_TO_CLASS( path_corner, CPathCorner );
+
+// Global Savedata for Delay
+TYPEDESCRIPTION	CPathCorner::m_SaveData[] = 
+{
+	DEFINE_FIELD( CPathCorner, m_flWait, FIELD_FLOAT ),
+};
+
+IMPLEMENT_SAVERESTORE( CPathCorner, CPointEntity );
 
 //
 // Cache user-entity-field values until spawn is called.
@@ -110,6 +118,16 @@ void CPathCorner :: Touch( CBaseEntity *pOther )
 
 
 
+TYPEDESCRIPTION	CPathTrack::m_SaveData[] = 
+{
+	DEFINE_FIELD( CPathTrack, m_length, FIELD_FLOAT ),
+	DEFINE_FIELD( CPathTrack, m_pnext, FIELD_CLASSPTR ),
+	DEFINE_FIELD( CPathTrack, m_paltpath, FIELD_CLASSPTR ),
+	DEFINE_FIELD( CPathTrack, m_pprevious, FIELD_CLASSPTR ),
+	DEFINE_FIELD( CPathTrack, m_altName, FIELD_STRING ),
+};
+
+IMPLEMENT_SAVERESTORE( CPathTrack, CBaseEntity );
 LINK_ENTITY_TO_CLASS( path_track, CPathTrack );
 
 //

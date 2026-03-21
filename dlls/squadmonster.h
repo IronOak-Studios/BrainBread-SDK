@@ -1,6 +1,6 @@
 /***
 *
-*	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
+*	Copyright (c) 1996-2001, Valve LLC. All rights reserved.
 *	
 *	This product contains software technology licensed from Id 
 *	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
@@ -106,6 +106,11 @@ public:
 	BOOL SquadMemberInRange( const Vector &vecLocation, float flDist );
 
 	virtual CSquadMonster *MySquadMonsterPointer( void ) { return this; }
+
+	static TYPEDESCRIPTION m_SaveData[];
+
+	int	Save( CSave &save ); 
+	int Restore( CRestore &restore );
 
 	BOOL FValidateCover ( const Vector &vecCoverLocation );
 

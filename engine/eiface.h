@@ -1,6 +1,6 @@
 /***
 *
-*	Copyright (c) 1999, Valve LLC. All rights reserved.
+ *	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
 *	
 *	This product contains software technology licensed from Id 
 *	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
@@ -35,11 +35,13 @@
 // This is conveniently done for them in extdll.h
 //
 
+/*
 #ifdef _WIN32
 #define DLLEXPORT __stdcall
 #else
-#define DLLEXPORT /* */
+#define DLLEXPORT  __attribute__ ((visibility("default")))
 #endif
+*/
 
 typedef enum
 	{
@@ -286,9 +288,13 @@ typedef struct enginefuncs_s
 	// destroyed and recreated.
 	void (*pfnRegisterTutorMessageShown)(int mid);
 	int (*pfnGetTimesTutorMessageShown)(int mid);
-	void (*pfnProcessTutorMessageDecayBuffer)(int *buffer, int bufferLength);
-	void (*pfnConstructTutorMessageDecayBuffer)(int *buffer, int bufferLength);
-	void (*pfnResetTutorMessageDecayData)( void );
+	void (*ProcessTutorMessageDecayBuffer)(int *buffer, int bufferLength);
+	void (*ConstructTutorMessageDecayBuffer)(int *buffer, int bufferLength);
+	void (*ResetTutorMessageDecayData)( void );
+
+	void (*pfnQueryClientCvarValue)( const edict_t *player, const char *cvarName );
+	void (*pfnQueryClientCvarValue2)( const edict_t *player, const char *cvarName, int requestID );
+	int (*pfnCheckParm)( const char *pchCmdLineToken, char **ppnext );
 } enginefuncs_t;
 
 
@@ -512,6 +518,8 @@ typedef struct
 	void			(*pfnOnFreeEntPrivateData)(edict_t *pEnt);
 	void			(*pfnGameShutdown)(void);
 	int				(*pfnShouldCollide)( edict_t *pentTouched, edict_t *pentOther );
+	void			(*pfnCvarValue)( const edict_t *pEnt, const char *value );
+	void			(*pfnCvarValue2)( const edict_t *pEnt, int requestID, const char *cvarName, const char *value );
 } NEW_DLL_FUNCTIONS;
 typedef int	(*NEW_DLL_FUNCTIONS_FN)( NEW_DLL_FUNCTIONS *pFunctionTable, int *interfaceVersion );
 

@@ -1,6 +1,6 @@
 /***
 *
-*	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
+*	Copyright (c) 1996-2001, Valve LLC. All rights reserved.
 *	
 *	This product contains software technology licensed from Id 
 *	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
@@ -56,8 +56,8 @@ public:
 	CPathTrack	*GetNext( void );
 	CPathTrack	*GetPrevious( void );
 
-	//virtual int		Save( CSave &save );
-	//virtual int		Restore( CRestore &restore );
+	virtual int		Save( CSave &save );
+	virtual int		Restore( CRestore &restore );
 	
 	static	TYPEDESCRIPTION m_SaveData[];
 #if PATH_SPARKLE_DEBUG
@@ -98,8 +98,8 @@ public:
 	
 	static CFuncTrackTrain *Instance( edict_t *pent );
 
-	//virtual int		Save( CSave &save );
-	//virtual int		Restore( CRestore &restore );
+	virtual int		Save( CSave &save );
+	virtual int		Restore( CRestore &restore );
 	
 	static	TYPEDESCRIPTION m_SaveData[];
 	virtual int	ObjectCaps( void ) { return (CBaseEntity :: ObjectCaps() & ~FCAP_ACROSS_TRANSITION) | FCAP_DIRECTIONAL_USE; }
