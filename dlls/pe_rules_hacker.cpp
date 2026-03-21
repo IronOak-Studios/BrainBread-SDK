@@ -19,7 +19,6 @@
 #include	"pe_mapobjects.h"
 #include	"bb_escape.h"
 #include "../cl_dll/pe_help_topics.h"
-#include <hash_map>
 using namespace::std;
 
 #ifdef WIN32

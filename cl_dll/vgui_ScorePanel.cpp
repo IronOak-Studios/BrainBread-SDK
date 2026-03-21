@@ -71,7 +71,7 @@ team_info_t			 g_TeamInfo[MAX_TEAMS+1];
 int					 g_IsSpectator[MAX_PLAYERS+1];
 int					 g_IsSpecial[512]; // O_o
 
-char *gsAlive[] = 
+const char *gsAlive[] = 
 {
 	"DEAD",
 	"",

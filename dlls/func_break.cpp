@@ -818,7 +818,7 @@ public:
 	
 	static	TYPEDESCRIPTION m_SaveData[];
 
-	static char *m_soundNames[3];
+	static const char *m_soundNames[3];
 	int		m_lastSound;	// no need to save/restore, just keeps the same sound from playing twice in a row
 	float	m_maxSpeed;
 	float	m_soundTime;
@@ -827,7 +827,7 @@ public:
 
 LINK_ENTITY_TO_CLASS( func_pushable, CPushable );
 
-char *CPushable :: m_soundNames[3] = { "debris/pushbox1.wav", "debris/pushbox2.wav", "debris/pushbox3.wav" };
+const char *CPushable :: m_soundNames[3] = { "debris/pushbox1.wav", "debris/pushbox2.wav", "debris/pushbox3.wav" };
 
 
 void CPushable :: Spawn( void )
@@ -860,7 +860,7 @@ void CPushable :: Spawn( void )
 void CPushable :: Precache( void )
 {
 	for ( int i = 0; i < 3; i++ )
-		PRECACHE_SOUND( m_soundNames[i] );
+		PRECACHE_SOUND( (char *)m_soundNames[i] );
 
 	if ( pev->spawnflags & SF_PUSH_BREAKABLE )
 		CBreakable::Precache( );

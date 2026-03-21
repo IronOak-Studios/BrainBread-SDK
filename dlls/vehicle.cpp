@@ -166,7 +166,7 @@ void CFuncVehicle :: Blocked( CBaseEntity *pOther )
 	miny = min(vFrontLeft.y, vBackRight.y);
 	maxy = max(vFrontLeft.y, vBackRight.y);
 	minz = pev->origin.z;
-	maxz = pev->origin.z + abs(pev->mins.z - pev->maxs.z) * 2;
+	maxz = pev->origin.z + fabs(pev->mins.z - pev->maxs.z) * 2;
 
 	// Check if the target is out of the bounds of the vehicle...
 	if (	((vOrigin.x < minx) || (vOrigin.x > maxx))
@@ -328,7 +328,7 @@ void CFuncVehicle :: UpdateSound( void )
 	if (!pev->noise)
 		return;
 
-	flpitch = VEHICLE_STARTPITCH + (abs(pev->speed) * (VEHICLE_MAXPITCH - VEHICLE_STARTPITCH) / VEHICLE_MAXSPEED);
+	flpitch = VEHICLE_STARTPITCH + (fabs(pev->speed) * (VEHICLE_MAXPITCH - VEHICLE_STARTPITCH) / VEHICLE_MAXSPEED);
 
 	if (flpitch > VEHICLE_MAXPITCH)
 		flpitch = VEHICLE_MAXPITCH;

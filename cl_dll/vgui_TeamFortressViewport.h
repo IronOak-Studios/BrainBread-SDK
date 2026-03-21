@@ -55,9 +55,9 @@ class CEquip;
 char* GetVGUITGAName(const char *pszName);
 BitmapTGA *LoadTGAForRes(const char* pImageName);
 void ScaleColors( int &r, int &g, int &b, int a );
-extern char *sTFClassSelection[];
+extern const char *sTFClassSelection[];
 extern int sTFValidClassInts[];
-extern char *sLocalisedClasses[];
+extern const char *sLocalisedClasses[];
 extern int iTeamColors[5][3];
 extern int iNumberOfTeamColors;
 

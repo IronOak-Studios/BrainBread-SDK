@@ -732,9 +732,9 @@ void CHalfLifeMultiplay::DeathNotice( CBasePlayer *pVictim, entvars_t *pKiller, 
 	int killer_index = 0;
 	
 	// Hack to fix name change
-	char *tau = "tau_cannon";
-	char *gluon = "gluon gun";
-	char *wpns[32] = 
+	const char *tau = "tau_cannon";
+	const char *gluon = "gluon gun";
+	const char *wpns[32] = 
 	{
 		"Desert Eagle", "Seburo CX", "Benelli M3", "Beretta 92FS",
 		"M16", "Glock 18 Semi", "Knife", "Steyr Aug", "M134 Vulcan Minigun",

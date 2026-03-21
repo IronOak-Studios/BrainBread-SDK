@@ -177,7 +177,7 @@ int CHudDeathNotice :: MsgFunc_DeathMsg( const char *pszName, int iSize, void *p
 	int killer = READ_BYTE();
 	int victim = READ_BYTE();
 
-	char *wpns[32] = 
+	const char *wpns[32] = 
 	{
 		"  Desert Eagle", "  Seburo CX", "  Benelli M3", "  Beretta 92FS",
 		"  M16", "  Glock 18 Semi", "  Knife", "  Steyr Aug", "  M134 Vulcan Minigun",

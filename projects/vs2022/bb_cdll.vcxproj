@@ -206,7 +206,7 @@ call ..\..\filecopy.bat $(TargetDir)\$(TargetName).pdb ..\..\..\game\brainbread\
     <ClCompile Include="..\..\game_shared\vgui_scrollbar2.cpp" />
     <ClCompile Include="..\..\game_shared\vgui_slider2.cpp" />
     <ClCompile Include="..\..\game_shared\voice_banmgr.cpp" />
-    <ClCompile Include="..\..\game_shared\voice_status.cpp" />
+    <ClCompile Include="..\..\cl_dll\voice_status.cpp" />
     <ClCompile Include="..\..\game_shared\voice_vgui_tweakdlg.cpp" />
     <ClCompile Include="..\..\pm_shared\pm_debug.c" />
     <ClCompile Include="..\..\pm_shared\pm_math.c" />

@@ -59,7 +59,7 @@ CBaseEntity
 
 #undef EXPORT
 #ifdef _WIN32
-#define EXPORT	_declspec( dllexport )
+#define EXPORT	__declspec( dllexport )
 #else
 #define EXPORT	/* */
 #endif

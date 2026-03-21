@@ -173,7 +173,7 @@ int iTeamColors[5][3] =
 
 
 // Used for Class specific buttons
-char *sTFClasses[] =
+const char *sTFClasses[] =
 {
 	"",
 	"SCOUT",
@@ -188,7 +188,7 @@ char *sTFClasses[] =
 	"CIVILIAN",
 };
 
-char *sLocalisedClasses[] = 
+const char *sLocalisedClasses[] = 
 {
 	"SOL",
 	"CAG",
@@ -204,7 +204,7 @@ char *sLocalisedClasses[] =
 	"",
 };
 
-char *sTFClassSelection[] = 
+const char *sTFClassSelection[] = 
 {
 	"civilian",
 	"scout",

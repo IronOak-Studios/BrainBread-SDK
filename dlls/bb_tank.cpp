@@ -305,7 +305,7 @@ void CTank::HuntThink( )
 	
   if( m_pGoalEnt )
 	{
-		if( flLength < max( ( 0.5f * TANK_ACCEL * ( speed / TANK_ACCEL ) * ( speed / TANK_ACCEL ) ), 64 ) )
+		if( flLength < max( ( 0.5f * TANK_ACCEL * ( speed / TANK_ACCEL ) * ( speed / TANK_ACCEL ) ), 64.0f ) )
       NextTarget( );
 	}
   else if( m_pGoalEnt == NULL && !FStringNull(pev->target) )
@@ -432,7 +432,7 @@ void CTank::Drive(  )
     speed += TANK_ACCEL * deltatime;
   else
     speed -= TANK_ACCEL * deltatime;
-  speed = max( speed, 0 );
+  speed = max( speed, 0.0f );
   speed = min( speed, maxspeed );
 
   //ALERT( at_console, "speed: %f, max: %f, dist: %f\n", m_flGoalSpeed, m_flMaxGoalSpeed, flDist );

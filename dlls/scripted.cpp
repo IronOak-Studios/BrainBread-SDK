@@ -1059,7 +1059,8 @@ BOOL CScriptedSentence :: AcceptableSpeaker( CBaseToggle *pMonster )
 	{
 		if ( pev->spawnflags & SF_SENTENCE_FOLLOWERS )
 		{
-			if ( pMonster->m_hTargetEnt == NULL || !FClassnameIs(pMonster->m_hTargetEnt->pev, "player") )
+			CBaseMonster *pBM = pMonster->MyMonsterPointer();
+			if ( pBM == NULL || pBM->m_hTargetEnt == NULL || !FClassnameIs(pBM->m_hTargetEnt->pev, "player") )
 				return FALSE;
 		}
 		BOOL override;
