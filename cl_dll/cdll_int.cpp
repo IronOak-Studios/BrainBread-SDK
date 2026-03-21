@@ -164,9 +164,6 @@ and whenever the vid_mode is changed
 so the HUD can reinitialize itself.
 ==========================
 */
-// IMAGE-SPACE GLOW
-//extern void InitScreenGlow(void);
-
 int DLLEXPORT HUD_VidInit( void )
 {
 	if( !g_font )
@@ -178,9 +175,6 @@ int DLLEXPORT HUD_VidInit( void )
 	gHUD.VidInit();
 
 	VGui_Startup();
-
-	// IMAGE-SPACE GLOW
-	//InitScreenGlow();
 
 	return 1;
 }
@@ -212,12 +206,9 @@ redraw the HUD.
 ===========================
 */
 
-//extern void RenderScreenGlow( );
-
 extern globalvars_t *gpGlobals;
 int DLLEXPORT HUD_Redraw( float time, int intermission )
 {
-  //RenderScreenGlow( );
   if( gpGlobals )
 	  gpGlobals->time = time;
 	gHUD.Redraw( time, intermission );

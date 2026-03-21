@@ -45,14 +45,14 @@
     <OutDir>.\debug\</OutDir>
     <IntDir>.\debug\</IntDir>
     <LinkIncremental>true</LinkIncremental>
-    <LibraryPath>.\glext\lib;C:\Program Files (x86)\NVIDIA Corporation\Cg\lib;$(LibraryPath)</LibraryPath>
+    <LibraryPath>.\glext\lib;$(LibraryPath)</LibraryPath>
     <TargetName>client</TargetName>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
     <OutDir>.\release\</OutDir>
     <IntDir>.\release\</IntDir>
     <LinkIncremental>false</LinkIncremental>
-    <LibraryPath>.\glext\lib;C:\Program Files (x86)\NVIDIA Corporation\Cg\lib;$(LibraryPath)</LibraryPath>
+    <LibraryPath>.\glext\lib;$(LibraryPath)</LibraryPath>
     <TargetName>client</TargetName>
   </PropertyGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -95,7 +95,7 @@ copy "$(TargetDir)"client.pdb $(SteamDir)\steamapps\common\half-life\brainbread\
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>odbc32.lib;odbccp32.lib;winmm.lib;../utils/vgui/lib/win32_vc6/vgui.lib;wsock32.lib;opengl32.lib;cg.lib;cgGL.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>odbc32.lib;odbccp32.lib;winmm.lib;../utils/vgui/lib/win32_vc6/vgui.lib;wsock32.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>.\debug\client.dll</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -148,7 +148,7 @@ copy "$(TargetDir)"client.pdb $(SteamDir)\steamapps\common\half-life\brainbread\
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>odbc32.lib;odbccp32.lib;winmm.lib;../utils/vgui/lib/win32_vc6/vgui.lib;wsock32.lib;opengl32.lib;cg.lib;cgGL.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>odbc32.lib;odbccp32.lib;winmm.lib;../utils/vgui/lib/win32_vc6/vgui.lib;wsock32.lib;opengl32.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>.\release\client.dll</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <ProgramDatabaseFile>.\release\client.pdb</ProgramDatabaseFile>
