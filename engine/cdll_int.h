@@ -37,6 +37,7 @@ extern "C" {
 namespace cldll {
 typedef int HSPRITE;	// handle to a graphic
 }
+using cldll::HSPRITE;
 
 #define SCRINFO_SCREENFLASH 1
 #define SCRINFO_STRETCHED	2

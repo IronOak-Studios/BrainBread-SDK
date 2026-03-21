@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2002, Valve LLC, All rights reserved. ============
+//========= Copyright ï¿½ 1996-2002, Valve LLC, All rights reserved. ============
 //
 // Purpose: 
 //
@@ -15,7 +15,10 @@
 #include "camera.h"
 #include "in_defs.h"
 
+#include "Exports.h"
+#ifdef _WIN32
 #include "windows.h"
+#endif
 
 float CL_KeyState (kbutton_t *key);
 

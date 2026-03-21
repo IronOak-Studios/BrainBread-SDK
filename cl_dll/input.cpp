@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2002, Valve LLC, All rights reserved. ============
+//========= Copyright ï¿½ 1996-2002, Valve LLC, All rights reserved. ============
 //
 // Purpose: 
 //
@@ -28,15 +28,7 @@ extern "C"
 #include <ctype.h>
 
 #include "vgui_TeamFortressViewport.h"
-
-
-extern "C" 
-{
-	struct kbutton_s DLLEXPORT *KB_Find( const char *name );
-	void DLLEXPORT CL_CreateMove ( float frametime, struct usercmd_s *cmd, int active );
-	void DLLEXPORT HUD_Shutdown( void );
-	int DLLEXPORT HUD_Key_Event( int eventcode, int keynum, const char *pszCurrentBinding );
-}
+#include "Exports.h"
 
 extern int g_iAlive;
 

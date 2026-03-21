@@ -30,6 +30,7 @@
 #include "../hud_iface.h"
 #include "../com_weapons.h"
 #include "../demo.h"
+#include "../Exports.h"
 
 #undef PE_CROSS_CALM
 #undef PE_CROSS_CALM_SLOW

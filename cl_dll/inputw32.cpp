@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2002, Valve LLC, All rights reserved. ============
+//========= Copyright ï¿½ 1996-2002, Valve LLC, All rights reserved. ============
 //
 // Purpose: 
 //
@@ -692,12 +692,12 @@ void IN_StartupJoystick (void)
 		return; 
 
 	static float flLastCheck = 0.0f;
-	if ( flLastCheck > 0.0f && (gEngfuncs.GetAbsoluteTime()-flLastCheck)  < 1.0f )
+	if ( flLastCheck > 0.0f && (gEngfuncs.GetClientTime()-flLastCheck)  < 1.0f )
 		return;
 
 	//gEngfuncs.Con_Printf("IN_StartupJoystick, %f\n", flLastCheck);
 
-	flLastCheck = gEngfuncs.GetAbsoluteTime();
+	flLastCheck = gEngfuncs.GetClientTime();
 
 	int nJoysticks = SDL_NumJoysticks();
 	if ( nJoysticks > 0 )

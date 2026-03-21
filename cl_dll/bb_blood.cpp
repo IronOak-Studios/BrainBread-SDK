@@ -10,8 +10,16 @@
 #include "r_studioint.h"
 #include <gl/gl.h>
 #include <gl/glext.h>
+#undef min
+#undef max
 #include <list>
 using namespace std;
+#ifndef max
+#define max(a, b)  (((a) > (b)) ? (a) : (b))
+#endif
+#ifndef min
+#define min(a, b)  (((a) < (b)) ? (a) : (b))
+#endif
 
 extern engine_studio_api_t IEngineStudio;
 
