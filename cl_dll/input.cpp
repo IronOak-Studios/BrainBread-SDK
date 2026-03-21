@@ -1,10 +1,3 @@
-//========= Copyright � 1996-2002, Valve LLC, All rights reserved. ============
-//
-// Purpose: 
-//
-// $NoKeywords: $
-//=============================================================================
-
 // cl.input.c  -- builds an intended movement command to send to the server
 
 //xxxxxx Move bob and pitch drifting code here and other stuff from view if needed

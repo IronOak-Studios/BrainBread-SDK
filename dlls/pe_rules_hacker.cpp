@@ -1907,8 +1907,8 @@ void cPEHacking::Think( )
 	float flFragLimit = fraglimit.value;
 	float flScoreLimit = teamscorelimit.value;
 	int time_remaining = (int)( flTimeLimit ? ( flTimeLimit - gpGlobals->time ) : 0);
-	int frags_remaining;
-	int score_remaining;
+	int frags_remaining = 0;
+	int score_remaining = 0;
 	if( flScoreLimit )
 	{
 		int remain, bestscore = 9999;

@@ -1,4 +1,4 @@
-//========= Copyright � 1996-2002, Valve LLC, All rights reserved. ============
+//========= Copyright © 1996-2002, Valve LLC, All rights reserved. ============
 //
 // Purpose: 
 //
@@ -241,6 +241,14 @@ void CL_DLLEXPORT IN_ActivateMouse (void)
 			restore_spi = SystemParametersInfo (SPI_SETMOUSE, 0, newmouseparms, 0);
 
 #endif
+		if (IN_UseRawInput())
+		{
+			SDL_SetRelativeMouseMode(SDL_TRUE);
+			// Flush any stale delta so we don't get a single-frame jump
+			int dx, dy;
+			SDL_GetRelativeMouseState(&dx, &dy);
+		}
+
 		mouseactive = 1;
 	}
 }
@@ -260,6 +268,10 @@ void CL_DLLEXPORT IN_DeactivateMouse (void)
 			SystemParametersInfo (SPI_SETMOUSE, 0, originalmouseparms, 0);
 
 #endif
+		if (IN_UseRawInput())
+		{
+			SDL_SetRelativeMouseMode(SDL_FALSE);
+		}
 
 		mouseactive = 0;
 	}
@@ -1100,6 +1112,25 @@ void IN_JoyMove ( float frametime, usercmd_t *cmd )
 	gEngfuncs.SetViewAngles( (float *)viewangles );
 }
 
+static void IN_UpdateMouseGrab(void)
+{
+	if (!IN_UseRawInput())
+		return;
+
+	SDL_bool shouldBeRelative = (mouseactive && !g_iVisibleMouse && !iMouseInUse) ? SDL_TRUE : SDL_FALSE;
+
+	if (SDL_GetRelativeMouseMode() != shouldBeRelative)
+	{
+		SDL_SetRelativeMouseMode(shouldBeRelative);
+		if (shouldBeRelative)
+		{
+			// Flush stale delta so we don't get a snap on re-entry
+			int dx, dy;
+			SDL_GetRelativeMouseState(&dx, &dy);
+		}
+	}
+}
+
 /*
 ===========
 IN_Move
@@ -1107,6 +1138,8 @@ IN_Move
 */
 void IN_Move ( float frametime, usercmd_t *cmd)
 {
+	IN_UpdateMouseGrab();
+
 	if ( !iMouseInUse && mouseactive )
 	{
 		IN_MouseMove ( frametime, cmd);
