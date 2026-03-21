@@ -4,6 +4,7 @@
 // headers to prevent macro interference with <cstdlib> and <algorithm>
 #undef min
 #undef max
+#undef fabs
 #include "string.h"
 #include "bb_blood.h"
 #include "triangleapi.h"

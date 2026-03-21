@@ -631,6 +631,7 @@ public:
 	int						m_StandardMenu;	// indexs in m_pCommandMenus
 	int						m_SpectatorOptionsMenu;
 	int						m_SpectatorCameraMenu;
+	int						m_PlayerMenu;
 	CClassMenuPanel	*m_pClassMenu;
 	ScorePanel		*m_pScoreBoard;
 	SpectatorPanel *		m_pSpectatorPanel;

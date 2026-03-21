@@ -2,6 +2,7 @@
 #include "cl_util.h"
 #undef min
 #undef max
+#undef fabs
 #include "demo.h"
 #include "demo_api.h"
 #include "parsemsg.h"
