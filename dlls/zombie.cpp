@@ -37,7 +37,7 @@
 class CZombie : public CBaseMonster
 {
 public:
-	void Spawn( void );
+	void Spawn( void ); 
 	void Precache( void );
 	void SetYawSpeed( void );
 	int  Classify ( void );
