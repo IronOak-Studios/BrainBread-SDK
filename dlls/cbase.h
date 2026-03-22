@@ -74,6 +74,7 @@ CBaseEntity
 
 extern "C" CBASE_DLLEXPORT int GetEntityAPI( DLL_FUNCTIONS *pFunctionTable, int interfaceVersion );
 extern "C" CBASE_DLLEXPORT int GetEntityAPI2( DLL_FUNCTIONS *pFunctionTable, int *interfaceVersion );
+extern "C" CBASE_DLLEXPORT int GetNewDLLFunctions( NEW_DLL_FUNCTIONS *pFunctionTable, int *interfaceVersion );
 
 extern int DispatchSpawn( edict_t *pent );
 extern void DispatchKeyValue( edict_t *pentKeyvalue, KeyValueData *pkvd );
@@ -165,7 +166,7 @@ public:
     entcount++;
     //ALERT( at_logged, "entcount: %d\n", entcount );
   }
-  ~CBaseEntity( )
+  virtual ~CBaseEntity( )
   {
     entcount--;
     //ALERT( at_logged, "entcount: %d\n", entcount );

@@ -45,6 +45,8 @@ extern "C" void PM_Move ( struct playermove_s *ppmove, int server );
 extern "C" void PM_Init ( struct playermove_s *ppmove  );
 extern "C" char PM_FindTextureType( char *name );
 
+void OnFreeEntPrivateData( edict_s *pEdict );
+
 extern Vector VecBModelOrigin( entvars_t* pevBModel );
 extern DLL_GLOBAL Vector		g_vecAttackDir;
 extern DLL_GLOBAL int			g_iSkillLevel;
@@ -113,6 +115,11 @@ static DLL_FUNCTIONS gFunctionTable =
 	AllowLagCompensation,		//pfnAllowLagCompensation
 };
 
+static NEW_DLL_FUNCTIONS gNewDLLFunctions =
+{
+	OnFreeEntPrivateData,		//pfnOnFreeEntPrivateData
+};
+
 static void SetObjectCollisionBox( entvars_t *pev );
 
 extern "C" {
@@ -141,8 +148,27 @@ int GetEntityAPI2( DLL_FUNCTIONS *pFunctionTable, int *interfaceVersion )
 	return TRUE;
 }
 
+int GetNewDLLFunctions( NEW_DLL_FUNCTIONS *pFunctionTable, int *interfaceVersion )
+{
+	if ( !pFunctionTable || *interfaceVersion != NEW_DLL_FUNCTIONS_VERSION )
+	{
+		*interfaceVersion = NEW_DLL_FUNCTIONS_VERSION;
+		return FALSE;
+	}
+
+	memcpy( pFunctionTable, &gNewDLLFunctions, sizeof( NEW_DLL_FUNCTIONS ) );
+	return TRUE;
 }
 
+}
+
+void OnFreeEntPrivateData( edict_s *pEdict )
+{
+	if ( pEdict && pEdict->pvPrivateData )
+	{
+		((CBaseEntity *)pEdict->pvPrivateData)->~CBaseEntity();
+	}
+}
 
 int DispatchSpawn( edict_t *pent )
 {
