@@ -1227,9 +1227,9 @@ void CBasePlayer::Killed( entvars_t *pevAttacker, int iGib )
 			NVGActive( FALSE ); 
 		
 		m_fNVG = FALSE; 
-		MESSAGE_BEGIN(MSG_ONE, gmsgNVG, NULL, pev);
+		/*MESSAGE_BEGIN(MSG_ONE, gmsgNVG, NULL, pev);
 			WRITE_BYTE( 0 );
-        MESSAGE_END( );
+        MESSAGE_END( );*/
 
 	// this client isn't going to be thinking for a while, so reset the sound until they respawn
 	pSound = CSoundEnt::SoundPointerForIndex( CSoundEnt::ClientSoundIndex( edict() ) );
@@ -3525,9 +3525,9 @@ void CBasePlayer::Spawn( void )
 			NVGActive( FALSE ); 
 		
 		m_fNVG = FALSE; 
-		MESSAGE_BEGIN(MSG_ONE, gmsgNVG, NULL, pev);
+		/*MESSAGE_BEGIN(MSG_ONE, gmsgNVG, NULL, pev);
 			WRITE_BYTE( 0 );
-        MESSAGE_END( );
+        MESSAGE_END( );*/
 
 	//}
 	m_fNVG = FALSE;
@@ -5771,7 +5771,7 @@ void CBasePlayer::NVGActive(BOOL Active)
 	//if (!m_fNVG)
 	//	return;
 
-    if( Active && !m_fNVGActive )
+    /*if (Active && !m_fNVGActive)
 	{
         MESSAGE_BEGIN(MSG_ONE, gmsgNVGActive, NULL, pev);
 			WRITE_BYTE( 1 );
@@ -5787,7 +5787,7 @@ void CBasePlayer::NVGActive(BOOL Active)
 		MESSAGE_END( );
 		m_fNVGActive = FALSE;
 		NVGCreateInfrared( FALSE );
-    }
+    }*/
 }
 void CBasePlayer::NVGCreateInfrared( BOOL fOn )  //THX to Prefect
 {

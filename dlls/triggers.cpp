@@ -2370,7 +2370,7 @@ void CTriggerCamera::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYP
 	}
 		
 	m_hPlayer = pActivator;
-	if (FBitSet(pev->spawnflags, 8))
+	/*if (FBitSet(pev->spawnflags, 8))
 	{
 		MESSAGE_BEGIN(MSG_ONE, gmsgNVGActive, NULL, m_hPlayer->pev);
 			WRITE_BYTE( 1 );
@@ -2381,7 +2381,7 @@ void CTriggerCamera::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYP
 		MESSAGE_BEGIN(MSG_ONE, gmsgNVGActive, NULL, m_hPlayer->pev);
 			WRITE_BYTE( 0 );
 		MESSAGE_END( );
-	}
+	}*/
 
 	m_flReturnTime = gpGlobals->time + 10;//m_flWait;
 	pev->speed = m_initialSpeed;
@@ -2465,9 +2465,9 @@ void CTriggerCamera::FollowTarget( )
 			SET_VIEW( m_hPlayer->edict(), m_hPlayer->edict() );
 			((CBasePlayer *)((CBaseEntity *)m_hPlayer))->EnableControl(TRUE);
 		}
-		MESSAGE_BEGIN(MSG_ONE, gmsgNVGActive, NULL, m_hPlayer->pev);
+		/*MESSAGE_BEGIN(MSG_ONE, gmsgNVGActive, NULL, m_hPlayer->pev);
 			WRITE_BYTE( 0 );
-		MESSAGE_END( );
+		MESSAGE_END( );*/
 		SUB_UseTargets( this, USE_TOGGLE, 0 );
 		pev->avelocity = Vector( 0, 0, 0 );
 		m_state = 0;
