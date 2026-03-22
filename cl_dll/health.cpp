@@ -26,7 +26,7 @@
 #include "cl_util.h"
 #include "parsemsg.h"
 #include <string.h>
-
+#include "demo_api.h"
 
 DECLARE_MESSAGE(m_Health, Health )
 DECLARE_MESSAGE(m_Health, Damage )
