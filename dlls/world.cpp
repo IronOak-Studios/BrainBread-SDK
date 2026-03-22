@@ -191,7 +191,10 @@ void CDecal :: KeyValue( KeyValueData *pkvd )
 		
 		// Found
 		if ( pev->skin >= 0 )
+		{
+			pkvd->fHandled = TRUE;
 			return;
+		}
 		ALERT( at_console, "Can't find decal %s\n", pkvd->szValue );
 	}
 	else

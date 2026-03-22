@@ -325,6 +325,7 @@ void CFuncRotating :: KeyValue( KeyValueData* pkvd)
 		UTIL_StringToVector( (float *)tmp, pkvd->szValue );
 		if ( tmp != g_vecZero )
 			pev->origin = tmp;
+		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "sounds"))
 	{

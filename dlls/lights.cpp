@@ -149,7 +149,7 @@ void CEnvLight::KeyValue( KeyValueData* pkvd )
 {
 	if (FStrEq(pkvd->szKeyName, "_light"))
 	{
-		int r, g, b, v, j;
+		int r = 0, g = 0, b = 0, v = 0, j;
 		char szColor[64];
 		j = sscanf( pkvd->szValue, "%d %d %d %d\n", &r, &g, &b, &v );
 		if (j == 1)

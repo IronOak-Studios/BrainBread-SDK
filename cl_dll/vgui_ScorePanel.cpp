@@ -685,12 +685,12 @@ void ScorePanel::FillGrid()
 				case COLUMN_NAME:
 					if ( m_iIsATeam[row] == TEAM_SPECTATORS )
 					{
-						sprintf( sz2, CHudTextMessage::BufferedLocaliseTextString( "#Spectators" ) );
+						sprintf( sz2, "%s", CHudTextMessage::BufferedLocaliseTextString( "#Spectators" ) );
 					}
 					else
 					{
 						//sprintf( sz2, gViewPort->GetTeamName(team_info->teamnumber) );
-						sprintf( sz2, g_TeamInfo[team_info->teamnumber].name );
+						sprintf( sz2, "%s", g_TeamInfo[team_info->teamnumber].name );
 					}
 
 					strcpy(sz, sz2);
@@ -894,7 +894,7 @@ void ScorePanel::mousePressed(MouseCode code, Panel* panel)
 					GetClientVoiceMgr()->SetPlayerBlockedState(iPlayer, true);
 
 					sprintf( string1, CHudTextMessage::BufferedLocaliseTextString( "#Muted" ), pl_info->name );
-					sprintf( string2, CHudTextMessage::BufferedLocaliseTextString( "#No_longer_hear_that_player" ) );
+					sprintf( string2, "%s", CHudTextMessage::BufferedLocaliseTextString( "#No_longer_hear_that_player" ) );
 					sprintf( string, "%c** %s %s\n", HUD_PRINTTALK, string1, string2 );
 
 					gHUD.m_TextMessage.MsgFunc_TextMsg(NULL, strlen(string)+1, string );
