@@ -70,6 +70,13 @@ public:
   float m_fBurning;
 	int type;
 
+	// Stuck detection & obstacle avoidance
+	Vector m_vecStuckCheckPos;	// Position when stuck timer started
+	float  m_flStuckStartTime;	// When the zombie first got stuck (0 = not stuck)
+	int    m_iLastAvoidDir;		// Direction of current/last avoidance: 0=none, 1=right, -1=left
+	float  m_flAvoidRemaining;	// Sideways distance left in current burst (0 = not avoiding)
+	Vector m_vecAvoidEnemyPos;	// Enemy pos when m_iLastAvoidDir was set (for 80-unit reset)
+
 	void PainSound( void );
 	void AlertSound( void );
 	void IdleSound( void );
@@ -81,6 +88,13 @@ public:
 	static const char *pPainSounds[];
 	static const char *pAttackHitSounds[];
 	static const char *pAttackMissSounds[];
+
+	// Obstacle avoidance overrides
+	void Move( float flInterval );
+	int CheckLocalMove( const Vector &vecStart, const Vector &vecEnd, CBaseEntity *pTarget, float *pflDist );
+
+	// AI override - always retry chase on failure
+	Schedule_t *GetScheduleOfType( int Type );
 
 	// No range attacks
 	BOOL CheckRangeAttack1 ( float flDot, float flDist ) { return FALSE; }
@@ -786,6 +800,12 @@ void CZombie :: Spawn()
 
   nextSound = gpGlobals->time + SOUND_DELAY;
 
+  m_vecStuckCheckPos = pev->origin;
+  m_flStuckStartTime = 0;
+  m_iLastAvoidDir = 0;
+  m_flAvoidRemaining = 0;
+  m_vecAvoidEnemyPos = Vector( 0, 0, 0 );
+
   /*MESSAGE_BEGIN( MSG_PVS, gmsgSpray, pev->origin );
 		WRITE_BYTE( SPRAY_BURN );
     WRITE_COORD( pev->origin.x ); // origin
@@ -804,6 +824,266 @@ void CZombie::SpawningThink( )
 {
  	MonsterInit();
 }
+
+//=========================================================
+// Move - zombie override with simple obstacle avoidance.
+//
+// Normal movement via CBaseMonster::Move(). If the zombie
+// hasn't moved for 1 second, it starts a sideways burst
+// (66-196 units) to get around the obstacle. The burst
+// runs across multiple frames at the zombie's normal speed.
+// Once done, control returns to normal movement. On the
+// next stuck event it goes the opposite direction.
+//=========================================================
+void CZombie::Move( float flInterval )
+{
+	// Old behavior: just use base class movement
+	if ( zombie_behavior.value == 0 )
+	{
+		CBaseMonster::Move( flInterval );
+		return;
+	}
+
+	// --- Currently doing a sideways burst ---
+	if ( m_flAvoidRemaining > 0 )
+	{
+		if ( FRouteClear() || m_movementGoal == MOVEGOAL_NONE )
+		{
+			// Lost our route — abort burst
+			m_flAvoidRemaining = 0;
+			CBaseMonster::Move( flInterval );
+			return;
+		}
+
+		// Compute goal direction and perpendicular
+		Vector vecToGoal = ( m_Route[ m_iRouteIndex ].vecLocation - pev->origin );
+		vecToGoal.z = 0;
+		float flGoalDist = vecToGoal.Length();
+		if ( flGoalDist < 1.0 )
+		{
+			m_flAvoidRemaining = 0;
+			CBaseMonster::Move( flInterval );
+			return;
+		}
+		vecToGoal = vecToGoal / flGoalDist;
+
+		Vector vecUp( 0, 0, 1 );
+		Vector vecPerp = CrossProduct( vecToGoal, vecUp );
+		Vector vecSideDir = vecPerp * (float)m_iLastAvoidDir;
+
+		// Face toward the goal while sliding sideways
+		MakeIdealYaw( m_Route[ m_iRouteIndex ].vecLocation );
+		ChangeYaw( pev->yaw_speed );
+
+		if ( m_IdealActivity != m_movementActivity )
+			m_IdealActivity = m_movementActivity;
+
+		// Move sideways at normal speed this frame
+		float flDist = m_flGroundSpeed * pev->framerate * flInterval;
+		Vector vecSideTarget = pev->origin + vecSideDir * 64;
+
+		float flTotal = flDist;
+		float flStep;
+		while ( flTotal > 0.001 )
+		{
+			flStep = min( 16.0f, flTotal );
+			UTIL_MoveToOrigin( ENT( pev ), vecSideTarget, flStep, MOVE_NORMAL );
+			flTotal -= flStep;
+		}
+
+		m_flAvoidRemaining -= flDist;
+
+		// Check if the way to the enemy is now clear
+		if ( m_hEnemy != NULL )
+		{
+			TraceResult trFwd;
+			UTIL_TraceLine( pev->origin, m_hEnemy->pev->origin, dont_ignore_monsters, ENT( pev ), &trFwd );
+			if ( trFwd.flFraction > 0.9 )
+				m_flAvoidRemaining = 0;	// path is open, stop sliding
+		}
+
+		// Burst finished — refresh route and reset stuck timer
+		if ( m_flAvoidRemaining <= 0 )
+		{
+			m_flAvoidRemaining = 0;
+			m_vecStuckCheckPos = pev->origin;
+			m_flStuckStartTime = 0;
+
+			// Rebuild route toward enemy's current position
+			if ( m_hEnemy != NULL )
+				m_vecEnemyLKP = m_hEnemy->pev->origin;
+			FRefreshRoute();
+		}
+
+		return;
+	}
+
+	// --- Normal movement ---
+
+	// Forget avoidance direction if enemy moved significantly (>80 units,
+	// same threshold Valve uses for route refresh in CheckEnemy)
+	if ( m_iLastAvoidDir != 0 && m_hEnemy != NULL )
+	{
+		if ( ( m_hEnemy->pev->origin - m_vecAvoidEnemyPos ).Length2D() > 80 )
+			m_iLastAvoidDir = 0;
+	}
+
+	// If we've been stuck for >0.5s, stop pushing into the wall to prevent
+	// oscillation. The first 0.5s allows wall-sliding to work normally —
+	// the zombie has that time to accumulate 16 units of displacement from
+	// the stuck checkpoint, which resets the timer. If it hasn't moved
+	// enough by 0.5s, it's genuinely stuck and we stop until the burst
+	// starts at 1.0s.
+	if ( m_flStuckStartTime > 0 && gpGlobals->time - m_flStuckStartTime > 0.5 )
+	{
+		if ( !FRouteClear() )
+		{
+			MakeIdealYaw( m_Route[ m_iRouteIndex ].vecLocation );
+			ChangeYaw( pev->yaw_speed );
+
+			if ( m_IdealActivity != m_movementActivity )
+				m_IdealActivity = m_movementActivity;
+		}
+	}
+	else
+	{
+		CBaseMonster::Move( flInterval );
+	}
+
+	// Nothing to avoid if we're not trying to go somewhere
+	if ( m_movementGoal == MOVEGOAL_NONE || FRouteClear() )
+	{
+		m_flStuckStartTime = 0;
+		return;
+	}
+
+	// Check if we've been stuck (not moving) for 1 second
+	float flDistFromStuckPos = ( pev->origin - m_vecStuckCheckPos ).Length2D();
+
+	if ( flDistFromStuckPos > 16.0 )
+	{
+		// We're moving fine — reset stuck timer
+		m_vecStuckCheckPos = pev->origin;
+		m_flStuckStartTime = 0;
+		return;
+	}
+
+	// Not moving much — start or continue the stuck timer
+	if ( m_flStuckStartTime == 0 )
+	{
+		m_flStuckStartTime = gpGlobals->time;
+		m_vecStuckCheckPos = pev->origin;
+		return;
+	}
+
+	// Haven't been stuck long enough yet
+	if ( gpGlobals->time - m_flStuckStartTime < 1.0 )
+		return;
+
+	// --- Stuck for 1 second: start a sideways burst ---
+
+	// Compute direction toward goal
+	Vector vecToGoal = ( m_Route[ m_iRouteIndex ].vecLocation - pev->origin );
+	vecToGoal.z = 0;
+	float flGoalDist = vecToGoal.Length();
+	if ( flGoalDist < 1.0 )
+		return;
+	vecToGoal = vecToGoal / flGoalDist;
+
+	// Perpendicular axis (right of goal direction)
+	Vector vecUp( 0, 0, 1 );
+	Vector vecPerp = CrossProduct( vecToGoal, vecUp );
+
+	// Pick direction: opposite of last time.
+	// First time: prefer the side closer to the enemy.
+	int iDir;
+	if ( m_iLastAvoidDir != 0 )
+	{
+		iDir = -m_iLastAvoidDir;
+	}
+	else if ( m_hEnemy != NULL )
+	{
+		Vector vecToEnemy = ( m_hEnemy->pev->origin - pev->origin );
+		vecToEnemy.z = 0;
+		float flDot = DotProduct( vecPerp, vecToEnemy );
+		iDir = ( flDot >= 0 ) ? 1 : -1;
+	}
+	else
+	{
+		iDir = RANDOM_LONG( 0, 1 ) ? 1 : -1;
+	}
+
+	m_iLastAvoidDir = iDir;
+
+	// Record enemy position for the 80-unit direction reset check
+	if ( m_hEnemy != NULL )
+	{
+		m_vecAvoidEnemyPos = m_hEnemy->pev->origin;
+		m_vecEnemyLKP = m_hEnemy->pev->origin;
+	}
+
+	// Step back 10 units to pull off the wall
+	Vector vecBackTarget = pev->origin - vecToGoal * 10;
+	UTIL_MoveToOrigin( ENT( pev ), vecBackTarget, 10.0, MOVE_NORMAL );
+
+	// Force route refresh so burst slides relative to current enemy pos
+	FRefreshRoute();
+
+	// Start the burst — will be executed over subsequent frames
+	m_flAvoidRemaining = (float)RANDOM_LONG( 66, 196 );
+	m_vecStuckCheckPos = pev->origin;
+	m_flStuckStartTime = 0;
+}
+
+//=========================================================
+// CheckLocalMove - zombie override that always bypasses
+// obstacle detection so route-building always succeeds.
+// Actual obstacle avoidance is handled by the custom
+// Move() logic which detects stuck zombies and moves
+// them sideways around obstacles.
+//=========================================================
+int CZombie::CheckLocalMove( const Vector &vecStart, const Vector &vecEnd, CBaseEntity *pTarget, float *pflDist )
+{
+	// Old behavior: no override, handled by zombie hack in CBaseMonster::CheckLocalMove
+	if ( zombie_behavior.value == 0 )
+		return CBaseMonster::CheckLocalMove( vecStart, vecEnd, pTarget, pflDist );
+
+	// New behavior: always force VALID so route-building succeeds with direct paths
+	int iResult = CBaseMonster::CheckLocalMove( vecStart, vecEnd, pTarget, pflDist );
+
+	if ( iResult == LOCALMOVE_INVALID )
+	{
+		iResult = LOCALMOVE_VALID;
+	}
+
+	return iResult;
+}
+
+//=========================================================
+// GetScheduleOfType - zombie override that prevents the
+// zombie from ever idling or giving up when it has an
+// enemy. On any failure, immediately retry chasing.
+//=========================================================
+Schedule_t *CZombie::GetScheduleOfType( int Type )
+{
+	// Old behavior: no override
+	if ( zombie_behavior.value == 0 )
+		return CBaseMonster::GetScheduleOfType( Type );
+
+	// New behavior: never give up chasing
+	switch ( Type )
+	{
+	case SCHED_CHASE_ENEMY_FAILED:
+	case SCHED_FAIL:
+		// Zombies never give up - if we have an enemy, chase again immediately
+		if ( m_hEnemy != NULL )
+			return CBaseMonster::GetScheduleOfType( SCHED_CHASE_ENEMY );
+		break;
+	}
+
+	return CBaseMonster::GetScheduleOfType( Type );
+}
+
 //=========================================================
 // Precache - precaches all resources this monster needs
 //=========================================================

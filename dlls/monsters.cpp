@@ -32,6 +32,7 @@
 #include "decals.h"
 #include "soundent.h"
 #include "gamerules.h"
+#include "game.h"
 
 #define MONSTER_CUT_CORNER_DIST		8 // 8 means the monster's bounding box is contained without the box of the node in WC
 
@@ -1296,7 +1297,7 @@ int CBaseMonster :: CheckLocalMove ( const Vector &vecStart, const Vector &vecEn
 					iReturn = LOCALMOVE_VALID;
 				else
 					iReturn = LOCALMOVE_INVALID;
-				if( FClassnameIs( pev, "monster_zombie" ) && FBitSet( pev->flags, FL_ONGROUND ) )
+				if ( zombie_behavior.value == 0 && FClassnameIs( pev, "monster_zombie" ) && FBitSet( pev->flags, FL_ONGROUND ) )
 					iReturn = LOCALMOVE_VALID;
 				break;
 			}
@@ -1929,6 +1930,9 @@ void CBaseMonster::MoveExecute( CBaseEntity *pTargetEnt, const Vector &vecDir, f
   bool step = false;
 
   vec3_t dir = ( m_Route[ m_iRouteIndex ].vecLocation - pev->origin ).Normalize( );
+
+	if ( zombie_behavior.value == 0 )
+	{
   UTIL_TraceLine( pev->origin, pev->origin + dir * flTotal, ignore_monsters, dont_ignore_glass, ENT( pev ), &tr );
   if( tr.flFraction < 1.0 && tr.pHit->v.solid == SOLID_BSP )
   {
@@ -1959,6 +1963,7 @@ void CBaseMonster::MoveExecute( CBaseEntity *pTargetEnt, const Vector &vecDir, f
     //else
      // ALERT( at_console, "%f %f %f -> %f %f %f", start.x, start.y, start.z, tr.vecEndPos.x, tr.vecEndPos.y, tr.vecEndPos.z );
   //}*/
+  	}
   
   while (flTotal > 0.001)
 	{
