@@ -11,7 +11,7 @@ SRCDIR=.
 OBJDIR=$(SRCDIR)/obj
 
 #safe optimization
-CFLAGS=-w -m486 -O1
+CFLAGS=-w -m32 -O1
 
 #full optimization
 #CFLAGS=-w -m486 -O2 \
@@ -22,7 +22,7 @@ CFLAGS=-w -m486 -O1
 #use these when debugging 
 #CFLAGS=$(BASE_CFLAGS) -g
 
-LDFLAGS=-lgcc -ldl
+LDFLAGS=-m32 -lgcc -ldl
 
 AR=ar
 RANLIB=ranlib
