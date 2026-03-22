@@ -120,6 +120,7 @@ public:
 	  //pev->solid = SOLID_NOT;
 	  pev->velocity = g_vecZero;
 	  pev->avelocity = g_vecZero;
+	  ClearBits( pev->effects, EF_NOINTERP );
 
 	  pev->nextthink = gpGlobals->time + 0;
 	  SetThink ( &CZombie::SUB_FadeIn );
@@ -772,7 +773,7 @@ void CZombie :: Spawn()
   m_fBurning = 0;
 
 	pev->solid			= SOLID_SLIDEBOX;
-	pev->movetype		= MOVETYPE_STEP;
+	pev->movetype		= MOVETYPE_NONE;
 	m_bloodColor		= BLOOD_COLOR_RED;
   if( isFred )
     pev->health = FRED_HEALTH * max( ((cPEHacking*)g_pGameRules)->m_iClients, 1 );
@@ -793,7 +794,7 @@ void CZombie :: Spawn()
   SetBits( pev->flags, FL_MONSTER );
   ClearBits( pev->flags, FL_DORMANT );
   ClearBits( pev->effects, EF_NODRAW );
-  ClearBits( pev->effects, EF_NOINTERP );
+  SetBits( pev->effects, EF_NOINTERP );
   for( int i = 0; i < 9; i++ )
     SetBodygroup( i, 0 );
 
@@ -826,6 +827,13 @@ void CZombie :: Spawn()
 
 void CZombie::SpawningThink( )
 {
+	if( !m_fSequenceFinished )
+	{
+		StudioFrameAdvance();
+		pev->nextthink = gpGlobals->time + 0.1;
+		return;
+	}
+	pev->movetype = MOVETYPE_STEP;
  	MonsterInit();
 }
 
