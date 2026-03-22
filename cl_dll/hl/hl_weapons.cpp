@@ -883,6 +883,9 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 	// Get current clock
 	//gpGlobals->time = time;
 
+	//Lets weapons code use frametime to decrement timers and stuff.
+	gpGlobals->frametime = cmd->msec / 1000.0f;
+
 	// Fill in data based on selected weapon
 	// FIXME, make this a method in each weapon?  where you pass in an entity_state_t *?
 	switch ( from->client.m_iId )

@@ -20,6 +20,7 @@
 
 */
 
+#include <cmath>
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
@@ -746,7 +747,7 @@ BOOL CanAttack( float attack_time, float curtime, BOOL isPredicted )
 	}
 	else
 	{
-		return ( attack_time <= 0.0 ) ? TRUE : FALSE;
+		return ( (static_cast<int>(std::floor(attack_time * 1000.0)) * 1000.0) <= 0.0 ) ? TRUE : FALSE;
 	}
 }
 
@@ -1315,7 +1316,7 @@ int CBasePlayerWeapon::PrimaryAmmoIndex( void )
 //=========================================================
 int CBasePlayerWeapon::SecondaryAmmoIndex( void )
 {
-	return -1;
+	return m_iSecondaryAmmoType;
 }
 
 void CBasePlayerWeapon::Holster( int skiplocal /* = 0 */ )

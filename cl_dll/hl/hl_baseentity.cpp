@@ -339,8 +339,8 @@ int CBasePlayerWeapon::UpdateClientData( CBasePlayer *pPlayer ) { return 0; }
 BOOL CBasePlayerWeapon :: AddPrimaryAmmo( int iCount, char *szName, int iMaxClip, int iMaxCarry ) { return TRUE; }
 BOOL CBasePlayerWeapon :: AddSecondaryAmmo( int iCount, char *szName, int iMaxClip, int iMaxCarry ) { return TRUE; }
 BOOL CBasePlayerWeapon :: IsUseable( void ) { return TRUE; }
-int CBasePlayerWeapon::PrimaryAmmoIndex( void ) { return -1; }
-int CBasePlayerWeapon::SecondaryAmmoIndex( void ) {	return -1; }
+int CBasePlayerWeapon::PrimaryAmmoIndex( void ) { return m_iPrimaryAmmoType; }
+int CBasePlayerWeapon::SecondaryAmmoIndex( void ) {	return m_iSecondaryAmmoType; }
 void CBasePlayerAmmo::Spawn( void ) { }
 CBaseEntity* CBasePlayerAmmo::Respawn( void ) { return this; }
 void CBasePlayerAmmo::Materialize( void ) { }
