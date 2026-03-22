@@ -471,9 +471,16 @@ void CStudioModelRenderer::StudioSetUpTransform (int trivial_accept)
 			f = 0;
 		}
 
-		for (i = 0; i < 3; i++)
 		{
-			modelpos[i] += (m_pCurrentEntity->origin[i] - m_pCurrentEntity->latched.prevorigin[i]) * f;
+			mstudioseqdesc_t *pseqdesc_interp = (mstudioseqdesc_t *)((byte *)m_pStudioHeader + m_pStudioHeader->seqindex) + m_pCurrentEntity->curstate.sequence;
+
+			if ( (pseqdesc_interp->motiontype & STUDIO_LX) || (m_pCurrentEntity->curstate.eflags & EFLAG_SLERP) )
+			{
+				for (i = 0; i < 3; i++)
+				{
+					modelpos[i] += (m_pCurrentEntity->origin[i] - m_pCurrentEntity->latched.prevorigin[i]) * f;
+				}
+			}
 		}
 
 		// NOTE:  Because multiplayer lag can be relatively large, we don't want to cap
@@ -938,7 +945,8 @@ void CStudioModelRenderer::StudioSetupBones ( void )
 			{
 				copy = 0;
 			}
-			else if ( !strcmp( pbones[ pbones[i].parent ].name, "Bip01 Pelvis" ) )
+			else if ( pbones[i].parent >= 0 && pbones[i].parent < m_pStudioHeader->numbones
+				&& !strcmp( pbones[ pbones[i].parent ].name, "Bip01 Pelvis" ) )
 			{
 				copy = 1;
 			}

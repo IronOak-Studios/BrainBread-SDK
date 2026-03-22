@@ -2093,6 +2093,10 @@ void PM_LadderMove( physent_t *pLadder )
 		onFloor = false;
 
 	pmove->gravity = 0;
+	memset( &trace, 0, sizeof(trace) );
+	VectorCopy( ladderCenter, trace.endpos );
+	trace.allsolid = 1;
+	trace.fraction = 1.0f;
 	pmove->PM_TraceModel( pLadder, pmove->origin, ladderCenter, &trace );
 	if ( trace.fraction != 1.0 )
 	{

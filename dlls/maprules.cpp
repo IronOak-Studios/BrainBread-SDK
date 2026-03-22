@@ -175,7 +175,7 @@ void CGameScore::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE us
 		return;
 
 	// Only players can use this
-	if ( pActivator->IsPlayer() )
+	if ( pActivator && pActivator->IsPlayer() )
 	{
 		if ( AwardToTeam() )
 		{
@@ -826,6 +826,9 @@ void CGamePlayerEquip::Touch( CBaseEntity *pOther )
 void CGamePlayerEquip::EquipPlayer( CBaseEntity *pEntity )
 {
 	CBasePlayer *pPlayer = NULL;
+
+	if ( !pEntity || !pEntity->IsPlayer() )
+		return;
 
 	if ( pEntity->IsPlayer() )
 	{

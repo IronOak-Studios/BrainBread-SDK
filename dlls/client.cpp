@@ -130,6 +130,17 @@ void ClientDisconnect( edict_t *pEntity )
 	pEntity->v.solid = SOLID_NOT;// nonsolid
 	UTIL_SetOrigin ( &pEntity->v, pEntity->v.origin );
 
+	// Stop controlling func_tank on disconnect to prevent it becoming unusable
+	CBasePlayer *pPlayer = (CBasePlayer *)GET_PRIVATE(pEntity);
+	if ( pPlayer )
+	{
+		if ( pPlayer->m_pTank != NULL )
+		{
+			pPlayer->m_pTank->Use( pPlayer, pPlayer, USE_OFF, 0 );
+			pPlayer->m_pTank = NULL;
+		}
+	}
+
 	g_pGameRules->ClientDisconnected( pEntity );
 }
 
@@ -1222,6 +1233,13 @@ int AddToFullPack( struct entity_state_s *state, int e, edict_t *ent, edict_t *h
 {
 	int					i;
 
+	// Entities with an index greater than this will corrupt the client's heap because 
+	// the index is sent with only 11 bits of precision (2^11 == 2048).
+	if ( e >= 2048 )
+	{
+		return 0;
+	}
+
 	// don't send if flagged for NODRAW and it's not the host getting the message
 	if ( ( ent->v.effects & EF_NODRAW ) &&
 		 ( ent != host ) )
@@ -1959,18 +1977,18 @@ int GetHullBounds( int hullnumber, float *mins, float *maxs )
 	switch ( hullnumber )
 	{
 	case 0:				// Normal player
-		mins = VEC_HULL_MIN;
-		maxs = VEC_HULL_MAX;
+		VEC_HULL_MIN.CopyToArray(mins);
+		VEC_HULL_MAX.CopyToArray(maxs);
 		iret = 1;
 		break;
 	case 1:				// Crouched player
-		mins = VEC_DUCK_HULL_MIN;
-		maxs = VEC_DUCK_HULL_MAX;
+		VEC_DUCK_HULL_MIN.CopyToArray(mins);
+		VEC_DUCK_HULL_MAX.CopyToArray(maxs);
 		iret = 1;
 		break;
 	case 2:				// Point based hull
-		mins = Vector( 0, 0, 0 );
-		maxs = Vector( 0, 0, 0 );
+		Vector( 0, 0, 0 ).CopyToArray(mins);
+		Vector( 0, 0, 0 ).CopyToArray(maxs);
 		iret = 1;
 		break;
 	}

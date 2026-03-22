@@ -291,7 +291,7 @@ public:
 		return pEnt; 
 	}
 
-	static CBaseEntity *Instance( entvars_t *instpev ) { return Instance( ENT( instpev ) ); }
+	static CBaseEntity *Instance( entvars_t *instpev ) { if ( !instpev ) return Instance( ENT(0) ); return Instance( ENT( instpev ) ); }
 	static CBaseEntity *Instance( int inst_eoffset) { return Instance( ENT( inst_eoffset) ); }
 
 	CBaseMonster *GetMonsterPointer( entvars_t *pevMonster ) 

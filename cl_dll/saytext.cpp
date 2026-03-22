@@ -208,7 +208,8 @@ void CHudSayText :: SayTextPrint( const char *pszBuf, int iBufSize, int clientIn
 		}
 	}
 
-	strncpy( g_szLineBuffer[i], pszBuf, max(iBufSize -1, MAX_CHARS_PER_LINE-1) );
+	strncpy( g_szLineBuffer[i], pszBuf, MAX_CHARS_PER_LINE );
+	g_szLineBuffer[i][MAX_CHARS_PER_LINE - 1] = '\0';
 
 	// make sure the text fits in one line
 	EnsureTextFitsInOneLineAndWrapIfHaveTo( i );
