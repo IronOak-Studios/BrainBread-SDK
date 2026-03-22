@@ -578,7 +578,7 @@ void CBasePlayerItem::AttemptToMaterialize( void )
 		return;
 	}
 
-	pev->nextthink = gpGlobals->time + time;
+	pev->nextthink = time;
 }
 
 //=========================================================
@@ -1414,7 +1414,7 @@ int CBasePlayerWeapon::ExtractAmmo( CBasePlayerWeapon *pWeapon )
 	if ( pszAmmo2() != NULL )
 	{
 		//iReturn = pWeapon->AddSecondaryAmmo( 0, (char *)pszAmmo2(), iMaxAmmo2() );
-		iReturn = pWeapon->AddSecondaryAmmo( m_iDefaultAmmo, (char *)pszAmmo2(), iMaxClip2(), iMaxAmmo2() );
+		iReturn |= pWeapon->AddSecondaryAmmo( m_iDefaultAmmo, (char *)pszAmmo2(), iMaxClip2(), iMaxAmmo2() );
 	}
 	m_iDefaultAmmo = 0;
 

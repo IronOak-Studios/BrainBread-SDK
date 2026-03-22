@@ -293,7 +293,7 @@ public:
 	Vector				m_vecAutoAim;
 	BOOL				m_fOnTarget;
 	int					m_iDeaths;
-	float				m_iRespawnFrames;	// used in PlayerDeathThink() to make sure players can always respawn
+	float				m_flRespawnTimer;	// used in PlayerDeathThink() to make sure players can always respawn
 
 	int					m_iAutoWepSwitch;	// auto weapon switch preference (0=never, 1=always, 2=if-better)
 

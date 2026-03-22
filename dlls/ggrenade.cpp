@@ -131,7 +131,12 @@ void CGrenade::Explode( TraceResult *pTrace, int bitsDamageType )
 
 	pev->owner = NULL; // can't traceline attack owner if this is set
 
-	RadiusDamage ( pev, pevOwner, pev->dmg, CLASS_NONE, bitsDamageType );
+	// Counteract the vecSrc.z += 1 in RadiusDamage so explosions under brushes
+	// don't deal damage through the brush to entities on the other side.
+	Vector vecOrigin = pev->origin;
+	vecOrigin.z -= 1;
+
+	::RadiusDamage ( vecOrigin, pev, pevOwner, pev->dmg, pev->dmg * 2.5, CLASS_NONE, bitsDamageType );
 
 	if ( RANDOM_FLOAT( 0 , 1 ) < 0.5 )
 	{
