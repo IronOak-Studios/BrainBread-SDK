@@ -118,6 +118,7 @@ public:
 	  }
 
 	  //pev->solid = SOLID_NOT;
+	  pev->velocity = g_vecZero;
 	  pev->avelocity = g_vecZero;
 
 	  pev->nextthink = gpGlobals->time + 0;
@@ -499,7 +500,7 @@ void CZombie :: SetYawSpeed ( void )
 {
 	int ys;
 
-	ys = 120;
+	ys = zombie_yawspeed.value ? (int)zombie_yawspeed.value : 10;
 
 #if 0
 	switch ( m_Activity )
@@ -711,6 +712,7 @@ void CZombie :: Spawn()
 		type = NORMAL;
   points_given = false;
   pev->velocity = Vector( 0, 0, 0 );
+  pev->avelocity = g_vecZero;
 
   if( isFred )
   {
@@ -791,6 +793,7 @@ void CZombie :: Spawn()
   SetBits( pev->flags, FL_MONSTER );
   ClearBits( pev->flags, FL_DORMANT );
   ClearBits( pev->effects, EF_NODRAW );
+  ClearBits( pev->effects, EF_NOINTERP );
   for( int i = 0; i < 9; i++ )
     SetBodygroup( i, 0 );
 
@@ -800,6 +803,7 @@ void CZombie :: Spawn()
 
   nextSound = gpGlobals->time + SOUND_DELAY;
 
+  m_flLastYawTime = 0;
   m_vecStuckCheckPos = pev->origin;
   m_flStuckStartTime = 0;
   m_iLastAvoidDir = 0;
