@@ -1549,7 +1549,7 @@ void CBaseEntity::TraceAttack(entvars_t *pevAttacker, float flDamage, Vector vec
 {
 	Vector vecOrigin = ptr->vecEndPos - vecDir * 4;
 
-	if ( pev->takedamage )
+	if( pev->takedamage )
 	{
 		AddMultiDamage( pevAttacker, this, flDamage, bitsDamageType );
 
@@ -1641,7 +1641,6 @@ This version is used by Monsters.
 void CBaseEntity::FireBullets(ULONG cShots, Vector vecSrc, Vector vecDirShooting, Vector vecSpread, float flDistance, int iBulletType, int iTracerFreq, int iDamage, entvars_t *pevAttacker )
 {
 	static int tracerCount;
-	int tracer;
 	TraceResult tr;
 	Vector vecRight = gpGlobals->v_right;
 	Vector vecUp = gpGlobals->v_up;
@@ -1670,7 +1669,6 @@ void CBaseEntity::FireBullets(ULONG cShots, Vector vecSrc, Vector vecDirShooting
 		vecEnd = vecSrc + vecDir * flDistance;
 		UTIL_TraceLine(vecSrc, vecEnd, dont_ignore_monsters, ENT(pev)/*pentIgnore*/, &tr);
 
-		tracer = 0;
 		if (iTracerFreq != 0 && (tracerCount++ % iTracerFreq) == 0)
 		{
 			Vector vecTracerSrc;
@@ -1684,8 +1682,6 @@ void CBaseEntity::FireBullets(ULONG cShots, Vector vecSrc, Vector vecDirShooting
 				vecTracerSrc = vecSrc;
 			}
 			
-			if ( iTracerFreq != 1 )		// guns that always trace also always decal
-				tracer = 1;
 			switch( iBulletType )
 			{
 			case BULLET_MONSTER_MP5:
@@ -1737,11 +1733,8 @@ void CBaseEntity::FireBullets(ULONG cShots, Vector vecSrc, Vector vecDirShooting
 
 			case BULLET_MONSTER_12MM:		
 				pEntity->TraceAttack(pevAttacker, 35 * diff.value, vecDir, &tr, DMG_BULLET); 
-				if ( !tracer )
-				{
-					TEXTURETYPE_PlaySound(&tr, vecSrc, vecEnd, iBulletType);
-					DecalGunshot( &tr, iBulletType );
-				}
+				TEXTURETYPE_PlaySound(&tr, vecSrc, vecEnd, iBulletType);
+				DecalGunshot( &tr, iBulletType );
 				break;
 			
 			case BULLET_NONE: // FIX 
@@ -2045,7 +2038,7 @@ again:
 	// + ste0
 	if( UTIL_FromChance(95) && ( VARS( tr.pHit )->solid == SOLID_BSP ) && ( strcmp( STRING(VARS( tr.pHit )->classname), "pe_objectclip" ) ) ) 
 	{
-		// durch die Wand schieﬂen	
+		// durch die Wand schie√üen	
 		if( pwall ) // spin - nur einmal durch die wand
 			return /*vecDir;//*/Vector( x * vecSpread.x, y * vecSpread.y, 0.0 );
 		pwall = 1;

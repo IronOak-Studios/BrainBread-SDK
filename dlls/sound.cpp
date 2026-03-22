@@ -890,12 +890,12 @@ void CEnvSound :: Think( void )
 			} else {
 				
 				// current sound entity affecting player is no longer valid,
-				// flag this state by clearing room_type and range.
+				// flag this state by clearing sound handle and range.
 				// NOTE: we do not actually change the player's room_type
 				// NOTE: until we have a new valid room_type to change it to.
 
+				pPlayer->m_pentSndLast = NULL;
 				pPlayer->m_flSndRange = 0;
-				pPlayer->m_flSndRoomtype = 0;
 				goto env_sound_Think_slow;
 			}
 		} else {
@@ -917,15 +917,7 @@ void CEnvSound :: Think( void )
 			pPlayer->m_flSndRoomtype = m_flRoomtype;
 			pPlayer->m_flSndRange = flRange;
 			
-			// send room_type command to player's server.
-			// this should be a rare event - once per change of room_type
-			// only!
-
-			//CLIENT_COMMAND(pentPlayer, "room_type %f", m_flRoomtype);
-			
-			MESSAGE_BEGIN( MSG_ONE, SVC_ROOMTYPE, NULL, pentPlayer );		// use the magic #1 for "one client"
-				WRITE_SHORT( (short)m_flRoomtype );					// sequence number
-			MESSAGE_END();
+			// New room type is sent to player in CBasePlayer::UpdateClientData.
 
 			// crank up nextthink rate for new active sound entity
 			// by falling through to think_fast...
@@ -1279,7 +1271,7 @@ void SENTENCEG_Init()
 		if (!buffer[j])
 			continue;
 
-		if (gcallsentences > CVOXFILESENTENCEMAX)
+		if (gcallsentences >= CVOXFILESENTENCEMAX)
 		{
 			ALERT (at_error, "Too many sentences in sentences.txt!\n");
 			break;

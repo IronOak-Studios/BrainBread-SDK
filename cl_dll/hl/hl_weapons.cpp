@@ -878,8 +878,6 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 
 	memset( &nulldata, 0, sizeof( nulldata ) );
 
-	HUD_InitClientWeapons();	
-
 	// Get current clock
 	//gpGlobals->time = time;
 
@@ -1316,6 +1314,9 @@ void CL_DLLEXPORT HUD_PostRunCmd( struct local_state_s *from, struct local_state
 //	RecClPostRunCmd(from, to, cmd, runfuncs, time, random_seed);
 
 	g_runfuncs = runfuncs;
+
+	//Event code depends on this stuff, so always initialize it.
+	HUD_InitClientWeapons();
 
 #if defined( CLIENT_WEAPONS )
 	if ( cl_lw && cl_lw->value )

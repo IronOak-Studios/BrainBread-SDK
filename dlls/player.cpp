@@ -1,4 +1,4 @@
-	/***
+/***
 *
 *	Copyright (c) 1996-2001, Valve LLC. All rights reserved.
 *	
@@ -3539,6 +3539,7 @@ void CBasePlayer::Spawn( void )
 
 	pev->fov = m_iFOV				= 0;// init field of view.
 	m_iClientFOV		= -1; // make sure fov reset is sent
+	m_flClientSndRoomtype = -1; // make sure room type reset is sent
 
 	m_flNextDecalTime	= 0;// let this player decal as soon as he spawns.
 
@@ -3754,6 +3755,9 @@ int CBasePlayer::Restore( CRestore &restore )
 	pev->angles = pev->v_angle;
 
 	pev->fixangle = TRUE;           // turn this way immediately
+
+	m_iClientFOV = -1; // Make sure the client gets the right FOV value.
+	m_flClientSndRoomtype = -1;
 
 // Copied from spawn() for now
 	m_bloodColor	= BLOOD_COLOR_RED;
@@ -4185,6 +4189,7 @@ void CBasePlayer :: ForceClientDllUpdate( void )
 	m_iClientBattery = -1;
 	m_iClientHideHUD = -1;
 	m_iClientFOV = -1;
+	m_flClientSndRoomtype = -1;
 	m_iTrain |= TRAIN_NEW;  // Force new train message.
 	m_fWeapon = FALSE;          // Force weapon send
 	m_fKnownItem = FALSE;    // Force weaponinit messages.
@@ -5035,6 +5040,16 @@ void CBasePlayer :: UpdateClientData( void )
 	{
 		UpdateStatusBar();
 		m_flNextSBarUpdateTime = gpGlobals->time + 0.2;
+	}
+
+	// Send new room type to client.
+	if ( m_flClientSndRoomtype != m_flSndRoomtype )
+	{
+		m_flClientSndRoomtype = m_flSndRoomtype;
+
+		MESSAGE_BEGIN( MSG_ONE, SVC_ROOMTYPE, NULL, edict() );
+			WRITE_SHORT( (short)m_flSndRoomtype );
+		MESSAGE_END();
 	}
 }
 
