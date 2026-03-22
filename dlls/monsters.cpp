@@ -2519,6 +2519,11 @@ float CBaseMonster::ChangeYaw ( int yawSpeed )
 	ideal = pev->ideal_yaw;
 	if (current != ideal)
 	{
+		if (m_flLastYawTime == 0.0f)
+		{
+			m_flLastYawTime = gpGlobals->time - gpGlobals->frametime;
+		}
+
 		float delta = min( gpGlobals->time - m_flLastYawTime, 0.25f );
 		m_flLastYawTime = gpGlobals->time;
 		speed = (float)yawSpeed * delta * 10;
@@ -3394,7 +3399,7 @@ CBaseEntity* CBaseMonster :: DropItem ( char *pszItemName, const Vector &vecPos,
 	else
 	{
 		ALERT ( at_console, "DropItem() - Didn't create!\n" );*/
-		return FALSE;
+		return NULL;
 	//}
 
 }

@@ -209,9 +209,9 @@ public:
 	virtual int		BloodColor( void ) { return DONT_BLEED; }
 	virtual void	TraceBleed( float flDamage, Vector vecDir, TraceResult *ptr, int bitsDamageType );
 	virtual BOOL    IsTriggered( CBaseEntity *pActivator ) {return TRUE;}
+	virtual CBaseToggle* MyTogglePointer(void) { return NULL; }
 	virtual CBaseMonster *MyMonsterPointer( void ) { return NULL;}
 	virtual CSquadMonster *MySquadMonsterPointer( void ) { return NULL;}
-	virtual CBaseToggle *MyTogglePointer( void ) { return NULL;}
 	virtual	int		GetToggleState( void ) { return TS_AT_TOP; }
 	virtual void	AddPoints( int score, BOOL bAllowNegativeScore ) {}
 	virtual void	AddPointsToTeam( int score, BOOL bAllowNegativeScore ) {}
@@ -592,21 +592,24 @@ public:
 	void EXPORT AngularMoveDone( void );
 	BOOL IsLockedByMaster( void );
 
+	virtual CBaseToggle* MyTogglePointer(void) { return this; }
+
+	// monsters use this, but so could buttons for instance
+	virtual void PlaySentence(const char* pszSentence, float duration, float volume, float attenuation);
+	virtual void PlayScriptedSentence(const char* pszSentence, float duration, float volume, float attenuation, BOOL bConcurrent, CBaseEntity* pListener);
+	virtual void SentenceStop(void);
+	virtual int	 CanPlaySentence( BOOL fDisregardState ) { return IsAlive(); }
+	virtual BOOL IsAllowedToSpeak() { return IsAlive(); }
+
 	static float		AxisValue( int flags, const Vector &angles );
 	static void			AxisDir( entvars_t *pev );
 	static float		AxisDelta( int flags, const Vector &angle1, const Vector &angle2 );
 
 	string_t m_sMaster;		// If this button has a master switch, this is the targetname.
-						// A master switch must be of the multisource type. If all 
-						// of the switches in the multisource have been triggered, then
-						// the button will be allowed to operate. Otherwise, it will be
-						// deactivated.
-
-	virtual int		CanPlaySentence( BOOL fDisregardState ) { return IsAlive(); }
-	virtual void	PlaySentence( const char *pszSentence, float duration, float volume, float attenuation );
-	virtual void	PlayScriptedSentence( const char *pszSentence, float duration, float volume, float attenuation, BOOL bConcurrent, CBaseEntity *pListener );
-	virtual void	SentenceStop( void );
-	virtual BOOL	IsAllowedToSpeak( void ) { return IsAlive(); }
+							// A master switch must be of the multisource type. If all 
+							// of the switches in the multisource have been triggered, then
+							// the button will be allowed to operate. Otherwise, it will be
+							// deactivated.
 };
 #define SetMoveDone( a ) m_pfnCallWhenMoveDone = static_cast <void (CBaseToggle::*)(void)> (a)
 
