@@ -173,7 +173,7 @@ class CBBAmmo : public CBaseEntity
     //SetThink( Recharge );
     //pev->nextthink = gpGlobals->time + 1;
     SetThink( NULL );
-    SetUse( &CBaseEntity::Use );
+    SetUse( NULL );
     nextCharge = gpGlobals->time + 1;
 	}
 
@@ -188,7 +188,7 @@ class CBBAmmo : public CBaseEntity
     ammoLeft = AMMO_TOTAL;
     pev->effects &= ~EF_NODRAW;
     SetThink( NULL );
-    SetUse( &CBaseEntity::Use );
+    SetUse( NULL );
     nextCharge = gpGlobals->time + 1;
   }
 

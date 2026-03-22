@@ -436,7 +436,7 @@ void CBaseMonster :: MonsterThink ( void )
 // perhaps MaintainActivity() or a ShiftAnimationOverTime() or something.
 	if ( m_MonsterState != MONSTERSTATE_SCRIPT && m_MonsterState != MONSTERSTATE_DEAD && m_Activity == ACT_IDLE && m_fSequenceFinished )
 	{
-		int iSequence;
+		int iSequence = ACTIVITY_NOT_AVAILABLE;
 
     if( FClassnameIs( pev, "monster_zombie" ) )
     {

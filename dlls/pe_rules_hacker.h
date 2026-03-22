@@ -32,14 +32,14 @@ public:
   {
     complete = false;
     //FireTargets( STRING( pev->target ), this, this, USE_TOGGLE, 0 );
-    SetUse( &cBBMapMission::Use );
+    SetUse( &cBBMapMission::MissionUse );
   }
   void Deactivate( )
   {
     complete = false;
     SetUse( NULL );
   }
-  void EXPORT Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
+  void EXPORT MissionUse( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
   {
     complete = true;
     FireTargets( STRING( pev->message ), this, this, USE_TOGGLE, 0 );
