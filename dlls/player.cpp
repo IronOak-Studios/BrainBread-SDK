@@ -1287,6 +1287,12 @@ void CBasePlayer::Killed( entvars_t *pevAttacker, int iGib )
 	// UNDONE: Put this in, but add FFADE_PERMANENT and make fade time 8.8 instead of 4.12
 	// UTIL_ScreenFade( edict(), Vector(128,0,0), 6, 15, 255, FFADE_OUT | FFADE_MODULATE );
 
+	// Always make players non-solid upon death in multiplayer
+	if ( g_pGameRules->IsMultiplayer() )
+	{
+		pev->solid = SOLID_NOT;
+	}
+
 	if ( ( pev->health < -40 && iGib != GIB_NEVER ) || iGib == GIB_ALWAYS )
 	{
 		pev->solid			= SOLID_NOT;
@@ -4165,11 +4171,18 @@ void CBasePlayer :: ForceClientDllUpdate( void )
 {
 	m_iClientHealth  = -1;
 	m_iClientBattery = -1;
+	m_iClientHideHUD = -1;
+	m_iClientFOV = -1;
 	m_iTrain |= TRAIN_NEW;  // Force new train message.
 	m_fWeapon = FALSE;          // Force weapon send
 	m_fKnownItem = FALSE;    // Force weaponinit messages.
 	m_fInitHUD = TRUE;		// Force HUD gmsgResetHUD message
   clientteam = -1;
+
+	for ( int i = 0; i < MAX_AMMO_SLOTS; i++ )
+	{
+		m_rgAmmoLast[i] = 0;
+	}
 
 	// Now force all the necessary messages
 	//  to be sent.
@@ -4683,6 +4696,10 @@ void CBasePlayer::ItemPostFrame()
 	}
 
 	ImpulseCommands();
+
+	// Check again if the player started using a tank during PlayerUse
+	if ( m_pTank != NULL )
+		return;
 
 	if (!m_pActiveItem)
 		return;

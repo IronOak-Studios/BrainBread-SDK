@@ -967,7 +967,9 @@ void CStudioModelRenderer::StudioSetupBones ( void )
 		bonematrix[1][3] = pos[i][1];
 		bonematrix[2][3] = pos[i][2];
 
-		if (pbones[i].parent == -1) 
+		const int parent = pbones[i].parent;
+
+		if (parent == -1) 
 		{
 			if ( IEngineStudio.IsHardware() )
 			{
@@ -986,10 +988,10 @@ void CStudioModelRenderer::StudioSetupBones ( void )
 			// Apply client-side effects to the transformation matrix
 			StudioFxTransform( m_pCurrentEntity, (*m_pbonetransform)[i] );
 		} 
-		else 
+		else if (parent >= 0 && parent < m_pStudioHeader->numbones)
 		{
-			ConcatTransforms ((*m_pbonetransform)[pbones[i].parent], bonematrix, (*m_pbonetransform)[i]);
-			ConcatTransforms ((*m_plighttransform)[pbones[i].parent], bonematrix, (*m_plighttransform)[i]);
+			ConcatTransforms ((*m_pbonetransform)[parent], bonematrix, (*m_pbonetransform)[i]);
+			ConcatTransforms ((*m_plighttransform)[parent], bonematrix, (*m_plighttransform)[i]);
 		}
 	}
 }
@@ -1078,7 +1080,9 @@ void CStudioModelRenderer::StudioMergeBones ( model_t *m_pSubModel )
 			bonematrix[1][3] = pos[i][1];
 			bonematrix[2][3] = pos[i][2];
 
-			if (pbones[i].parent == -1) 
+			const int parent = pbones[i].parent;
+
+			if (parent == -1) 
 			{
 				if ( IEngineStudio.IsHardware() )
 				{
@@ -1097,10 +1101,10 @@ void CStudioModelRenderer::StudioMergeBones ( model_t *m_pSubModel )
 				// Apply client-side effects to the transformation matrix
 				StudioFxTransform( m_pCurrentEntity, (*m_pbonetransform)[i] );
 			} 
-			else 
+			else if (parent >= 0 && parent < m_pStudioHeader->numbones)
 			{
-				ConcatTransforms ((*m_pbonetransform)[pbones[i].parent], bonematrix, (*m_pbonetransform)[i]);
-				ConcatTransforms ((*m_plighttransform)[pbones[i].parent], bonematrix, (*m_plighttransform)[i]);
+				ConcatTransforms ((*m_pbonetransform)[parent], bonematrix, (*m_pbonetransform)[i]);
+				ConcatTransforms ((*m_plighttransform)[parent], bonematrix, (*m_plighttransform)[i]);
 			}
 		}
 	}
