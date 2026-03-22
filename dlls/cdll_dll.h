@@ -44,4 +44,8 @@
 
 #define WEAPON_SUIT			31
 
+#ifdef _WIN32
+#pragma warning(disable: 4996)
+#endif
+
 #endif

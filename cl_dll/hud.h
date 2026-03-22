@@ -29,7 +29,6 @@
 #include "wrect.h"
 #include "cl_dll.h"
 #include "ammo.h"
-#include "windows.h"
 
 #define DHN_DRAWZERO 1
 #define DHN_2DIGITS  2

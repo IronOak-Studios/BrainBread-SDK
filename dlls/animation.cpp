@@ -17,6 +17,9 @@
 #include <string.h>
 
 #include "../common/nowin.h"
+#ifdef _WIN32
+#pragma warning(disable: 4996)
+#endif
 
 typedef int BOOL;
 #define TRUE	 1	

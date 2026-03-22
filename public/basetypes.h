@@ -44,7 +44,7 @@
 // C functions for external declarations that call the appropriate C++ methods
 #ifndef EXPORT
 #ifdef _WIN32
-#define EXPORT	_declspec( dllexport )
+#define EXPORT	__declspec( dllexport )
 #else
 #define EXPORT	__attribute__ ((visibility("default")))
 #endif

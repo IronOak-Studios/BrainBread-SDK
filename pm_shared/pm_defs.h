@@ -32,6 +32,9 @@
 #define PM_TRACELINE_PHYSENTSONLY	0
 #define PM_TRACELINE_ANYVISIBLE		1
 
+#ifdef _WIN32
+#pragma warning(disable: 4996)
+#endif
 
 #include "pm_info.h"
 

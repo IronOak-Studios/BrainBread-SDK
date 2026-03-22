@@ -164,7 +164,7 @@ int cPEPointMgr::Draw( float time )
   g_font->DrawString( xpos + 150, ypos + 27, text, 140, 140, 140 );
   sprintf( text, "%d", hp );  
   g_font->DrawString( xpos +  33, ypos + 27, text, 140, 140, 140 );
-  sprintf( text, "%d%", spd );  
+  sprintf( text, "%d%%", spd );
   g_font->DrawString( xpos +  70, ypos + 27, text, 140, 140, 140 );
   sprintf( text, "%d", dmg );  
   g_font->DrawString( xpos + 111, ypos + 27, text, 140, 140, 140 );
