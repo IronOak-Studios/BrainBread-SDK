@@ -401,7 +401,7 @@ void uPrepSpawn( )
 	memset( gListSynd, 0, sizeof(s_spawnlist) * MAX_SPAWN_SPOTS );
   memset( gListBackup, 0, sizeof(s_spawnlist) * MAX_SPAWN_SPOTS );
 	CBaseEntity *respawn = UTIL_FindEntityByClassname( NULL, "bb_spawn_player" );
-	while( i <= MAX_SPAWN_SPOTS && respawn != NULL )
+	while( i < MAX_SPAWN_SPOTS && respawn != NULL )
 	{
 		gListCorp[i].spot = respawn;
 		gListCorp[i].player = NULL;
@@ -411,7 +411,7 @@ void uPrepSpawn( )
 	i = 0;
 
 	respawn = UTIL_FindEntityByClassname( NULL, "bb_zombie_player" );
-	while( i <= MAX_SPAWN_SPOTS && respawn != NULL )
+	while( i < MAX_SPAWN_SPOTS && respawn != NULL )
 	{
     gListSynd[i].spot = respawn;
 		gListSynd[i].player = NULL;
@@ -421,7 +421,7 @@ void uPrepSpawn( )
   i = 0;
 
 	respawn = UTIL_FindEntityByClassname( NULL, "bb_spawn_zombie" );
-	while( i <= MAX_SPAWN_SPOTS && respawn != NULL )
+	while( i < MAX_SPAWN_SPOTS && respawn != NULL )
 	{
     gListBackup[i].spot = respawn;
 		gListBackup[i].player = NULL;

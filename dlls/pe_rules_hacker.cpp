@@ -2382,7 +2382,7 @@ entvars_t *GetObjectiveSpawn( int flagSet )
 	CBaseEntity *respawn = UTIL_FindEntityByClassname( NULL, "bb_objectives" );
   if( !respawn )
 	  respawn = UTIL_FindEntityByClassname( respawn, "bb_objectives" );
-	while( i <= MAX_SPAWN_SPOTS && respawn != NULL )
+	while( i < MAX_SPAWN_SPOTS && respawn != NULL )
 	{
     if( !flagSet || !respawn->pev->spawnflags || FBitSet( respawn->pev->spawnflags, (1<<(flagSet-1)) ) )
     {
