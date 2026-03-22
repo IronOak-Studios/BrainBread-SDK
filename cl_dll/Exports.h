@@ -5,14 +5,6 @@
 #define CL_DLLEXPORT __attribute__ ((visibility("default")))
 #endif
 
-// Compatibility aliases for old code that uses DLLEXPORT or _DLLEXPORT
-#ifndef DLLEXPORT
-#define DLLEXPORT CL_DLLEXPORT
-#endif
-#ifndef _DLLEXPORT
-#define _DLLEXPORT CL_DLLEXPORT
-#endif
-
 extern "C" 
 {
 	// From hl_weapons

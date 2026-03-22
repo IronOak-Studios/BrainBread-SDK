@@ -34,32 +34,33 @@ extern "C"
 #define M_PI		3.14159265358979323846	// matches value in gcc v2 math.h
 #endif
 
-extern "C" 
-{
 	int CL_IsThirdPerson( void );
 	void CL_CameraOffset( float *ofs );
 
-	void DLLEXPORT V_CalcRefdef( struct ref_params_s *pparams );
+	void CL_DLLEXPORT V_CalcRefdef( struct ref_params_s *pparams );
 
 	void PM_ParticleLine( float *start, float *end, int pcolor, float life, float vert);
 	int		PM_GetVisEntInfo( int ent );
-	int		PM_GetPhysEntInfo( int ent );
+	extern "C" int		PM_GetPhysEntInfo( int ent );
 	void	InterpolateAngles(  float * start, float * end, float * output, float frac );
 	void	NormalizeAngles( float * angles );
-	float	Distance(const float * v1, const float * v2);
+	extern "C" float	Distance(const float * v1, const float * v2);
 	float	AngleBetweenVectors(  const float * v1,  const float * v2 );
 
 	float	vJumpOrigin[3];
 	float	vJumpAngles[3];
-}
+
 
 void V_DropPunchAngle ( float frametime, float *ev_punchangle );
 void VectorAngles( const float *forward, float *angles );
 
 #include "r_studioint.h"
 #include "com_model.h"
+#include "kbutton.h"
 
 extern engine_studio_api_t IEngineStudio;
+
+extern kbutton_t	in_mlook;
 
 /*
 The view is allowed to move slightly from it's true position for bobbing,
@@ -297,18 +298,30 @@ void V_DriftPitch ( struct ref_params_s *pparams )
 	}
 
 	// don't count small mouse motion
-	if (pd.nodrift)
+	if ( pd.nodrift)
 	{
-		if ( fabs( pparams->cmd->forwardmove ) < cl_forwardspeed->value )
-			pd.driftmove = 0;
-		else
-			pd.driftmove += pparams->frametime;
-	
-		if ( pd.driftmove > v_centermove->value)
-		{
-			V_StartPitchDrift ();
+		if ( v_centermove->value > 0 && !(in_mlook.state & 1) )
+		{		
+			// this is for lazy players. if they stopped, looked around and then continued
+			// to move the view will be centered automatically if they move more than
+			// v_centermove units. 
+
+			if ( fabs( pparams->cmd->forwardmove ) < cl_forwardspeed->value )
+				pd.driftmove = 0;
+			else
+				pd.driftmove += pparams->frametime;
+		
+			if ( pd.driftmove > v_centermove->value)
+			{
+				V_StartPitchDrift ();
+			}
+			else
+			{
+				return;	// player didn't move enough
+			}
 		}
-		return;
+
+		return;	// don't drift view
 	}
 	
 	delta = pparams->idealpitch - pparams->cl_viewangles[PITCH];
@@ -386,7 +399,7 @@ void V_AddIdle ( struct ref_params_s *pparams )
 	pparams->viewangles[YAW] += v_idlescale * sin(pparams->time*v_iyaw_cycle.value) * v_iyaw_level.value;
 }
 
-
+ 
 /*
 ==============
 V_CalcViewRoll
@@ -1557,6 +1570,9 @@ void V_CalcSpectatorRefdef ( struct ref_params_s * pparams )
 
 			case OBS_ROAMING	:	VectorCopy (v_cl_angles, v_angles);
 									VectorCopy (v_sim_org, v_origin);
+									
+									// override values if director is active
+									gHUD.m_Spectator.GetDirectorCamera(v_origin, v_angles);
 									break;
 
 			case OBS_IN_EYE		:   V_CalcNormalRefdef ( pparams );
@@ -1623,8 +1639,10 @@ void V_CalcSpectatorRefdef ( struct ref_params_s * pparams )
 
 
 
-void DLLEXPORT V_CalcRefdef( struct ref_params_s *pparams )
+void CL_DLLEXPORT V_CalcRefdef( struct ref_params_s *pparams )
 {
+//	RecClCalcRefdef(pparams);
+
 	// intermission / finale rendering
 	if ( pparams->intermission )
 	{	

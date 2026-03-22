@@ -813,8 +813,8 @@ void CHudSpectator::DirectorMessage( int iSize, void *pbuf )
 							break;
 
 		case DRC_CMD_STUFFTEXT:
-							ClientCmd( READ_STRING() );	// + BB: pfnFilteredClientCmd not in BB's engine struct
-							break;
+						EngineFilteredClientCmd( READ_STRING() );
+						break;
 
 		case DRC_CMD_CAMPATH:
 							v1[0] = READ_COORD();	// position

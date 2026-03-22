@@ -34,8 +34,12 @@ extern "C"
 #include "interface.h"
 #include "pe_helper.h"
 
-#define DLLEXPORT __declspec( dllexport )
-
+#ifdef _WIN32
+#include "winsani_in.h"
+#include <windows.h>
+#include "winsani_out.h"
+#endif
+#include "Exports.h"
 
 cl_enginefunc_t gEngfuncs;
 CHud gHUD;
@@ -46,39 +50,16 @@ void EV_HookEvents( void );
 void IN_Commands( void );
 
 /*
-========================== 
-    Initialize
-
-Called when the DLL is first loaded.
-==========================
-*/
-extern "C" 
-{
-int		DLLEXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion );
-int		DLLEXPORT HUD_VidInit( void );
-void	DLLEXPORT HUD_Init( void );
-int		DLLEXPORT HUD_Redraw( float flTime, int intermission );
-int		DLLEXPORT HUD_UpdateClientData( client_data_t *cdata, float flTime );
-void	DLLEXPORT HUD_Reset ( void );
-void	DLLEXPORT HUD_PlayerMove( struct playermove_s *ppmove, int server );
-void	DLLEXPORT HUD_PlayerMoveInit( struct playermove_s *ppmove );
-char	DLLEXPORT HUD_PlayerMoveTexture( char *name );
-int		DLLEXPORT HUD_ConnectionlessPacket( const struct netadr_s *net_from, const char *args, char *response_buffer, int *response_buffer_size );
-int		DLLEXPORT HUD_GetHullBounds( int hullnumber, float *mins, float *maxs );
-void	DLLEXPORT HUD_Frame( double time );
-void	DLLEXPORT HUD_VoiceStatus(int entindex, qboolean bTalking);
-void	DLLEXPORT HUD_DirectorMessage( int iSize, void *pbuf );
-}
-
-/*
 ================================
 HUD_GetHullBounds
 
   Engine calls this to enumerate player collision hulls, for prediction.  Return 0 if the hullnumber doesn't exist.
 ================================
 */
-int DLLEXPORT HUD_GetHullBounds( int hullnumber, float *mins, float *maxs )
+int CL_DLLEXPORT HUD_GetHullBounds( int hullnumber, float *mins, float *maxs )
 {
+//	RecClGetHullBounds(hullnumber, mins, maxs);
+
 	int iret = 0;
 
 	switch ( hullnumber )
@@ -111,8 +92,10 @@ HUD_ConnectionlessPacket
   size of the response_buffer, so you must zero it out if you choose not to respond.
 ================================
 */
-int	DLLEXPORT HUD_ConnectionlessPacket( const struct netadr_s *net_from, const char *args, char *response_buffer, int *response_buffer_size )
+int	CL_DLLEXPORT HUD_ConnectionlessPacket( const struct netadr_s *net_from, const char *args, char *response_buffer, int *response_buffer_size )
 {
+//	RecClConnectionlessPacket(net_from, args, response_buffer, response_buffer_size);
+
 	// Parse stuff from args
 	int max_buffer_size = *response_buffer_size;
 
@@ -125,24 +108,32 @@ int	DLLEXPORT HUD_ConnectionlessPacket( const struct netadr_s *net_from, const c
 	return 0;
 }
 
-void DLLEXPORT HUD_PlayerMoveInit( struct playermove_s *ppmove )
+void CL_DLLEXPORT HUD_PlayerMoveInit( struct playermove_s *ppmove )
 {
+//	RecClClientMoveInit(ppmove);
+
 	PM_Init( ppmove );
 }
 
-char DLLEXPORT HUD_PlayerMoveTexture( char *name )
+char CL_DLLEXPORT HUD_PlayerMoveTexture( char *name )
 {
+//	RecClClientTextureType(name);
+
 	return PM_FindTextureType( name );
 }
 
-void DLLEXPORT HUD_PlayerMove( struct playermove_s *ppmove, int server )
+void CL_DLLEXPORT HUD_PlayerMove( struct playermove_s *ppmove, int server )
 {
+//	RecClClientMove(ppmove, server);
+
 	PM_Move( ppmove, server );
 }
 
-int DLLEXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
+int CL_DLLEXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
 {
 	gEngfuncs = *pEnginefuncs;
+
+//	RecClInitialize(pEnginefuncs, iVersion);
 
 	if (iVersion != CLDLL_INTERFACE_VERSION)
 		return 0;
@@ -151,6 +142,7 @@ int DLLEXPORT Initialize( cl_enginefunc_t *pEnginefuncs, int iVersion )
 
 	EV_HookEvents();
 
+	// get tracker interface, if any
 	return 1;
 }
 
@@ -164,7 +156,7 @@ and whenever the vid_mode is changed
 so the HUD can reinitialize itself.
 ==========================
 */
-int DLLEXPORT HUD_VidInit( void )
+int CL_DLLEXPORT HUD_VidInit( void )
 {
 	if( !g_font )
 		g_font = new cPEFontMgr( );
@@ -172,6 +164,7 @@ int DLLEXPORT HUD_VidInit( void )
 		g_font->Reload( );
   cPEFader::DeleteAll( );
 	cPEFader::Init( );
+//	RecClHudVidInit();
 	gHUD.VidInit();
 
 	VGui_Startup();
@@ -189,8 +182,9 @@ the hud variables.
 ==========================
 */
 
-void DLLEXPORT HUD_Init( void )
+void CL_DLLEXPORT HUD_Init( void )
 {
+//	RecClHudInit();
 	InitInput();
 	gHUD.Init();
 	Scheme_Init();
@@ -207,8 +201,10 @@ redraw the HUD.
 */
 
 extern globalvars_t *gpGlobals;
-int DLLEXPORT HUD_Redraw( float time, int intermission )
+int CL_DLLEXPORT HUD_Redraw( float time, int intermission )
 {
+//	RecClHudRedraw(time, intermission);
+
   if( gpGlobals )
 	  gpGlobals->time = time;
 	gHUD.Redraw( time, intermission );
@@ -233,8 +229,10 @@ returns 1 if anything has been changed, 0 otherwise.
 ==========================
 */
 
-int DLLEXPORT HUD_UpdateClientData(client_data_t *pcldata, float flTime )
+int CL_DLLEXPORT HUD_UpdateClientData(client_data_t *pcldata, float flTime )
 {
+//	RecClHudUpdateClientData(pcldata, flTime);
+
 	IN_Commands();
 
 	return gHUD.UpdateClientData(pcldata, flTime );
@@ -248,8 +246,10 @@ Called at start and end of demos to restore to "non"HUD state.
 ==========================
 */
 
-void DLLEXPORT HUD_Reset( void )
+void CL_DLLEXPORT HUD_Reset( void )
 {
+//	RecClHudReset();
+
 	gHUD.VidInit();
 }
 
@@ -261,8 +261,10 @@ Called by engine every frame that client .dll is loaded
 ==========================
 */
 
-void DLLEXPORT HUD_Frame( double time )
+void CL_DLLEXPORT HUD_Frame( double time )
 {
+//	RecClHudFrame(time);
+
 	ServersThink( time );
 
 	GetClientVoiceMgr()->Frame(time);
@@ -277,8 +279,10 @@ Called when a player starts or stops talking.
 ==========================
 */
 
-void DLLEXPORT HUD_VoiceStatus(int entindex, qboolean bTalking)
+void CL_DLLEXPORT HUD_VoiceStatus(int entindex, qboolean bTalking)
 {
+////	RecClVoiceStatus(entindex, bTalking);
+
 	GetClientVoiceMgr()->UpdateSpeakerStatus(entindex, bTalking);
 }
 
@@ -290,9 +294,11 @@ Called when a director event message was received
 ==========================
 */
 
-void DLLEXPORT HUD_DirectorMessage( int iSize, void *pbuf )
+void CL_DLLEXPORT HUD_DirectorMessage( int iSize, void *pbuf )
 {
-	 gHUD.m_Spectator.DirectorMessage( iSize, pbuf );
+//	RecClDirectorMessage(iSize, pbuf);
+
+	gHUD.m_Spectator.DirectorMessage( iSize, pbuf );
 }
 
 

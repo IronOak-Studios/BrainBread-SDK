@@ -16,6 +16,7 @@
 #define EIFACE_H
 
 #include "archtypes.h"     // DAL
+
 #ifdef HLDEMO_BUILD
 #define INTERFACE_VERSION       001
 #else  // !HLDEMO_BUILD, i.e., regular version of HL
@@ -395,11 +396,11 @@ typedef enum _fieldtypes
 	FIELD_TYPECOUNT,		// MUST BE LAST
 } FIELDTYPE;
 
-#ifndef hldll_offsetof
-#define hldll_offsetof(s,m)	(size_t)&(((s *)0)->m)
+#if !defined(offsetof)  && !defined(GNUC)
+#define offsetof(s,m)	(size_t)&(((s *)0)->m)
 #endif
 
-#define _FIELD(type,name,fieldtype,count,flags)		{ fieldtype, #name, hldll_offsetof(type, name), count, flags }
+#define _FIELD(type,name,fieldtype,count,flags)		{ fieldtype, #name, offsetof(type, name), count, flags }
 #define DEFINE_FIELD(type,name,fieldtype)			_FIELD(type, name, fieldtype, 1, 0)
 #define DEFINE_ARRAY(type,name,fieldtype,count)		_FIELD(type, name, fieldtype, count, 0)
 #define DEFINE_ENTITY_FIELD(name,fieldtype)			_FIELD(entvars_t, name, fieldtype, 1, 0 )
@@ -422,6 +423,7 @@ typedef struct
 #ifndef ARRAYSIZE
 #define ARRAYSIZE(p)		(sizeof(p)/sizeof(p[0]))
 #endif // ARRAYSIZE
+
 
 typedef struct 
 {

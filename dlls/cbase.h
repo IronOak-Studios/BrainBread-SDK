@@ -1,6 +1,6 @@
 /***
 *
-*	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
+*	Copyright (c) 1996-2001, Valve LLC. All rights reserved.
 *	
 *	This product contains software technology licensed from Id 
 *	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
@@ -48,6 +48,7 @@ CBaseEntity
 // UNDONE: This will ignore transition volumes (trigger_transition), but not the PVS!!!
 #define		FCAP_FORCE_TRANSITION		0x00000080		// ALWAYS goes across transitions
 
+#include "archtypes.h"     // DAL
 #include "saverestore.h"
 #include "schedule.h"
 
@@ -57,15 +58,22 @@ CBaseEntity
 
 // C functions for external declarations that call the appropriate C++ methods
 
-#undef EXPORT
+#ifndef CBASE_DLLEXPORT
 #ifdef _WIN32
-#define EXPORT	__declspec( dllexport )
+#define CBASE_DLLEXPORT _declspec( dllexport )
 #else
-#define EXPORT	/* */
+#define CBASE_DLLEXPORT __attribute__ ((visibility("default")))
+#endif
 #endif
 
-extern "C" EXPORT int GetEntityAPI( DLL_FUNCTIONS *pFunctionTable, int interfaceVersion );
-extern "C" EXPORT int GetEntityAPI2( DLL_FUNCTIONS *pFunctionTable, int *interfaceVersion );
+#if defined EXPORT
+#undef EXPORT
+#endif
+
+#define EXPORT CBASE_DLLEXPORT
+
+extern "C" CBASE_DLLEXPORT int GetEntityAPI( DLL_FUNCTIONS *pFunctionTable, int interfaceVersion );
+extern "C" CBASE_DLLEXPORT int GetEntityAPI2( DLL_FUNCTIONS *pFunctionTable, int *interfaceVersion );
 
 extern int DispatchSpawn( edict_t *pent );
 extern void DispatchKeyValue( edict_t *pentKeyvalue, KeyValueData *pkvd );
@@ -217,7 +225,7 @@ public:
 	virtual void	SetToggleState( int state ) {}
 	virtual void    StartSneaking( void ) {}
 	virtual void    StopSneaking( void ) {}
-	virtual BOOL	OnControls( entvars_t *onpev ) { return FALSE; }
+	virtual BOOL	OnControls( entvars_t *pev ) { return FALSE; }
 	virtual BOOL    IsSneaking( void ) { return FALSE; }
 	virtual BOOL	IsAlive( void ) { return (pev->deadflag == DEAD_NO) && pev->health > 0; }
 	virtual BOOL	IsBSPModel( void ) { return pev->solid == SOLID_BSP || pev->movetype == MOVETYPE_PUSHSTEP; }
@@ -238,9 +246,9 @@ public:
 	void (CBaseEntity ::*m_pfnUse)( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value );
 	void (CBaseEntity ::*m_pfnBlocked)( CBaseEntity *pOther );
 
-	virtual void EXPORT Think( void ) { if (m_pfnThink) (this->*m_pfnThink)(); };
-	virtual void EXPORT Touch( CBaseEntity *pOther ) { if (m_pfnTouch) (this->*m_pfnTouch)( pOther ); };
-	virtual void EXPORT Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value ) 
+	virtual void Think( void ) { if (m_pfnThink) (this->*m_pfnThink)(); };
+	virtual void Touch( CBaseEntity *pOther ) { if (m_pfnTouch) (this->*m_pfnTouch)( pOther ); };
+	virtual void Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value ) 
 	{ 
 		if (m_pfnUse) 
 			(this->*m_pfnUse)( pActivator, pCaller, useType, value );
@@ -287,7 +295,7 @@ public:
 	{ 
 		if ( !pent )
 			pent = ENT(0);
-		CBaseEntity *pEnt = (CBaseEntity *)GET_PRIVATE(pent);
+		CBaseEntity *pEnt = (CBaseEntity *)GET_PRIVATE(pent); 
 		return pEnt; 
 	}
 
@@ -314,32 +322,32 @@ public:
 #ifdef _DEBUG
 	void FunctionCheck( void *pFunction, char *name ) 
 	{ 
-		if (pFunction && !NAME_FOR_FUNCTION((unsigned long)(pFunction)) )
-			ALERT( at_error, "No EXPORT: %s:%s (%08lx)\n", STRING(pev->classname), name, (unsigned long)pFunction );
+		if (pFunction && !NAME_FOR_FUNCTION((uint32)pFunction) )
+			ALERT( at_error, "No EXPORT: %s:%s (%08lx)\n", STRING(pev->classname), name, (uint32)pFunction );
 	}
 
 	BASEPTR	ThinkSet( BASEPTR func, char *name ) 
 	{ 
 		m_pfnThink = func; 
-		FunctionCheck( (void *)*((int *)((char *)this + ( hldll_offsetof(CBaseEntity,m_pfnThink)))), name ); 
+		FunctionCheck( (void *)*((int *)((char *)this + ( offsetof(CBaseEntity,m_pfnThink)))), name ); 
 		return func;
 	}
 	ENTITYFUNCPTR TouchSet( ENTITYFUNCPTR func, char *name ) 
 	{ 
 		m_pfnTouch = func; 
-		FunctionCheck( (void *)*((int *)((char *)this + ( hldll_offsetof(CBaseEntity,m_pfnTouch)))), name ); 
+		FunctionCheck( (void *)*((int *)((char *)this + ( offsetof(CBaseEntity,m_pfnTouch)))), name ); 
 		return func;
 	}
 	USEPTR	UseSet( USEPTR func, char *name ) 
 	{ 
 		m_pfnUse = func; 
-		FunctionCheck( (void *)*((int *)((char *)this + ( hldll_offsetof(CBaseEntity,m_pfnUse)))), name ); 
+		FunctionCheck( (void *)*((int *)((char *)this + ( offsetof(CBaseEntity,m_pfnUse)))), name ); 
 		return func;
 	}
 	ENTITYFUNCPTR	BlockedSet( ENTITYFUNCPTR func, char *name ) 
 	{ 
 		m_pfnBlocked = func; 
-		FunctionCheck( (void *)*((int *)((char *)this + ( hldll_offsetof(CBaseEntity,m_pfnBlocked)))), name ); 
+		FunctionCheck( (void *)*((int *)((char *)this + ( offsetof(CBaseEntity,m_pfnBlocked)))), name ); 
 		return func;
 	}
 
@@ -749,7 +757,7 @@ public:
 	static	TYPEDESCRIPTION m_SaveData[];
 	// Buttons that don't take damage can be IMPULSE used
 	virtual int	ObjectCaps( void ) { return (CBaseToggle:: ObjectCaps() & ~FCAP_ACROSS_TRANSITION) | (pev->takedamage?0:FCAP_IMPULSE_USE); }
-	virtual BOOL	IsAllowedToSpeak( void ) { return TRUE; }
+	virtual BOOL IsAllowedToSpeak() { return TRUE; }
 
 	BOOL	m_fStayPushed;	// button stays pushed in until touched again?
 	BOOL	m_fRotating;		// a rotating button?  default is a sliding button.
@@ -846,4 +854,3 @@ public:
 	void Precache( void );
 	void KeyValue( KeyValueData *pkvd );
 };
-

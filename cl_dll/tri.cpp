@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2002, Valve LLC, All rights reserved. ============
+//========= Copyright ï¿½ 1996-2002, Valve LLC, All rights reserved. ============
 //
 // Purpose: 
 //
@@ -21,14 +21,7 @@
 #include "pe_rain.h"
 #include "bb_blood.h"
 #include "r_studioint.h"
-
-#define DLLEXPORT __declspec( dllexport )
-
-extern "C"
-{
-	void DLLEXPORT HUD_DrawNormalTriangles( void );
-	void DLLEXPORT HUD_DrawTransparentTriangles( void );
-};
+#include "Exports.h"
 
 //#define TEST_IT
 #if defined( TEST_IT )
@@ -103,7 +96,7 @@ HUD_DrawNormalTriangles
 Non-transparent triangles-- add them here
 =================
 */
-void DLLEXPORT HUD_DrawNormalTriangles( void )
+void CL_DLLEXPORT HUD_DrawNormalTriangles( void )
 {
 
 	gHUD.m_Spectator.DrawOverview();
@@ -136,7 +129,7 @@ cRain *gRain[20];*/
 s_bloodlist *gFBlood;
 s_bloodlist *gLBlood;
 
-void DLLEXPORT HUD_DrawTransparentTriangles( void )
+void CL_DLLEXPORT HUD_DrawTransparentTriangles( void )
 {
 	int i = 0;
 	if( fTime == -1 )
