@@ -2256,6 +2256,15 @@ public:
 	void EXPORT FollowTarget( void );
 	void Move(void);
 
+	float GetMoveDeltaTime()
+	{
+		if ( m_flLastMoveTime == 0 )
+		{
+			m_flLastMoveTime = gpGlobals->time - gpGlobals->frametime;
+		}
+		return gpGlobals->time - m_flLastMoveTime;
+	}
+
 	//virtual int		Save( CSave &save );
 	//virtual int		Restore( CRestore &restore );
 	virtual int	ObjectCaps( void ) { return CBaseEntity :: ObjectCaps() & ~FCAP_ACROSS_TRANSITION; }
@@ -2274,6 +2283,7 @@ public:
 	float m_acceleration;
 	float m_deceleration;
 	int	  m_state;
+	float m_flLastMoveTime;
 	
 };
 LINK_ENTITY_TO_CLASS( trigger_camera, CTriggerCamera );
@@ -2486,8 +2496,10 @@ void CTriggerCamera::FollowTarget( )
 	if (dy > 180) 
 		dy = dy - 360;
 
-	pev->avelocity.x = dx * 40 * gpGlobals->frametime;
-	pev->avelocity.y = dy * 40 * gpGlobals->frametime;
+	float deltaTime = GetMoveDeltaTime();
+
+	pev->avelocity.x = dx * 40 * deltaTime;
+	pev->avelocity.y = dy * 40 * deltaTime;
 
 
 	if (!(FBitSet (pev->spawnflags, SF_CAMERA_PLAYER_TAKECONTROL)))	
@@ -2504,12 +2516,15 @@ void CTriggerCamera::FollowTarget( )
 
 void CTriggerCamera::Move()
 {
+	float deltaTime = GetMoveDeltaTime();
+	m_flLastMoveTime = gpGlobals->time;
+
 	// Not moving on a path, return
 	if (!m_pentPath)
 		return;
 
 	// Subtract movement from the previous frame
-	m_moveDistance -= pev->speed * gpGlobals->frametime;
+	m_moveDistance -= pev->speed * deltaTime;
 
 	// Have we moved enough to reach the target?
 	if ( m_moveDistance <= 0 )
@@ -2542,11 +2557,11 @@ void CTriggerCamera::Move()
 	}
 
 	if ( m_flStopTime > gpGlobals->time )
-		pev->speed = UTIL_Approach( 0, pev->speed, m_deceleration * gpGlobals->frametime );
+		pev->speed = UTIL_Approach( 0, pev->speed, m_deceleration * deltaTime );
 	else
-		pev->speed = UTIL_Approach( m_targetSpeed, pev->speed, m_acceleration * gpGlobals->frametime );
+		pev->speed = UTIL_Approach( m_targetSpeed, pev->speed, m_acceleration * deltaTime );
 
-	float fraction = 2 * gpGlobals->frametime;
+	float fraction = 2 * deltaTime;
 	pev->velocity = ((pev->movedir * pev->speed) * fraction) + (pev->velocity * (1-fraction));
 }
 

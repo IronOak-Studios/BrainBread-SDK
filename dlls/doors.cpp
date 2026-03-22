@@ -883,6 +883,9 @@ public:
 	//virtual int	Restore( CRestore &restore );
 	static	TYPEDESCRIPTION m_SaveData[];
 
+	void EXPORT DoorMoveDone( void );
+	void EXPORT StopMoveSound( void );
+
 	BYTE	m_bMoveSnd;			// sound a door makes while moving	
 };
 
@@ -1010,7 +1013,24 @@ void CMomentaryDoor::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYP
 		if ( pev->nextthink < pev->ltime || pev->nextthink == 0 )
 			EMIT_SOUND(ENT(pev), CHAN_STATIC, (char*)STRING(pev->noiseMoving), 1, ATTN_NORM);
 
+		SetMoveDone( &CMomentaryDoor::DoorMoveDone );
 		LinearMove( move, speed );
 	}
 
+}
+
+void CMomentaryDoor::DoorMoveDone( void )
+{
+	// Stop sounds at the next think, rather than here as another
+	// Use call might immediately follow the end of this move.
+	// This think function will be replaced by LinearMove if that happens.
+	SetThink( &CMomentaryDoor::StopMoveSound );
+	pev->nextthink = pev->ltime + 0.1;
+}
+
+void CMomentaryDoor::StopMoveSound( void )
+{
+	STOP_SOUND(ENT(pev), CHAN_STATIC, (char*)STRING(pev->noiseMoving) );
+	EMIT_SOUND(ENT(pev), CHAN_STATIC, (char*)STRING(pev->noiseArrived), 1, ATTN_NORM);
+	SetThink( NULL );
 }

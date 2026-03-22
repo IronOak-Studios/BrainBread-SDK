@@ -57,6 +57,7 @@ int CHudSayText :: Init( void )
 
 	m_HUD_saytext =			gEngfuncs.pfnRegisterVariable( "hud_saytext", "1", 0 );
 	m_HUD_saytext_time =	gEngfuncs.pfnRegisterVariable( "hud_saytext_time", "5", 0 );
+	m_con_color =			gEngfuncs.pfnGetCvarPointer( "con_color" );
 
 	m_iFlags |= HUD_INTERMISSION; // is always drawn during an intermission
 
@@ -79,7 +80,6 @@ int CHudSayText :: VidInit( void )
 
 int ScrollTextUp( void )
 {
-	ConsolePrint( g_szLineBuffer[0] ); // move the first line into the console buffer
 	g_szLineBuffer[MAX_LINES][0] = 0;
 	memmove( g_szLineBuffer[0], g_szLineBuffer[1], sizeof(g_szLineBuffer) - sizeof(g_szLineBuffer[0]) ); // overwrite the first line
 	memmove( &g_pflNameColors[0], &g_pflNameColors[1], sizeof(g_pflNameColors) - sizeof(g_pflNameColors[0]) );
@@ -119,6 +119,17 @@ int CHudSayText :: Draw( float flTime )
 		else
 		{ // buffer is empty,  just disable drawing of this section
 			m_iFlags &= ~HUD_ACTIVE;
+		}
+	}
+
+	// Set text color to con_color cvar value before drawing to ensure consistent color.
+	// The engine resets this color after drawing a single string.
+	if ( m_con_color && m_con_color->string )
+	{
+		int r, g, b;
+		if ( sscanf( m_con_color->string, "%i %i %i", &r, &g, &b ) == 3 )
+		{
+			gEngfuncs.pfnDrawSetTextColor( r / 255.0f, g / 255.0f, b / 255.0f );
 		}
 	}
 
@@ -166,10 +177,11 @@ int CHudSayText :: MsgFunc_SayText( const char *pszName, int iSize, void *pbuf )
 
 void CHudSayText :: SayTextPrint( const char *pszBuf, int iBufSize, int clientIndex )
 {
+	// Print it straight to the console immediately
+	ConsolePrint( pszBuf );
+
 	if ( gViewPort && gViewPort->AllowedToPrintText() == FALSE )
 	{
-		// Print it straight to the console
-		ConsolePrint( pszBuf );
 		return;
 	}
 

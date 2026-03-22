@@ -1,4 +1,4 @@
-//========= Copyright © 1996-2002, Valve LLC, All rights reserved. ============
+//========= Copyright Â© 1996-2002, Valve LLC, All rights reserved. ============
 //
 // Purpose: 
 //
@@ -38,6 +38,7 @@ extern cvar_t *cl_lw;
 
 extern int g_runfuncs;
 extern vec3_t v_angles;
+extern vec3_t v_client_aimangles;
 extern float g_lastFOV;
 extern struct local_state_s *g_finalstate;
 

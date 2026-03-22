@@ -1083,7 +1083,7 @@ void CMomentaryRotButton::UpdateSelfReturn( float value )
 // Spark
 //----------------------------------------------------------------
 
-class CEnvSpark : public CBaseEntity
+class CEnvSpark : public CPointEntity
 {
 public:
 	void	Spawn(void);
