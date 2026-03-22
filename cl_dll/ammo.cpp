@@ -704,10 +704,10 @@ int CHudAmmo::MsgFunc_WeaponList(const char *pszName, int iSize, void *pbuf )
 	if ( Weapon.iId < 0 || Weapon.iId >= MAX_WEAPONS )
 		return 0;
 
-	if ( Weapon.iSlot < 0 || Weapon.iSlot >= MAX_WEAPON_SLOTS + 1 )
+	if ( Weapon.iSlot < -1 || Weapon.iSlot >= MAX_WEAPON_SLOTS + 1 )
 		return 0;
 
-	if ( Weapon.iSlotPos < 0 || Weapon.iSlotPos >= MAX_WEAPON_POSITIONS + 1 )
+	if ( Weapon.iSlotPos < -1 || Weapon.iSlotPos >= MAX_WEAPON_POSITIONS + 1 )
 		return 0;
 
 	if ( Weapon.iAmmoType < -1 || Weapon.iAmmoType >= MAX_AMMO_TYPES )
