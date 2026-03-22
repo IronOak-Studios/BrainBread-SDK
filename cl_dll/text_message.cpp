@@ -46,47 +46,51 @@ int CHudTextMessage::Init(void)
 // the new value is pushed into dst_buffer
 char *CHudTextMessage::LocaliseTextString( const char *msg, char *dst_buffer, int buffer_size )
 {
-	int len = buffer_size;
 	char *dst = dst_buffer;
-	for ( char *src = (char*)msg; *src != 0 && buffer_size > 0; buffer_size-- )
+
+	// Subtract one so we always have space for the null terminator.
+	int remaining = buffer_size - 1;
+
+	for ( const char *src = msg; *src != '\0' && remaining > 0; )
 	{
 		if ( *src == '#' )
 		{
 			// cut msg name out of string
 			static char word_buf[255];
-			char *wdst = word_buf, *word_start = src;
-			for ( ++src ; (*src >= 'A' && *src <= 'z') || (*src >= '0' && *src <= '9'); wdst++, src++ )
+			const char *word_start = src;
+			++src;
+
+			int nameLen = 0;
+			while ( ((*src >= 'A' && *src <= 'z') || (*src >= '0' && *src <= '9')) && nameLen < (int)sizeof( word_buf ) - 1 )
 			{
-				*wdst = *src;
+				word_buf[nameLen++] = *src++;
 			}
-			*wdst = 0;
+			word_buf[nameLen] = '\0';
 
 			// lookup msg name in titles.txt
 			client_textmessage_t *clmsg = TextMessageGet( word_buf );
-			if ( !clmsg || !(clmsg->pMessage) )
+			if ( clmsg && clmsg->pMessage )
 			{
-				src = word_start;
-				*dst = *src;
-				dst++, src++;
+				// copy localized string into output buffer
+				int msgLen = strlen( clmsg->pMessage );
+				int count = (msgLen < remaining) ? msgLen : remaining;
+				strncpy( dst, clmsg->pMessage, count );
+				dst += count;
+				remaining -= count;
 				continue;
 			}
 
-			// copy string into message over the msg name
-			for ( char *wsrc = (char*)clmsg->pMessage; *wsrc != 0; wsrc++, dst++ )
-			{
-				*dst = *wsrc;
-			}
-			*dst = 0;
+			// token not found, copy the '#' literally and let the loop continue
+			src = word_start;
 		}
-		else
-		{
-			*dst = *src;
-			dst++, src++;
-			*dst = 0;
-		}
+
+		*dst = *src;
+		dst++;
+		src++;
+		--remaining;
 	}
 
-	dst_buffer[len-1] = 0; // ensure null termination
+	*dst = '\0'; // ensure null termination
 	return dst_buffer;
 }
 

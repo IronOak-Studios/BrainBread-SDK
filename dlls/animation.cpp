@@ -426,7 +426,7 @@ float SetBlending( void *pmodel, entvars_t *pev, int iBlender, float flValue )
 	studiohdr_t *pstudiohdr;
 	
 	pstudiohdr = (studiohdr_t *)pmodel;
-	if (! pstudiohdr || pev->sequence < 0 )
+	if (! pstudiohdr || pev->sequence < 0 || pev->sequence >= pstudiohdr->numseq )
 		return flValue;
 
 	mstudioseqdesc_t	*pseqdesc;

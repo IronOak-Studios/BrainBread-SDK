@@ -5556,7 +5556,7 @@ BOOL CBasePlayer::HasNamedPlayerItem( const char *pszItemName )
 //=========================================================
 BOOL CBasePlayer :: SwitchWeapon( CBasePlayerItem *pWeapon ) 
 {
-	if ( !pWeapon->CanDeploy() )
+	if ( pWeapon && !pWeapon->CanDeploy() )
 	{
 		return FALSE;
 	}
@@ -5569,7 +5569,11 @@ BOOL CBasePlayer :: SwitchWeapon( CBasePlayerItem *pWeapon )
 	}
 
 	m_pActiveItem = pWeapon;
-	pWeapon->Deploy( );
+
+	if ( pWeapon )
+	{
+		pWeapon->Deploy( );
+	}
 
 	return TRUE;
 }

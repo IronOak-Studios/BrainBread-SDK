@@ -1846,6 +1846,7 @@ void CSpeaker :: SpeakerThink( void )
 		case 10: szSoundFile = "C2A5_"; break;
 		case 11: szSoundFile = "C3A1_"; break;
 		case 12: szSoundFile = "C3A2_"; break;
+		default: szSoundFile = ""; break;
 		}
 	} else
 		szSoundFile = (char*) STRING(pev->message);

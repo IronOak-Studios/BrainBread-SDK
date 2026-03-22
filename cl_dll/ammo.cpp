@@ -700,6 +700,21 @@ int CHudAmmo::MsgFunc_WeaponList(const char *pszName, int iSize, void *pbuf )
 	Weapon.iClip = 0;
 	Weapon.iClip2 = 0;
 
+	if ( Weapon.iId < 0 || Weapon.iId >= MAX_WEAPONS )
+		return 0;
+
+	if ( Weapon.iSlot < 0 || Weapon.iSlot >= MAX_WEAPON_SLOTS + 1 )
+		return 0;
+
+	if ( Weapon.iSlotPos < 0 || Weapon.iSlotPos >= MAX_WEAPON_POSITIONS + 1 )
+		return 0;
+
+	if ( Weapon.iAmmoType < -1 || Weapon.iAmmoType >= MAX_AMMO_TYPES )
+		return 0;
+
+	if ( Weapon.iAmmo2Type < -1 || Weapon.iAmmo2Type >= MAX_AMMO_TYPES )
+		return 0;
+
   if( Weapon.iId == 9 || Weapon.iId == 26 || Weapon.iId == 29 )
   {
     Weapon.iMax1 = ( 10 * Weapon.iMax1 + Weapon.iMax2 );

@@ -1500,7 +1500,8 @@ int ReloadMapCycleFile( char *filename, mapcycle_t *cycle )
 			if ( strlen( token ) <= 0 )
 				break;
 
-			strcpy( szMap, token );
+			strncpy( szMap, token, sizeof( szMap ) );
+			szMap[ sizeof( szMap ) - 1 ] = '\0';
 
 			// Any more tokens on this line?
 			if ( COM_TokenWaiting( pFileList ) )
@@ -1509,7 +1510,8 @@ int ReloadMapCycleFile( char *filename, mapcycle_t *cycle )
 				if ( strlen( token ) > 0 )
 				{
 					hasbuffer = 1;
-					strcpy( szBuffer, token );
+					strncpy( szBuffer, token, sizeof( szBuffer ) );
+					szBuffer[ sizeof( szBuffer ) - 1 ] = '\0';
 				}
 			}
 
