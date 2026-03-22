@@ -1019,7 +1019,7 @@ void CBasePlayer::PackDeadPlayerItems( void )
 	int iPW = 0;// index into packweapons array
 	int iPA = 0;// index into packammo array
 
-	memset(rgpPackWeapons, NULL, sizeof(rgpPackWeapons) );
+	memset(rgpPackWeapons, 0, sizeof(rgpPackWeapons) );
 	memset(iPackAmmo, -1, sizeof(iPackAmmo) );
 
 	// get the game rules 
@@ -1144,6 +1144,12 @@ void CBasePlayer::RemoveAllItems( BOOL removeSuit )
 	}
 
 	m_pLastItem = NULL;
+
+	if ( m_pTank != NULL )
+	{
+		m_pTank->Use( this, this, USE_OFF, 0 );
+		m_pTank = NULL;
+	}
 
 	int i;
 	CBasePlayerItem *pPendingItem;
@@ -3913,7 +3919,7 @@ void CBasePlayer::SelectLastItem(void)
 		return;
 	}
 
-	if ( m_pActiveItem && !m_pActiveItem->CanHolster() || !m_pLastItem->CanDeploy( ) )
+	if ( m_pActiveItem && (!m_pActiveItem->CanHolster() || (m_pLastItem && !m_pLastItem->CanDeploy())) )
 	{
 		return;
 	}

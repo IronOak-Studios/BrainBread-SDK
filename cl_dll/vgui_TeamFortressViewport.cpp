@@ -1577,8 +1577,8 @@ void TeamFortressViewport::UpdateSpectatorPanel()
 		// create player & health string
 		if ( player && name )
 		{
-			strcpy( bottomText, name );
-			sprintf( bottomText, "%s (Health: %d Armor: %d)", name, g_PlayerInfoList[0].health, g_PlayerInfoList[0].armor );
+			_snprintf( bottomText, sizeof(bottomText), "%s (Health: %d Armor: %d)", name, g_PlayerInfoList[0].health, g_PlayerInfoList[0].armor );
+			bottomText[sizeof(bottomText) - 1] = 0;
 		}
 
 		// in first person mode colorize player names
@@ -1710,7 +1710,7 @@ CMenuPanel* TeamFortressViewport::CreateTextWindow( int iTextToShow )
 	char sz[256];
 	char *cText;
 	char *pfile = NULL;
-	static const int MAX_TITLE_LENGTH = 32;
+	static const int MAX_TITLE_LENGTH = 64;
 	char cTitle[MAX_TITLE_LENGTH];
 
 	if ( iTextToShow == SHOW_MOTD )
@@ -2476,6 +2476,7 @@ int TeamFortressViewport::MsgFunc_ServerName( const char *pszName, int iSize, vo
 	BEGIN_READ( pbuf, iSize );
 
 	strncpy( m_szServerName, READ_STRING(), MAX_SERVERNAME_LENGTH );
+	m_szServerName[MAX_SERVERNAME_LENGTH - 1] = 0;
 
 	return 1;
 }

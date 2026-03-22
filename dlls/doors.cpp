@@ -996,6 +996,8 @@ void CMomentaryDoor::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYP
 
 	if ( value > 1.0 )
 		value = 1.0;
+	if ( value < 0.0 )
+		value = 0.0;
 	Vector move = m_vecPosition1 + (value * (m_vecPosition2 - m_vecPosition1));
 	
 	Vector delta = move - pev->origin;

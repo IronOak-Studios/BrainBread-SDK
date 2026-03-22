@@ -377,7 +377,7 @@ void CPlatTrigger :: Touch( CBaseEntity *pOther )
 		return;
 
 	// Ignore touches by corpses
-	if (!pOther->IsAlive())
+	if (!pOther->IsAlive() || !m_pPlatform || !m_pPlatform->pev)
 		return;
 	
 	// Make linked platform go up/down.
