@@ -1,9 +1,3 @@
-//========= Copyright � 1996-2002, Valve LLC, All rights reserved. ============
-//
-// Purpose: 
-//
-// $NoKeywords: $
-//=============================================================================
 
 #ifndef TEAMFORTRESSVIEWPORT_H
 #define TEAMFORTRESSVIEWPORT_H
@@ -378,6 +372,7 @@ public:
 		m_iDirection = 0;
 	}
 
+
 	CCommandMenu( CCommandMenu *pParentMenu, int direction, int x,int y,int wide,int tall ) : Panel(x,y,wide,tall)
 	{
 		m_pParentMenu = pParentMenu;
@@ -403,7 +398,8 @@ public:
 
 	void		ClearButtonsOfArmedState( void );
 
-	void		RemoveAllButtons( void );
+	void		RemoveAllButtons(void);
+
 
 	bool		KeyInput( int keyNum );
 
@@ -633,7 +629,7 @@ public:
 	int						m_StandardMenu;	// indexs in m_pCommandMenus
 	int						m_SpectatorOptionsMenu;
 	int						m_SpectatorCameraMenu;
-	int						m_PlayerMenu;
+	int						m_PlayerMenu; // a list of current player
 	CClassMenuPanel	*m_pClassMenu;
 	ScorePanel		*m_pScoreBoard;
 	SpectatorPanel *		m_pSpectatorPanel;
@@ -1031,7 +1027,6 @@ public:
 
 		if (m_iFeignState == gViewPort->GetIsFeigning())
 			return false;
-
 		return true;
 	}
 };
@@ -1083,7 +1078,6 @@ public:
 		int iTmp = 1 << (gViewPort->GetNumberOfTeams() - 1);
 		if ( m_iValidTeamsBits & iTmp )
 			return false;
-
 		return true;
 	}
 };
@@ -1112,10 +1106,10 @@ public:
 };
 
 extern int iBuildingCosts[];
-#define BUILDSTATE_HASBUILDING		(1<<0)		// Data is building ID (1 = Dispenser, 2 = Sentry)
+#define BUILDSTATE_HASBUILDING		(1<<0)		// Data is building ID (1 = Dispenser, 2 = Sentry, 3 = Entry Teleporter, 4 = Exit Teleporter)
 #define BUILDSTATE_BUILDING			(1<<1)
 #define BUILDSTATE_BASE				(1<<2)
-#define BUILDSTATE_CANBUILD			(1<<3)		// Data is building ID (0 = Dispenser, 1 = Sentry)
+#define BUILDSTATE_CANBUILD			(1<<3)		// Data is building ID (1 = Dispenser, 2 = Sentry, 3 = Entry Teleporter, 4 = Exit Teleporter)
 
 class BuildButton : public CommandButton
 {

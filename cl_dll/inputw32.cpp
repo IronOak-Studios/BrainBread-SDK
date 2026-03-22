@@ -704,12 +704,12 @@ void IN_StartupJoystick (void)
 		return; 
 
 	static float flLastCheck = 0.0f;
-	if ( flLastCheck > 0.0f && (gEngfuncs.GetClientTime()-flLastCheck)  < 1.0f )
+	if ( flLastCheck > 0.0f && (gEngfuncs.GetAbsoluteTime()-flLastCheck)  < 1.0f )
 		return;
 
 	//gEngfuncs.Con_Printf("IN_StartupJoystick, %f\n", flLastCheck);
 
-	flLastCheck = gEngfuncs.GetClientTime();
+	flLastCheck = gEngfuncs.GetAbsoluteTime();
 
 	int nJoysticks = SDL_NumJoysticks();
 	if ( nJoysticks > 0 )

@@ -1,6 +1,6 @@
 /***
 *
-*	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
+*	Copyright (c) 1996-2001, Valve LLC. All rights reserved.
 *	
 *	This product contains software technology licensed from Id 
 *	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
@@ -16,7 +16,6 @@
 // sound.cpp 
 //=========================================================
 
-#include <ctype.h>
 #include "extdll.h"
 #include "util.h"
 #include "cbase.h"
@@ -24,6 +23,10 @@
 #include "player.h"
 #include "talkmonster.h"
 #include "gamerules.h"
+
+#if !defined ( _WIN32 )
+#include <ctype.h>
+#endif
 
 
 static char *memfgets( byte *pMemFile, int fileSize, int &filePos, char *pBuffer, int bufferSize );

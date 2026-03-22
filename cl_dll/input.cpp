@@ -19,9 +19,10 @@ extern "C"
 #include "view.h"
 #include <string.h>
 #include <ctype.h>
+#include "Exports.h"
 
 #include "vgui_TeamFortressViewport.h"
-#include "Exports.h"
+
 
 extern int g_iAlive;
 

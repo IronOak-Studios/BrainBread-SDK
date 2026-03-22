@@ -1,6 +1,6 @@
 /***
 *
-*	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
+*	Copyright (c) 1996-2001, Valve LLC. All rights reserved.
 *	
 *	This product contains software technology licensed from Id 
 *	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
@@ -27,16 +27,22 @@
 //=========================================================
 // Save/Restore
 //=========================================================
-TYPEDESCRIPTION CSquadMonster::m_SaveData[] = 
+TYPEDESCRIPTION	CSquadMonster::m_SaveData[] = 
 {
 	DEFINE_FIELD( CSquadMonster, m_hSquadLeader, FIELD_EHANDLE ),
 	DEFINE_ARRAY( CSquadMonster, m_hSquadMember, FIELD_EHANDLE, MAX_SQUAD_MEMBERS - 1 ),
+
+	// DEFINE_FIELD( CSquadMonster, m_afSquadSlots, FIELD_INTEGER ), // these need to be reset after transitions!
 	DEFINE_FIELD( CSquadMonster, m_fEnemyEluded, FIELD_BOOLEAN ),
 	DEFINE_FIELD( CSquadMonster, m_flLastEnemySightTime, FIELD_TIME ),
+
 	DEFINE_FIELD( CSquadMonster, m_iMySlot, FIELD_INTEGER ),
+
+
 };
 
 IMPLEMENT_SAVERESTORE( CSquadMonster, CBaseMonster );
+
 
 //=========================================================
 // OccupySlot - if any slots of the passed slots are 

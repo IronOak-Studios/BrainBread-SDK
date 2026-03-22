@@ -1,6 +1,6 @@
 /***
 *
-*	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
+*	Copyright (c) 1996-2001, Valve LLC. All rights reserved.
 *	
 *	This product contains software technology licensed from Id 
 *	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
@@ -98,7 +98,7 @@ void CBubbling::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE use
 
 	if ( m_state )
 	{
-		SetThink( &CBubbling::FizzThink );
+		SetThink( & CBubbling::FizzThink );
 		pev->nextthink = gpGlobals->time + 0.1;
 	}
 	else

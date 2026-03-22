@@ -1,6 +1,6 @@
 /***
 *
-*	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
+*	Copyright (c) 1996-2001, Valve LLC. All rights reserved.
 *	
 *	This product contains software technology licensed from Id 
 *	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
@@ -963,7 +963,7 @@ void CFuncTrain::OverrideReset( void )
 //
 // ---------------------------------------------------------------------
 
-TYPEDESCRIPTION CFuncTrackTrain::m_SaveData[] = 
+TYPEDESCRIPTION	CFuncTrackTrain::m_SaveData[] = 
 {
 	DEFINE_FIELD( CFuncTrackTrain, m_ppath, FIELD_CLASSPTR ),
 	DEFINE_FIELD( CFuncTrackTrain, m_length, FIELD_FLOAT ),
@@ -980,7 +980,6 @@ TYPEDESCRIPTION CFuncTrackTrain::m_SaveData[] =
 };
 
 IMPLEMENT_SAVERESTORE( CFuncTrackTrain, CBaseEntity );
-
 LINK_ENTITY_TO_CLASS( func_tracktrain, CFuncTrackTrain );
 
 void CFuncTrackTrain :: KeyValue( KeyValueData *pkvd )
@@ -1618,7 +1617,7 @@ void CFuncTrainControls :: Spawn( void )
 	UTIL_SetSize( pev, pev->mins, pev->maxs );
 	UTIL_SetOrigin( pev, pev->origin );
 	
-	SetThink( &CFuncTrainControls::Find );
+	SetThink(&CFuncTrainControls::Find );
 	pev->nextthink = gpGlobals->time;
 }
 

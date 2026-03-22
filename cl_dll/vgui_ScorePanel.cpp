@@ -1,4 +1,4 @@
-//=========== (C) Copyright 1996-2002 Valve, L.L.C. All rights reserved. ===========
+//=========== (C) Copyright 1999 Valve, L.L.C. All rights reserved. ===========
 //
 // The copyright to the contents herein is the property of Valve, L.L.C.
 // The contents may be used and/or copied only with the written permission of
@@ -8,45 +8,10 @@
 // Purpose: VGUI scoreboard
 //
 // $Workfile:     $
-// $Date: 2004/11/09 21:43:31 $
+// $Date:         $
 //
 //-----------------------------------------------------------------------------
-// $Log: vgui_ScorePanel.cpp,v $
-// Revision 1.5  2004/11/09 21:43:31  spin
-// *** empty log message ***
-//
-// Revision 1.4  2004/11/04 18:28:18  spin
-// - cvar
-// - fuser4
-// - panzer dmg
-// - flamer--
-// - scores add
-// - torso gib
-// - skills 0 0 0
-// - lvl up bonus
-// - 2 sprites
-//
-// Revision 1.3  2004/10/16 14:15:10  spin
-// - bawgfixes
-// - healthpack
-// - general ammo
-// - player spawns
-// - grunt spawn
-// - pe fixes
-//
-// Revision 1.2  2004/08/19 14:10:27  spin
-// - ugly obstacle stepover hack
-//
-// Revision 1.1  2004/07/31 09:28:37  spin
-// - rein damit
-//
-// Revision 1.2  2004/06/27 11:53:28  spin
-// - gameplay modifier
-// - frag/score limit
-//
-// Revision 1.1  2004/06/19 16:41:53  spin
-// - Spin commited pe source
-//
+// $Log: $
 //
 // $NoKeywords: $
 //=============================================================================
@@ -148,6 +113,8 @@ ScorePanel::ScorePanel(int x,int y,int wide,int tall) : Panel(x,y,wide,tall)
 	m_pCurrentHighlightLabel = NULL;
 	m_iHighlightRow = -1;
 
+	//m_pTrackerIcon = vgui_LoadTGANoInvertAlpha("gfx/vgui/640_scoreboardtracker.tga");
+
 	// Initialize the top title.
 	m_TitleLabel.setFont(tfont);
 	m_TitleLabel.setText("");
@@ -195,6 +162,7 @@ ScorePanel::ScorePanel(int x,int y,int wide,int tall) : Panel(x,y,wide,tall)
 			}
 			else if (i == 0)
 			{
+				// tracker icon cell
 				xwide -= 8;
 			}
 		}
@@ -505,8 +473,8 @@ void ScorePanel::SortPlayers( int iTeam, int team )
 //-----------------------------------------------------------------------------
 void ScorePanel::RebuildTeams()
 {
-	int i;
 	// clear out player counts from teams
+	int i;
 	for ( i = 1; i <= m_iNumTeams; i++ )
 	{
 		g_TeamInfo[i].players = 0;
@@ -567,7 +535,6 @@ void ScorePanel::FillGrid()
 	}
 
 	bool bNextRowIsGap = false;
-
 	int row;
 	for(row=0; row < NUM_ROWS; row++)
 	{
@@ -698,7 +665,7 @@ void ScorePanel::FillGrid()
 			{
 				pLabel->setContentAlignment( vgui::Label::a_west );
 			}
-			else if (col == COLUMN_TRACKER )
+			else if (col == COLUMN_TRACKER)
 			{
 				pLabel->setContentAlignment( vgui::Label::a_center );
 			}

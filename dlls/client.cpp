@@ -1,6 +1,6 @@
 /***
 *
-*	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
+*	Copyright (c) 1996-2001, Valve LLC. All rights reserved.
 *	
 *	This product contains software technology licensed from Id 
 *	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
@@ -106,7 +106,7 @@ void ClientDisconnect( edict_t *pEntity )
 	if (g_fGameOver)
 		return;
 
-	char text[256] = "";
+	char text[256] = "" ;
 	if ( pEntity->v.netname )
 		_snprintf( text, sizeof(text), "- %s has left the game\n", STRING(pEntity->v.netname) );
 	text[ sizeof(text) - 1 ] = 0;
@@ -430,9 +430,10 @@ void Host_Say( edict_t *pEntity, int teamonly )
 		p[strlen(p)-1] = 0;
 	}
 
-// make sure the text has valid content
-	if ( !p || !p[0] || !Q_UnicodeValidate( p ) )
-		return;
+// make sure the text has content
+
+	if ( !p || !p[0] || !Q_UnicodeValidate ( p ) )
+		return;  // no character found, so say nothing
 
 	CBasePlayer *pPlayer = (CBasePlayer*) CBaseEntity::Instance( pEntity );
 // turn on color set 2  (color on,  no sound)

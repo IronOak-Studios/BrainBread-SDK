@@ -1,6 +1,6 @@
 /***
 *
-*	Copyright (c) 1999, 2000 Valve LLC. All rights reserved.
+*	Copyright (c) 1996-2001, Valve LLC. All rights reserved.
 *	
 *	This product contains software technology licensed from Id 
 *	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
@@ -320,6 +320,18 @@ void CApache :: DyingThink( void )
 	else
 	{
 		Vector vecSpot = pev->origin + (pev->mins + pev->maxs) * 0.5;
+
+		/*
+		MESSAGE_BEGIN( MSG_BROADCAST, SVC_TEMPENTITY );
+			WRITE_BYTE( TE_EXPLOSION);		// This just makes a dynamic light now
+			WRITE_COORD( vecSpot.x );
+			WRITE_COORD( vecSpot.y );
+			WRITE_COORD( vecSpot.z + 300 );
+			WRITE_SHORT( g_sModelIndexFireball );
+			WRITE_BYTE( 250 ); // scale * 10
+			WRITE_BYTE( 8  ); // framerate
+		MESSAGE_END();
+		*/
 
 		// fireball
 		MESSAGE_BEGIN( MSG_PVS, SVC_TEMPENTITY, vecSpot );

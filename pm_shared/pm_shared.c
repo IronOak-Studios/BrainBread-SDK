@@ -251,6 +251,7 @@ void PM_InitTextureTypes()
 
 	// Must use engine to free since we are in a .dll
 	pmove->COM_FreeFile ( pMemFile );
+
 	PM_SortTextures();
 
 	bTextureTypeInit = true;
@@ -1786,7 +1787,7 @@ void PM_SpectatorMove (void)
 		}
 #endif
 		// Move around in normal spectator method
-
+	
 		speed = Length (pmove->velocity);
 		if (speed < 1)
 		{

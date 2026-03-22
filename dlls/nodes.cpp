@@ -1,6 +1,6 @@
 /***
 *
-*	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
+*	Copyright (c) 1996-2001, Valve LLC. All rights reserved.
 *	
 *	This product contains software technology licensed from Id 
 *	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
@@ -580,7 +580,6 @@ int CGraph :: FindShortestPath ( int *piPath, int iStart, int iDest, int iHull, 
 	int		iCurrentNode;
 	int		iNumPathNodes;
 	int		iHullMask;
-    int		i;
 
 	if ( !m_fGraphPresent || !m_fGraphPointersSet )
 	{// protect us in the case that the node graph isn't available or built
@@ -657,6 +656,7 @@ int CGraph :: FindShortestPath ( int *piPath, int iStart, int iDest, int iHull, 
 
 		// Mark all the nodes as unvisited.
 		//
+		int i;
 		for ( i = 0; i < m_cNodes; i++)
 		{
 			m_pNodes[ i ].m_flClosestSoFar = -1.0;
@@ -2849,7 +2849,6 @@ void CGraph::SortNodes(void)
 
 void CGraph::BuildLinkLookups(void)
 {
-	int i;
 	m_nHashLinks = 3*m_cLinks/2 + 3;
 
 	HashChoosePrimes(m_nHashLinks);
@@ -2859,6 +2858,7 @@ void CGraph::BuildLinkLookups(void)
 		ALERT(at_aiconsole, "Couldn't allocated Link Lookup Table.\n");
 		return;
 	}
+	int i;
 	for (i = 0; i < m_nHashLinks; i++)
 	{
 		m_pHashLinks[i] = ENTRY_STATE_EMPTY;
@@ -2886,7 +2886,6 @@ void CGraph::BuildLinkLookups(void)
 void CGraph::BuildRegionTables(void)
 {
 	if (m_di) free(m_di);
-	int i;
 
 	// Go ahead and setup for range searching the nodes for FindNearestNodes
 	//
@@ -2900,6 +2899,7 @@ void CGraph::BuildRegionTables(void)
 	// Calculate regions for all the nodes.
 	//
 	//
+	int i;
 	for (i = 0; i < 3; i++)
 	{
 		m_RegionMin[i] =  999999999.0; // just a big number out there;
@@ -3045,7 +3045,7 @@ void CGraph :: ComputeStaticRoutingTables( void )
 
 	if (Routes && pMyPath && BestNextNodes && pRoute)
 	{
-		int nTotalCompressedSize = 0, iFrom;
+		int nTotalCompressedSize = 0;
 		for (int iHull = 0; iHull < MAX_NODE_HULLS; iHull++)
 		{
 			for (int iCap = 0; iCap < 2; iCap++)
@@ -3065,7 +3065,8 @@ void CGraph :: ComputeStaticRoutingTables( void )
 
 				// Initialize Routing table to uncalculated.
 				//
-				for ( iFrom = 0; iFrom < m_cNodes; iFrom++)
+				int iFrom;
+				for (iFrom = 0; iFrom < m_cNodes; iFrom++)
 				{
 					for (int iTo = 0; iTo < m_cNodes; iTo++)
 					{

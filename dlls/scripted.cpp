@@ -1,6 +1,6 @@
 /***
 *
-*	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
+*	Copyright (c) 1996-2001, Valve LLC. All rights reserved.
 *	
 *	This product contains software technology licensed from Id 
 *	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
@@ -94,7 +94,7 @@ void CCineMonster :: KeyValue( KeyValueData *pkvd )
 	}
 }
 
-TYPEDESCRIPTION CCineMonster::m_SaveData[] = 
+TYPEDESCRIPTION	CCineMonster::m_SaveData[] = 
 {
 	DEFINE_FIELD( CCineMonster, m_iszIdle, FIELD_STRING ),
 	DEFINE_FIELD( CCineMonster, m_iszPlay, FIELD_STRING ),
@@ -102,14 +102,17 @@ TYPEDESCRIPTION CCineMonster::m_SaveData[] =
 	DEFINE_FIELD( CCineMonster, m_fMoveTo, FIELD_INTEGER ),
 	DEFINE_FIELD( CCineMonster, m_flRepeat, FIELD_FLOAT ),
 	DEFINE_FIELD( CCineMonster, m_flRadius, FIELD_FLOAT ),
+
 	DEFINE_FIELD( CCineMonster, m_iDelay, FIELD_INTEGER ),
 	DEFINE_FIELD( CCineMonster, m_startTime, FIELD_TIME ),
-	DEFINE_FIELD( CCineMonster, m_saved_movetype, FIELD_INTEGER ),
-	DEFINE_FIELD( CCineMonster, m_saved_solid, FIELD_INTEGER ),
+
+	DEFINE_FIELD( CCineMonster,	m_saved_movetype, FIELD_INTEGER ),
+	DEFINE_FIELD( CCineMonster,	m_saved_solid, FIELD_INTEGER ),
 	DEFINE_FIELD( CCineMonster, m_saved_effects, FIELD_INTEGER ),
 	DEFINE_FIELD( CCineMonster, m_iFinishSchedule, FIELD_INTEGER ),
 	DEFINE_FIELD( CCineMonster, m_interruptable, FIELD_BOOLEAN ),
 };
+
 
 IMPLEMENT_SAVERESTORE( CCineMonster, CBaseMonster );
 
@@ -1175,7 +1178,7 @@ BOOL CScriptedSentence :: StartSentence( CBaseToggle *pTarget )
 //=========================================================
 // Furniture - this is the cool comment I cut-and-pasted
 //=========================================================
-class CFurniture : public CBaseMonster
+class CFurniture : public CBaseMonster 
 {
 public:
 	void Spawn ( void );

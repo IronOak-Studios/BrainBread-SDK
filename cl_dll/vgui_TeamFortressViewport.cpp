@@ -1,4 +1,4 @@
-//=========== (C) Copyright 1996-2002 Valve, L.L.C. All rights reserved. ===========
+//=========== (C) Copyright 1999 Valve, L.L.C. All rights reserved. ===========
 //
 // The copyright to the contents herein is the property of Valve, L.L.C.
 // The contents may be used and/or copied only with the written permission of
@@ -8,71 +8,10 @@
 // Purpose: Client DLL VGUI Viewport
 //
 // $Workfile:     $
-// $Date: 2004/12/12 15:19:35 $
+// $Date:         $
 //
 //-----------------------------------------------------------------------------
-// $Log: vgui_TeamFortressViewport.cpp,v $
-// Revision 1.10  2004/12/12 15:19:35  spin
-// *** empty log message ***
-//
-// Revision 1.9  2004/11/30 19:51:13  spin
-// *** empty log message ***
-//
-// Revision 1.8  2004/11/21 10:43:46  spin
-// *** empty log message ***
-//
-// Revision 1.7  2004/11/16 17:53:33  spin
-// *** empty log message ***
-//
-// Revision 1.6  2004/11/12 10:28:21  spin
-// - Linux compile
-// - PE string remove
-//
-// Revision 1.5  2004/11/09 21:43:31  spin
-// *** empty log message ***
-//
-// Revision 1.4  2004/11/04 18:28:18  spin
-// - cvar
-// - fuser4
-// - panzer dmg
-// - flamer--
-// - scores add
-// - torso gib
-// - skills 0 0 0
-// - lvl up bonus
-// - 2 sprites
-//
-// Revision 1.3  2004/10/25 15:03:19  spin
-// - entchanges
-//
-// Revision 1.2  2004/10/16 14:15:10  spin
-// - bawgfixes
-// - healthpack
-// - general ammo
-// - player spawns
-// - grunt spawn
-// - pe fixes
-//
-// Revision 1.1  2004/07/31 09:28:37  spin
-// - rein damit
-//
-// Revision 1.3  2004/07/11 22:32:29  spin
-// - help queueing
-// - fixed fog
-// - free files
-// - hlp terminal,enemy
-// - bonus point announce
-// - prozentual punkte
-// - boderx/y posfader font in cfg
-// - bonus points anders
-//
-// Revision 1.2  2004/06/27 11:53:28  spin
-// - gameplay modifier
-// - frag/score limit
-//
-// Revision 1.1  2004/06/19 16:41:53  spin
-// - Spin commited pe source
-//
+// $Log: $
 //
 // $NoKeywords: $
 //=============================================================================
@@ -287,6 +226,27 @@ void CCommandMenu::AddButton( CommandButton *pButton )
 	}
 }
 
+void CCommandMenu::RemoveAllButtons(void)
+{
+	/*
+	for(int i=0;i<m_iButtons;i++)
+	{
+		CommandButton *pTemp = m_aButtons[i]; 
+		m_aButtons[i] = NULL;
+		
+		pTemp
+		if(pTemp)
+		{
+			delete(pTemp);
+		}
+		
+	}
+	*/
+	removeAllChildren();
+	m_iButtons=0;
+	
+}
+
 //-----------------------------------------------------------------------------
 // Purpose: Tries to find a button that has a key bound to the input, and
 //			presses the button if found
@@ -337,12 +297,6 @@ void CCommandMenu::ClearButtonsOfArmedState( void )
 			m_aButtons[i]->GetSubMenu()->ClearButtonsOfArmedState();
 		}
 	}
-}
-
-void CCommandMenu::RemoveAllButtons( void )
-{
-	removeAllChildren();
-	m_iButtons = 0;
 }
 
 //-----------------------------------------------------------------------------
@@ -519,7 +473,7 @@ CCommandMenu *TeamFortressViewport::CreateSubMenu( CommandButton *pButton, CComm
 		iDirection = pParentMenu->GetDirection();
 	}
 
-	CCommandMenu *pMenu = new CCommandMenu(pParentMenu, iDirection, iXPos, iYPos, iWide, iTall );
+	CCommandMenu *pMenu = new  CCommandMenu(pParentMenu, iDirection, iXPos, iYPos, iWide, iTall );
 	pMenu->setParent(this);
 	pButton->AddSubMenu( pMenu );
 	pButton->setFont( Scheme::sf_primary3 );
@@ -777,8 +731,10 @@ int TeamFortressViewport::CreateCommandMenu( char * menuFile, int direction, int
 		return newIndex;
 	}
 
+#ifdef _WIN32
 try
 {
+#endif
 	// First, read in the localisation strings
 
 	// Detpack strings
@@ -982,6 +938,7 @@ try
 
 		pfile = gEngfuncs.COM_ParseFile(pfile, token);
 	}
+#ifdef _WIN32
 }
 catch( CException *e )
 {
@@ -991,6 +948,7 @@ catch( CException *e )
 	m_iInitialized = false;
 	return newIndex;
 }
+#endif
 
 	SetCurrentMenu( NULL );
 	SetCurrentCommandMenu( NULL );
@@ -1393,6 +1351,7 @@ void TeamFortressViewport::HideCommandMenu()
 		m_pCommandMenus[m_PlayerMenu]->ClearButtonsOfArmedState();
 	}
 
+
 	m_flMenuOpenTime = 0.0f;
 	SetCurrentCommandMenu( NULL );
 	UpdateCursorState();
@@ -1483,7 +1442,8 @@ void TeamFortressViewport::SetCurrentCommandMenu( CCommandMenu *pNewMenu )
 
 void TeamFortressViewport::UpdateCommandMenu(int menuIndex)
 {
-	if ( menuIndex == m_PlayerMenu )
+	// if its the player menu update the player list
+	if(menuIndex==m_PlayerMenu)
 	{
 		m_pCommandMenus[m_PlayerMenu]->RemoveAllButtons();
 		UpdatePlayerMenu(m_PlayerMenu);
@@ -1491,25 +1451,34 @@ void TeamFortressViewport::UpdateCommandMenu(int menuIndex)
 
 	m_pCommandMenus[menuIndex]->RecalculateVisibles( 0, false );
 	m_pCommandMenus[menuIndex]->RecalculatePositions( 0 );
+
 }
 
-void TeamFortressViewport::UpdatePlayerMenu( int menuIndex )
+void TeamFortressViewport::UpdatePlayerMenu(int menuIndex)
 {
-	cl_entity_t *pEnt = NULL;
+
+	cl_entity_t * pEnt = NULL;
 	float flLabelSize = ( (ScreenWidth - (XRES_HD( CAMOPTIONS_BUTTON_X ) + 15)) - XRES_HD( 24 + 15 ) ) - XRES_HD( (15 + OPTIONS_BUTTON_X + 15) + 38 );
 	gViewPort->GetAllPlayersInfo();
 
-	for ( int i = 1; i < MAX_PLAYERS; i++ )
+
+	for (int i = 1; i < MAX_PLAYERS; i++ )
 	{
+		//if ( g_PlayerInfoList[i].name == NULL )
+		//	continue; // empty player slot, skip
+	
 		pEnt = gEngfuncs.GetEntityByIndex( i );
 
 		if ( !gHUD.m_Spectator.IsActivePlayer( pEnt ) )
 			continue;
 
-		SpectButton *pButton = new SpectButton( 1, g_PlayerInfoList[pEnt->index].name,
+		//if ( g_PlayerExtraInfo[i].teamname[0] == 0 )
+		//	continue; // skip over players who are not in a team
+	
+		SpectButton *pButton = new SpectButton(1 , g_PlayerInfoList[pEnt->index].name ,
 							XRES_HD( ( 15 + OPTIONS_BUTTON_X + 15 ) + 31 ), YRES_HD( PANEL_HEIGHT ) + (i - 1) * CMENU_SIZE_X, flLabelSize, BUTTON_SIZE_Y / 2 );
 
-		pButton->setBoundKey( (char)255 );
+		pButton->setBoundKey( (char)255  );
 		pButton->setContentAlignment( vgui::Label::a_center );
 		m_pCommandMenus[menuIndex]->AddButton( pButton );
 		pButton->setParentMenu( m_pCommandMenus[menuIndex] );
@@ -1517,11 +1486,15 @@ void TeamFortressViewport::UpdatePlayerMenu( int menuIndex )
 		// Override font in CommandMenu
 		pButton->setFont( Scheme::sf_primary3 );
 
-		pButton->addActionSignal( new CMenuHandler_SpectateFollow( g_PlayerInfoList[pEnt->index].name ) );
+		pButton->addActionSignal(new CMenuHandler_SpectateFollow( g_PlayerInfoList[pEnt->index].name));
 		// Create an input signal that'll popup the current menu
-		pButton->addInputSignal( new CMenuHandler_PopupSubMenuInput( pButton, m_pCommandMenus[menuIndex] ) );
+		pButton->addInputSignal( new CMenuHandler_PopupSubMenuInput(pButton, m_pCommandMenus[menuIndex]) );
+	
 	}
+
 }
+
+
 
 void COM_FileBase ( const char *in, char *out);
 
@@ -1578,7 +1551,7 @@ void TeamFortressViewport::UpdateSpectatorPanel()
 		if ( player && name )
 		{
 			_snprintf( bottomText, sizeof(bottomText), "%s (Health: %d Armor: %d)", name, g_PlayerInfoList[0].health, g_PlayerInfoList[0].armor );
-			bottomText[sizeof(bottomText) - 1] = 0;
+			bottomText[ sizeof(bottomText) - 1 ] = 0;
 		}
 
 		// in first person mode colorize player names

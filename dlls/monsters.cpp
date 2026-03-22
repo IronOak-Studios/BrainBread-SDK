@@ -1,6 +1,6 @@
 /***
 *
-*	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
+*	Copyright (c) 1996-2001, Valve LLC. All rights reserved.
 *	
 *	This product contains software technology licensed from Id 
 *	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
@@ -894,7 +894,7 @@ BOOL CBaseMonster :: CheckRangeAttack2 ( float flDot, float flDist )
 BOOL CBaseMonster :: CheckMeleeAttack1 ( float flDot, float flDist )
 {
 	// Decent fix to keep folks from kicking/punching hornets and snarks is to check the onground flag(sjb)
-  if ( flDist <= 64 && flDot >= 0.7 && m_hEnemy != NULL && FBitSet ( m_hEnemy->pev->flags, FL_ONGROUND ) )
+	if ( flDist <= 64 && flDot >= 0.7 && m_hEnemy != NULL && FBitSet ( m_hEnemy->pev->flags, FL_ONGROUND ) )
 	{
 		return TRUE;
 	}
@@ -1495,16 +1495,16 @@ BOOL CBaseMonster :: BuildRoute ( const Vector &vecGoal, int iMoveFlag, CBaseEnt
 		m_Route[ 1 ].vecLocation = vecGoal;
 		m_Route[ 1 ].iType = iMoveFlag | bits_MF_IS_GOAL;
 
-			
-			/*WRITE_BYTE(MSG_BROADCAST, SVC_TEMPENTITY);
+			/*
+			WRITE_BYTE(MSG_BROADCAST, SVC_TEMPENTITY);
 			WRITE_BYTE(MSG_BROADCAST, TE_SHOWLINE);
 			WRITE_COORD(MSG_BROADCAST, vecApex.x );
 			WRITE_COORD(MSG_BROADCAST, vecApex.y );
 			WRITE_COORD(MSG_BROADCAST, vecApex.z );
 			WRITE_COORD(MSG_BROADCAST, vecApex.x );
 			WRITE_COORD(MSG_BROADCAST, vecApex.y );
-			WRITE_COORD(MSG_BROADCAST, vecApex.z + 128 );*/
-			
+			WRITE_COORD(MSG_BROADCAST, vecApex.z + 128 );
+			*/
 
 		RouteSimplify( pTarget );
 		return TRUE;
@@ -2545,7 +2545,7 @@ float CBaseMonster::ChangeYaw ( int yawSpeed )
 			if (move < -speed)
 				move = -speed;
 		}
-		
+
 		pev->angles.y = UTIL_AngleMod (current + move);
 
 		// turn head in desired direction only if they have a turnable head
@@ -3214,9 +3214,6 @@ BOOL CBaseMonster :: FCanActiveIdle ( void )
 	*/
 	return FALSE;
 }
-
-
-// PlaySentence, PlayScriptedSentence, SentenceStop moved to CBaseToggle in subs.cpp
 
 
 void CBaseMonster::CorpseFallThink( void )

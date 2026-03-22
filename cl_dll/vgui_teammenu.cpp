@@ -8,22 +8,10 @@
 // Purpose: TFC Team Menu
 //
 // $Workfile:     $
-// $Date: 2004/11/19 12:34:55 $
+// $Date:         $
 //
 //-----------------------------------------------------------------------------
-// $Log: vgui_teammenu.cpp,v $
-// Revision 1.3  2004/11/19 12:34:55  spin
-// *** empty log message ***
-//
-// Revision 1.2  2004/11/16 17:53:33  spin
-// *** empty log message ***
-//
-// Revision 1.1  2004/07/31 09:28:37  spin
-// - rein damit
-//
-// Revision 1.1  2004/06/19 16:41:53  spin
-// - Spin commited pe source
-//
+// $Log: $
 //
 // $NoKeywords: $
 //=============================================================================

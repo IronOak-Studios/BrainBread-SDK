@@ -1,6 +1,6 @@
 /***
 *
-*	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
+*	Copyright (c) 1999, Valve LLC. All rights reserved.
 *	
 *	This product contains software technology licensed from Id 
 *	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
@@ -37,7 +37,7 @@ extern int g_iVisibleMouse;
 
 float HUD_GetFOV( void );
 
-extern cvar_t *sensitivity;
+extern float IN_GetMouseSensitivity();
 
 // Think
 void CHud::Think(void)
@@ -73,7 +73,7 @@ void CHud::Think(void)
 	else
 	{  
 		// set a new sensitivity that is proportional to the change from the FOV default
-		m_flMouseSensitivity = sensitivity->value * ((float)newfov / (float)90/*m_iFOV/*default_fov->value*/) * CVAR_GET_FLOAT("zoom_sensitivity_ratio");
+		m_flMouseSensitivity = IN_GetMouseSensitivity() * ((float)newfov / (float)90/*m_iFOV/*default_fov->value*/) * CVAR_GET_FLOAT("zoom_sensitivity_ratio");
 	}
 
 	// think about default fov
@@ -133,6 +133,7 @@ int CHud :: Redraw( float flTime, int intermission )
 	// if no redrawing is necessary
 	// return 0;
 	
+	// draw all registered HUD elements
 	if ( m_pCvarDraw->value )
 	{
 		HUDLIST *pList = m_pHudList;

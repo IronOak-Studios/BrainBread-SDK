@@ -1,6 +1,6 @@
 /***
 *
-*	Copyright (c) 1996-2002, Valve LLC. All rights reserved.
+*	Copyright (c) 1996-2001, Valve LLC. All rights reserved.
 *	
 *	This product contains software technology licensed from Id 
 *	Software, Inc. ("Id Technology").  Id Technology (c) 1996 Id Software, Inc. 
@@ -1549,7 +1549,7 @@ void CBaseEntity::TraceAttack(entvars_t *pevAttacker, float flDamage, Vector vec
 {
 	Vector vecOrigin = ptr->vecEndPos - vecDir * 4;
 
-	if( pev->takedamage )
+	if ( pev->takedamage )
 	{
 		AddMultiDamage( pevAttacker, this, flDamage, bitsDamageType );
 

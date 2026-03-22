@@ -335,6 +335,7 @@ void V_DriftPitch ( struct ref_params_s *pparams )
 	}
 
 	move = pparams->frametime * pd.pitchvel;
+	
 	pd.pitchvel += pparams->frametime * v_centerspeed->value;
 	
 	if (delta > 0)
