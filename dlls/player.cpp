@@ -1661,15 +1661,18 @@ void CBasePlayer::WaterMove()
 	
 	// make bubbles
 
-	air = (int)(pev->air_finished - gpGlobals->time);
-	if (!RANDOM_LONG(0,0x1f) && RANDOM_LONG(0,AIRTIME-1) >= air)
+	if ( pev->waterlevel == 3 )
 	{
-		switch (RANDOM_LONG(0,3))
+		air = (int)(pev->air_finished - gpGlobals->time);
+		if (!RANDOM_LONG(0,0x1f) && RANDOM_LONG(0,AIRTIME-1) >= air)
+		{
+			switch (RANDOM_LONG(0,3))
 			{
-			case 0:	EMIT_SOUND(ENT(pev), CHAN_BODY, "player/pl_swim1.wav", 0.8, ATTN_NORM); break;
-			case 1:	EMIT_SOUND(ENT(pev), CHAN_BODY, "player/pl_swim2.wav", 0.8, ATTN_NORM); break;
-			case 2:	EMIT_SOUND(ENT(pev), CHAN_BODY, "player/pl_swim3.wav", 0.8, ATTN_NORM); break;
-			case 3:	EMIT_SOUND(ENT(pev), CHAN_BODY, "player/pl_swim4.wav", 0.8, ATTN_NORM); break;
+				case 0:	EMIT_SOUND(ENT(pev), CHAN_BODY, "player/pl_swim1.wav", 0.8, ATTN_NORM); break;
+				case 1:	EMIT_SOUND(ENT(pev), CHAN_BODY, "player/pl_swim2.wav", 0.8, ATTN_NORM); break;
+				case 2:	EMIT_SOUND(ENT(pev), CHAN_BODY, "player/pl_swim3.wav", 0.8, ATTN_NORM); break;
+				case 3:	EMIT_SOUND(ENT(pev), CHAN_BODY, "player/pl_swim4.wav", 0.8, ATTN_NORM); break;
+			}
 		}
 	}
 
@@ -4203,8 +4206,6 @@ void CBasePlayer :: ForceClientDllUpdate( void )
 ImpulseCommands
 ============
 */
-extern float g_flWeaponCheat;
-
 void CBasePlayer::ImpulseCommands( )
 {
 	TraceResult	tr;// UNDONE: kill me! This is temporary for PreAlpha CDs
@@ -4286,7 +4287,7 @@ void CBasePlayer::ImpulseCommands( )
 void CBasePlayer::CheatImpulseCommands( int iImpulse )
 {
 #if !defined( HLDEMO_BUILD )
-	if ( g_flWeaponCheat == 0.0 )
+	if ( !g_psv_cheats || !g_psv_cheats->value )
 	{
 		return;
 	}
@@ -5173,8 +5174,8 @@ Vector CBasePlayer :: GetAutoaimVector( float flDelta )
 
 	// m_vecAutoAim = m_vecAutoAim * 0.99;
 
-	// Don't send across network if sv_aim is 0
-	if ( g_psv_aim->value != 0 )
+	// Don't send across network if sv_aim is 0 or autoaim is disabled
+	if ( g_psv_aim->value != 0 && g_psv_allow_autoaim && g_psv_allow_autoaim->value != 0 )
 	{
 		if ( m_vecAutoAim.x != m_lastx ||
 			 m_vecAutoAim.y != m_lasty )
@@ -5202,7 +5203,7 @@ Vector CBasePlayer :: AutoaimDeflection( Vector &vecSrc, float flDist, float flD
 	edict_t		*bestent;
 	TraceResult tr;
 
-	if ( g_psv_aim->value == 0 )
+	if ( g_psv_aim->value == 0 || ( g_psv_allow_autoaim && g_psv_allow_autoaim->value == 0 ) )
 	{
 		m_fOnTarget = FALSE;
 		return g_vecZero;

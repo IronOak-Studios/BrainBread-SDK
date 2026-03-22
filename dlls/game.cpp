@@ -79,6 +79,7 @@ cvar_t 	*g_psv_gravity = NULL;
 cvar_t	*g_psv_aim = NULL;
 cvar_t	*g_psv_allow_autoaim = NULL;
 cvar_t	*g_footsteps = NULL;
+cvar_t	*g_psv_cheats = NULL;
 
 //CVARS FOR SKILL LEVEL SETTINGS
 // Agrunt
@@ -513,6 +514,7 @@ void GameDLLInit( void )
 	g_psv_aim = CVAR_GET_POINTER( "sv_aim" );
 	g_psv_allow_autoaim = CVAR_GET_POINTER( "sv_allow_autoaim" );
 	g_footsteps = CVAR_GET_POINTER( "mp_footsteps" );
+	g_psv_cheats = CVAR_GET_POINTER( "sv_cheats" );
 
 	CVAR_REGISTER (&displaysoundlist);
 

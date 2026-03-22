@@ -569,7 +569,6 @@ ClientCommand
 called each time a player uses a "cmd" command
 ============
 */
-extern float g_flWeaponCheat;
 
 // Use CMD_ARGV,  CMD_ARGV, and CMD_ARGC to get pointers the character string command.
 void ClientCommand( edict_t *pEntity )
@@ -651,7 +650,7 @@ void ClientCommand( edict_t *pEntity )
     }*/
 	else if ( FStrEq(pcmd, "give" ) )
 	{
-		if ( g_flWeaponCheat != 0.0)
+		if ( g_psv_cheats && g_psv_cheats->value != 0.0 )
 		{
 			int iszItem = ALLOC_STRING( CMD_ARGV(1) );	// Make a copy of the classname
 			GetClassPtr((CBasePlayer *)pev)->GiveNamedItem( STRING(iszItem) );
@@ -689,7 +688,7 @@ void ClientCommand( edict_t *pEntity )
 	}
 	else if ( FStrEq(pcmd, "fov" ) )
 	{
-		if ( g_flWeaponCheat && CMD_ARGC() > 1)
+		if ( g_psv_cheats && g_psv_cheats->value && CMD_ARGC() > 1)
 		{
 			GetClassPtr((CBasePlayer *)pev)->m_iFOV = atoi( CMD_ARGV(1) );
 		}
@@ -1336,15 +1335,16 @@ int AddToFullPack( struct entity_state_s *state, int e, edict_t *ent, edict_t *h
 	state->skin       = ent->v.skin;
 	state->effects    = ent->v.effects;
 
-	// This non-player entity is being moved by the game .dll and not the physics simulation system
-	//  make sure that we interpolate it's position on the client if it moves
-	if ( !player &&
-		 ent->v.animtime &&
-		 ent->v.velocity[ 0 ] == 0 && 
-		 ent->v.velocity[ 1 ] == 0 && 
-		 ent->v.velocity[ 2 ] == 0 )
+	// Only interpolate entities with FL_FLY flag (flying monsters).
+	// The old code set EFLAG_SLERP on any non-player entity with animtime and zero velocity,
+	// which caused stuttering on doors, plats, and other brush entities.
+	if ( ( ent->v.flags & FL_FLY ) != 0 )
 	{
 		state->eflags |= EFLAG_SLERP;
+	}
+	else
+	{
+		state->eflags &= ~EFLAG_SLERP;
 	}
 
 	state->scale	  = ent->v.scale;
