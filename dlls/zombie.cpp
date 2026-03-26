@@ -827,12 +827,38 @@ void CZombie :: Spawn()
 
 void CZombie::SpawningThink( )
 {
-	if( !m_fSequenceFinished )
+	if( !m_fSequenceFinished && m_flFrameRate > 0 )
 	{
 		StudioFrameAdvance();
 		pev->nextthink = gpGlobals->time + 0.1;
 		return;
 	}
+
+	// Clear area before materializing
+	Vector mins = pev->origin + pev->mins;
+	Vector maxs = pev->origin + pev->maxs;
+	CBaseEntity *pList[32];
+	int count = UTIL_EntitiesInBox( pList, 32, mins, maxs, FL_CLIENT | FL_MONSTER );
+	if( count )
+	{
+		bool damaged = false;
+		for( int i = 0; i < count; i++ )
+		{
+			CBaseEntity *pEnt = pList[i];
+			if( !pEnt || !pEnt->IsAlive() || pEnt == this )
+				continue;
+
+			// ~10 damage per second (called every 0.1s)
+			pEnt->TakeDamage(VARS(INDEXENT(0)), VARS(INDEXENT(0)), 1, DMG_GENERIC );
+			damaged = true;
+		}
+		if (damaged)
+		{
+			pev->nextthink = gpGlobals->time + 0.1;
+			return;
+		}
+	}
+
 	pev->movetype = MOVETYPE_STEP;
  	MonsterInit();
 }
