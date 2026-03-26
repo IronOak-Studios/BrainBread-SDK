@@ -168,15 +168,17 @@ int CHudCounter::Draw( float flTime )
 	y = HudScale( 5 );
 
 	rect_s rect;
-	rect.bottom = 256;
+	rect.bottom = 248;
 	rect.top = 220;
-	rect.right = 221;
-	rect.left = 0;
+	rect.right = 182;
+	rect.left = 28;
 	int rs = 255, gs = 255, bs = 255, as = 255;
 	ScaleColors(rs, gs, bs, as );
-	ScaledSPR_DrawHoles( g_sprHUD1, 0, (int)( (float)ScreenWidth / 2.0 ) - HudScale( (int)( (float)( rect.right - rect.left ) / 2.0 ) ), 0, &rect, rs, gs, bs );
+	int bgWidth = HudScale( rect.right - rect.left );
+	ScaledSPR_DrawHoles( g_sprHUD1, 0, ScreenWidth / 2 - bgWidth / 2, 0, &rect, rs, gs, bs );
 
-	x = (int)( (float)ScreenWidth / 2.0 ) - ( 4 * HealthWidth ) - HudScale( 4 );
+	int visibleWidth = 2 * HealthWidth + HudScale( 12 );
+	x = ScreenWidth / 2 - visibleWidth / 2 - 2 * HealthWidth;
 
 	if(m_flRoundTime <= 0)
 	{
