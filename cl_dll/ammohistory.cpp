@@ -127,13 +127,17 @@ int HistoryResource :: DrawAmmoHistory( float flTime )
 				int r, g, b;
 				UnpackRGB(r,g,b, RGB_YELLOWISH);
 				float scale = (rgAmmoHistory[i].DisplayTime - flTime) * 80;
-				ScaleColors(r, g, b, min((int)scale, 255) );
+				int a = min((int)scale, 255);
+				ScaleColors(r, g, b, a);
 
 				// Draw the pic
 				int ypos = ScreenHeight - (AMMO_PICKUP_PICK_HEIGHT + (AMMO_PICKUP_GAP * i));
 				int xpos = ScreenWidth - HudScale(rcPic.right - rcPic.left) - HudScale( 4 );
 				if ( spr && *spr )    // weapon isn't loaded yet so just don't draw the pic
 				{ // the dll has to make sure it has sent info the weapons you need
+					int w = HudScale(rcPic.right - rcPic.left);
+					int h = HudScale(rcPic.bottom - rcPic.top);
+					gEngfuncs.pfnFillRGBABlend( xpos, ypos, w, h, 0, 0, 0, a / 2 );
 					ScaledSPR_DrawAdditive( *spr, 0, xpos, ypos, &rcPic, r, g, b );
 				}
 
@@ -148,16 +152,20 @@ int HistoryResource :: DrawAmmoHistory( float flTime )
 					return 1;  // we don't know about the weapon yet, so don't draw anything
 
 				int r, g, b;
-				UnpackRGB(r,g,b, RGB_YELLOWISH);
+				r = g = b = 255;
 
 				if ( !gWR.HasAmmo( weap ) )
 					UnpackRGB(r,g,b, RGB_REDISH);	// if the weapon doesn't have ammo, display it as red
 
 				float scale = (rgAmmoHistory[i].DisplayTime - flTime) * 80;
-				ScaleColors(r, g, b, min((int)scale, 255) );
+				int a = min((int)scale, 255);
+				ScaleColors(r, g, b, a);
 
 				int ypos = ScreenHeight - (AMMO_PICKUP_PICK_HEIGHT + (AMMO_PICKUP_GAP * i));
 				int xpos = ScreenWidth - HudScale(weap->rcInactive.right - weap->rcInactive.left);
+				int w = HudScale(weap->rcInactive.right - weap->rcInactive.left);
+				int h = HudScale(weap->rcInactive.bottom - weap->rcInactive.top);
+				gEngfuncs.pfnFillRGBABlend( xpos, ypos, w, h, 0, 0, 0, a / 2 );
 				ScaledSPR_DrawAdditive( weap->hInactive, 0, xpos, ypos, &weap->rcInactive, r, g, b );
 			}
 			else if ( rgAmmoHistory[i].type == HISTSLOT_ITEM )
@@ -171,11 +179,15 @@ int HistoryResource :: DrawAmmoHistory( float flTime )
 
 				UnpackRGB(r,g,b, RGB_YELLOWISH);
 				float scale = (rgAmmoHistory[i].DisplayTime - flTime) * 80;
-				ScaleColors(r, g, b, min((int)scale, 255) );
+				int a = min((int)scale, 255);
+				ScaleColors(r, g, b, a);
 
 				int ypos = ScreenHeight - (AMMO_PICKUP_PICK_HEIGHT + (AMMO_PICKUP_GAP * i));
 				int xpos = ScreenWidth - HudScale(rect.right - rect.left) - HudScale( 10 );
 
+				int w = HudScale(rect.right - rect.left);
+				int h = HudScale(rect.bottom - rect.top);
+				gEngfuncs.pfnFillRGBABlend( xpos, ypos, w, h, 0, 0, 0, a / 2 );
 				ScaledSPR_DrawAdditive( gHUD.GetSprite( rgAmmoHistory[i].iId ), 0, xpos, ypos, &rect, r, g, b );
 			}
 		}

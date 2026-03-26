@@ -1181,7 +1181,13 @@ int CHudAmmo::DrawWList(float flTime)
 		else
 			iWidth = giBucketWidth;
 
-		ScaledSPR_DrawAdditive(gHUD.GetSprite(m_HUD_bucket0 + i), 0, x, y, &gHUD.GetSpriteRect(m_HUD_bucket0 + i), r, g, b);
+		{
+			wrect_t rc = gHUD.GetSpriteRect(m_HUD_bucket0 + i);
+			int bw = HudScale(rc.right - rc.left);
+			int bh = HudScale(rc.bottom - rc.top);
+			gEngfuncs.pfnFillRGBABlend( x, y, bw, bh, 0, 0, 0, a );
+			ScaledSPR_DrawAdditive(gHUD.GetSprite(m_HUD_bucket0 + i), 0, x, y, &rc, r, g, b);
+		}
 		
 		x += iWidth + HudScale( 5 );
 	}
@@ -1221,6 +1227,9 @@ int CHudAmmo::DrawWList(float flTime)
 
 				if ( gpActiveSel == p )
 				{
+					int sw = HudScale(p->rcActive.right - p->rcActive.left);
+					int sh = HudScale(p->rcActive.bottom - p->rcActive.top);
+					gEngfuncs.pfnFillRGBABlend( x, y, sw, sh, 0, 0, 0, 220 );
 					ScaledSPR_DrawAdditive(p->hActive, 0, x, y, &p->rcActive, r, g, b);
 
 					ScaledSPR_DrawAdditive(gHUD.GetSprite(m_HUD_selection), 0, x, y, &gHUD.GetSpriteRect(m_HUD_selection), r, g, b);
@@ -1229,14 +1238,22 @@ int CHudAmmo::DrawWList(float flTime)
 				{
 					// Draw Weapon if Red if no ammo
 
+					int wa;
 					if ( gWR.HasAmmo(p) )
-						ScaleColors(r, g, b, 192);
+					{
+						wa = 192;
+						ScaleColors(r, g, b, wa);
+					}
 					else
 					{
 						UnpackRGB(r,g,b, RGB_REDISH);
-						ScaleColors(r, g, b, 128);
+						wa = 128;
+						ScaleColors(r, g, b, wa);
 					}
 
+					int sw = HudScale(p->rcInactive.right - p->rcInactive.left);
+					int sh = HudScale(p->rcInactive.bottom - p->rcInactive.top);
+					gEngfuncs.pfnFillRGBABlend( x, y, sw, sh, 0, 0, 0, wa / 2 );
 					ScaledSPR_DrawAdditive( p->hInactive, 0, x, y, &p->rcInactive, r, g, b );
 				}
 
@@ -1268,12 +1285,12 @@ int CHudAmmo::DrawWList(float flTime)
 				if ( gWR.HasAmmo(p) )
 				{
 					UnpackRGB(r,g,b, RGB_YELLOWISH);
-					a = 128;
+					a = 220;
 				}
 				else
 				{
 					UnpackRGB(r,g,b, RGB_REDISH);
-					a = 96;
+					a = 110;
 				}
 
 				FillRGBA( x, y, giBucketWidth, giBucketHeight, r, g, b, a );

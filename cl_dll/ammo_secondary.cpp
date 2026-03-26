@@ -75,10 +75,14 @@ int CHudAmmoSecondary :: Draw(float flTime)
 	if ( m_HUD_ammoicon )
 	{
 		// Draw the ammo icon
-		x -= HudScale( gHUD.GetSpriteRect(m_HUD_ammoicon).right - gHUD.GetSpriteRect(m_HUD_ammoicon).left );
-		y -= HudScale( gHUD.GetSpriteRect(m_HUD_ammoicon).top - gHUD.GetSpriteRect(m_HUD_ammoicon).bottom );
+		wrect_t rc = gHUD.GetSpriteRect(m_HUD_ammoicon);
+		x -= HudScale( rc.right - rc.left );
+		y -= HudScale( rc.top - rc.bottom );
 
-		ScaledSPR_DrawAdditive( gHUD.GetSprite(m_HUD_ammoicon), 0, x, y, &gHUD.GetSpriteRect(m_HUD_ammoicon), r, g, b );
+		int iw = HudScale( rc.right - rc.left );
+		int ih = HudScale( rc.bottom - rc.top );
+		gEngfuncs.pfnFillRGBABlend( x, y, iw, ih, 0, 0, 0, a / 2 );
+		ScaledSPR_DrawAdditive( gHUD.GetSprite(m_HUD_ammoicon), 0, x, y, &rc, r, g, b );
 	}
 	else
 	{  // move the cursor by the '0' char instead, since we don't have an icon to work with
