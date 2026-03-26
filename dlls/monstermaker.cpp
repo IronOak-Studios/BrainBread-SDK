@@ -166,7 +166,8 @@ void CMonsterMaker :: Precache( void )
 {
 	CBaseMonster::Precache();
 
-	UTIL_PrecacheOther( STRING( m_iszMonsterClassname ) );
+	if (m_iszMonsterClassname)
+		UTIL_PrecacheOther( STRING( m_iszMonsterClassname ) );
 }
 
 //=========================================================
