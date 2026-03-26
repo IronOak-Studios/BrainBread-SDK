@@ -1,5 +1,6 @@
 #include "hud.h"
 #include "cl_util.h"
+#include "hud_scale.h"
 #include "parsemsg.h"
 #include <string.h>
 #include "pe_fader.h"
@@ -137,8 +138,8 @@ s_helpitem *cPEHelper::ForceShowHelp( char *cfgfile )
 	ni->queued = false;
 	ni->pos[0] = 0;
 	ni->pos[1] = 0;
-	ni->border[0] = BORDER_DIST;
-	ni->border[1] = BORDER_DIST;
+	ni->border[0] = HudScale( BORDER_DIST );
+	ni->border[1] = HudScale( BORDER_DIST );
 	ni->spritename[0] = '\0';
 	memset( ni->text, '\0', MAX_HELPTEXT_LEN );
 	strcpy( ni->posfadername, "position" );
@@ -155,11 +156,11 @@ s_helpitem *cPEHelper::ForceShowHelp( char *cfgfile )
 			if( !strcmp( token, "false" ) )
 				ni->blackbg = false;
 		}
-		else if( !strcmp( token, "borderx" ) )
+	else if( !strcmp( token, "borderx" ) )
 		{
-			// Border distance x
+			// border x
 			pfile = gEngfuncs.COM_ParseFile( pfile, token );
-			ni->border[0] = atoi( token );
+			ni->border[0] = HudScale( atoi( token ) );
 		}
 		else if( !strcmp( token, "font" ) )
 		{
@@ -167,11 +168,11 @@ s_helpitem *cPEHelper::ForceShowHelp( char *cfgfile )
 			pfile = gEngfuncs.COM_ParseFile( pfile, token );
 			strncpy( font, token, MAX_NAME_LEN );
 		}
-		else if( !strcmp( token, "bordery" ) )
+	else if( !strcmp( token, "bordery" ) )
 		{
-			// Border distance x
+			// border y
 			pfile = gEngfuncs.COM_ParseFile( pfile, token );
-			ni->border[1] = atoi( token );
+			ni->border[1] = HudScale( atoi( token ) );
 		}
 		else if( !strcmp( token, "start" ) )
 		{
@@ -208,7 +209,7 @@ s_helpitem *cPEHelper::ForceShowHelp( char *cfgfile )
 			else if( token[0] == 'p' )
 				ni->pos[0] = (int)( atof( token + 1 ) / 100.0f * ScreenWidth );
 			else
-				ni->pos[0] = atoi( token );
+				ni->pos[0] = HudScale( atoi( token ) );
 		}
 		else if( !strcmp( token, "ypos" ) )
 		{
@@ -223,7 +224,7 @@ s_helpitem *cPEHelper::ForceShowHelp( char *cfgfile )
 			else if( token[0] == 'p' )
 				ni->pos[1] = (int)( atof( token + 1 ) / 100.0f * ScreenHeight );
 			else
-				ni->pos[1] = atoi( token );
+				ni->pos[1] = HudScale( atoi( token ) );
 		}
 		else if( !strcmp( token, "len" ) )
 		{
@@ -296,8 +297,8 @@ s_helpitem *cPEHelper::ForceShowHelp( char *cfgfile )
 
 	if( ni->sprite >= 0 ) // Calc dimension
 	{
-		ni->max[0] = SPR_Width( ni->sprite, 0 ) + 20;
-		ni->max[1] = SPR_Height( ni->sprite, 0 );
+		ni->max[0] = HudScale( SPR_Width( ni->sprite, 0 ) ) + HudScale( 20 );
+		ni->max[1] = HudScale( SPR_Height( ni->sprite, 0 ) );
 	}
 	else
 	{
@@ -455,9 +456,8 @@ void cPEHelper::Draw( float time )
 			rect.right = SPR_Width( cur->sprite, 0 );
 			r = br; g = bg; b = bb;
 			ScaleColors( r, g, b, ba );
-			SPR_Set( cur->sprite, r, g, b );
-			SPR_Draw( 0, x, y, &rect );
-			x += rect.right + 20;
+			ScaledSPR_DrawHoles( cur->sprite, 0, x, y, &rect, r, g, b );
+			x += HudScale( rect.right ) + HudScale( 20 );
 		}
 		if( strlen( cur->text ) )
 		{
@@ -466,24 +466,25 @@ void cPEHelper::Draw( float time )
 			g_font->DrawStringML( x, y, cur->text, r, g, b );
 		}
 
+		int bw = HudScale( 1 );
 		UTIL_FillRect(	ox,
 						oy,
 						cur->max[0],
-						1,
+						bw,
 						br, bg, bb, ba );
 		UTIL_FillRect(	ox + cur->max[0],
 						oy,
-						1,
-						cur->max[1] + 1,
+						bw,
+						cur->max[1] + bw,
 						br, bg, bb, ba );
 		UTIL_FillRect(	ox,
 						oy + cur->max[1],
 						cur->max[0],
-						1,
+						bw,
 						br, bg, bb, ba );
 		UTIL_FillRect(	ox,
 						oy,
-						1,
+						bw,
 						cur->max[1],
 						br, bg, bb, ba );
 

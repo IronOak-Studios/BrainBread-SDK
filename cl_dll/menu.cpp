@@ -19,6 +19,7 @@
 //
 #include "hud.h"
 #include "cl_util.h"
+#include "hud_scale.h"
 #include "parsemsg.h"
 
 #include <string.h>
@@ -108,8 +109,8 @@ int CHudMenu :: Draw( float flTime )
 	//int y = (ScreenHeight/2) - ((nlc/2)*12) - 40; // make sure it is above the say text
 	//int x = 20;
 
-	int y = 64; // make sure it is above the say text
-	int x = 24;
+	int y = HudScale( 64 ); // make sure it is above the say text
+	int x = HudScale( 24 );
 
 	// FIRO
 	int r = 0, g = 0, b = 0;
@@ -167,9 +168,9 @@ int CHudMenu :: Draw( float flTime )
 			b = 128;
 		}
 		g_font->DrawString( x, y, g_szMenuString+i+2, r, g, b );
-		y += 12;
+		y += HudScale( 12 );
 		
-		x = 20;
+		x = HudScale( 20 );
 		// FIRO
 
 		while ( i < MAX_MENU_STRING && g_szMenuString[i] != '\0' && g_szMenuString[i] != '\n' )

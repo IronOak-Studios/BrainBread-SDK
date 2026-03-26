@@ -17,6 +17,7 @@
 //
 #include "hud.h"
 #include "cl_util.h"
+#include "hud_scale.h"
 #include "const.h"
 #include "entity_state.h"
 #include "cl_entity.h"
@@ -56,7 +57,7 @@ int CHudStatusIcons::Draw( float flTime )
 	if (gEngfuncs.IsSpectateOnly())
 		return 1;
 	// find starting position to draw from, along right-hand side of screen
-	int x = 5;
+	int x = HudScale( 5 );
 	int y = ScreenHeight / 2;
 	
 	// loop through icon list, and draw any valid icons drawing up from the middle of screen
@@ -64,10 +65,10 @@ int CHudStatusIcons::Draw( float flTime )
 	{
 		if ( m_IconList[i].spr )
 		{
-			y -= ( m_IconList[i].rc.bottom - m_IconList[i].rc.top ) + 5;
+			y -= HudScale( m_IconList[i].rc.bottom - m_IconList[i].rc.top ) + HudScale( 5 );
 			
-			SPR_Set( m_IconList[i].spr, m_IconList[i].r, m_IconList[i].g, m_IconList[i].b );
-			SPR_DrawAdditive( 0, x, y, &m_IconList[i].rc );
+			ScaledSPR_DrawAdditive( m_IconList[i].spr, 0, x, y, &m_IconList[i].rc,
+				m_IconList[i].r, m_IconList[i].g, m_IconList[i].b );
 		}
 	}
 	
