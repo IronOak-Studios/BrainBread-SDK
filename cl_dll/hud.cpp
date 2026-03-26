@@ -36,6 +36,7 @@
 #include "pe_font.h"
 #include "pe_fader.h"
 #include "pe_helper.h"
+#include "hud_scale.h"
 
 
 
@@ -368,6 +369,7 @@ void CHud :: Init( void )
 
 	CVAR_CREATE( "hud_classautokill", "1", FCVAR_ARCHIVE | FCVAR_USERINFO );		// controls whether or not to suicide immediately on TF class switch
 	CVAR_CREATE( "hud_takesshots", "0", FCVAR_ARCHIVE );		// controls whether or not to automatically take screenshots at the end of a round
+	HudScale_Init();
 	CVAR_CREATE( "cl_help", "1", FCVAR_ARCHIVE );
 	CVAR_CREATE( "cl_help_times", "1", FCVAR_ARCHIVE );
 	m_iLogo = 0;
@@ -482,6 +484,8 @@ void CHud :: VidInit( void )
 
 	m_scrinfo.iSize = sizeof(m_scrinfo);
 	GetScreenInfo(&m_scrinfo);
+
+	HudScale_Update();
 
 	// ----------
 	// Load Sprites

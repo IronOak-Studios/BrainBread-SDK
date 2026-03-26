@@ -964,6 +964,8 @@ public:
 	int m_HUD_number_0;
 	int m_HUD_number_0large;
 
+	void DrawScaledDigit( int digit, int x, int y, int r, int g, int b );
+	void DrawScaledDigitLarge( int digit, int x, int y, int r, int g, int b );
 
 	void AddHudElem(CHudBase *p);
 

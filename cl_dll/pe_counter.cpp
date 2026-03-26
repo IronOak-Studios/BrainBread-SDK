@@ -1,5 +1,6 @@
 #include "hud.h"
 #include "cl_util.h"
+#include "hud_scale.h"
 #include "parsemsg.h"
 #include <string.h>
 #include <stdio.h>
@@ -9,7 +10,7 @@ extern TeamFortressViewport* gViewPort;
 #include "pe_fader.h"
 #include "pe_font.h"
 
-#define SMALL_CNT_HEIGHT 35
+#define SMALL_CNT_HEIGHT HudScale( 35 )
 DECLARE_MESSAGE(m_Counter, Counter) 
 DECLARE_MESSAGE(m_Counter, CntDown) 
 DECLARE_MESSAGE(m_Counter, SmallCnt) 
@@ -162,9 +163,9 @@ int CHudCounter::Draw( float flTime )
 	g_font->SetFont( FONT_COUNTER );
 
 
-	HealthWidth = gHUD.GetSpriteRect(gHUD.m_HUD_number_0large).right - gHUD.GetSpriteRect(gHUD.m_HUD_number_0large).left;
+	HealthWidth = HudScale( gHUD.GetSpriteRect(gHUD.m_HUD_number_0large).right - gHUD.GetSpriteRect(gHUD.m_HUD_number_0large).left );
 
-	y = 5;
+	y = HudScale( 5 );
 
 	rect_s rect;
 	rect.bottom = 256;
@@ -173,27 +174,26 @@ int CHudCounter::Draw( float flTime )
 	rect.left = 0;
 	int rs = 255, gs = 255, bs = 255, as = 255;
 	ScaleColors(rs, gs, bs, as );
-	SPR_Set( g_sprHUD1, rs, gs, bs );
-	SPR_DrawHoles( 0, (int)( (float)ScreenWidth / 2.0 ) - (int)( (float)( rect.right - rect.left ) / 2.0 ), 0, &rect );
+	ScaledSPR_DrawHoles( g_sprHUD1, 0, (int)( (float)ScreenWidth / 2.0 ) - HudScale( (int)( (float)( rect.right - rect.left ) / 2.0 ) ), 0, &rect, rs, gs, bs );
 
-	x = (int)( (float)ScreenWidth / 2.0 ) - ( 4 * HealthWidth ) - 4;
+	x = (int)( (float)ScreenWidth / 2.0 ) - ( 4 * HealthWidth ) - HudScale( 4 );
 
 	if(m_flRoundTime <= 0)
 	{
 		x = gHUD.DrawHudNumberLarge(x, y, DHN_3DIGITS | DHN_DRAWZERO, 0, r, g, b);
-		g_font->DrawString(x+4, y+5, ":", r, g, b);
-		gHUD.DrawHudNumberLarge(x+12, y, DHN_2DIGITS | DHN_PREZERO, 0, r, g, b);
+		g_font->DrawString(x + HudScale( 4 ), y + HudScale( 5 ), ":", r, g, b);
+		gHUD.DrawHudNumberLarge(x + HudScale( 12 ), y, DHN_2DIGITS | DHN_PREZERO, 0, r, g, b);
 	}
 	else
 	{
 		x = gHUD.DrawHudNumberLarge(x, y, DHN_3DIGITS | DHN_DRAWZERO, (int)m_flRoundTime/60, r, g, b);
-		g_font->DrawString(x+4, y+5, ":", r, g, b);
-		gHUD.DrawHudNumberLarge(x+12, y, DHN_2DIGITS | DHN_PREZERO, (int)m_flRoundTime%60, r, g, b);
+		g_font->DrawString(x + HudScale( 4 ), y + HudScale( 5 ), ":", r, g, b);
+		gHUD.DrawHudNumberLarge(x + HudScale( 12 ), y, DHN_2DIGITS | DHN_PREZERO, (int)m_flRoundTime%60, r, g, b);
 	}
 
 	x += HealthWidth/2;
 
-	int iHeight = gHUD.m_iFontHeight;
+	int iHeight = HudScale( gHUD.m_iFontHeight );
 	int iWidth = HealthWidth/10;
 	float pcent = 0;
 
@@ -207,11 +207,14 @@ int CHudCounter::Draw( float flTime )
 		if( flTime > ( m_sCounters[i].fStart + m_sCounters[i].fTotal ) )
 			m_sCounters[i].iActive = 0;
 
-		g_font->DrawString( 10, 145 + m_iNumCnts * SMALL_CNT_HEIGHT, m_sCounters[i].sName, 143, 143, 54 );
-		UTIL_FillRect( 10, 145 + m_iNumCnts * SMALL_CNT_HEIGHT + 18, XRES(80), 1, 143, 143, 54, 255 );
-		UTIL_FillRect( 10, 145 + m_iNumCnts * SMALL_CNT_HEIGHT + 30, XRES(80), 1, 143, 143, 54, 255 );
-		UTIL_FillRect( 10, 145 + m_iNumCnts * SMALL_CNT_HEIGHT + 18 + 1, 1, 11, 143, 143, 54, 255 );
-		UTIL_FillRect( 10 + XRES(80), 145 + m_iNumCnts * SMALL_CNT_HEIGHT + 18, 1, 13, 143, 143, 54, 255 );
+		int cy = HudScale( 145 ) + m_iNumCnts * SMALL_CNT_HEIGHT;
+		int cx = HudScale( 10 );
+		int cw = XRES(80);
+		g_font->DrawString( cx, cy, m_sCounters[i].sName, 143, 143, 54 );
+		UTIL_FillRect( cx, cy + HudScale( 18 ), cw, HudScale( 1 ), 143, 143, 54, 255 );
+		UTIL_FillRect( cx, cy + HudScale( 30 ), cw, HudScale( 1 ), 143, 143, 54, 255 );
+		UTIL_FillRect( cx, cy + HudScale( 19 ), HudScale( 1 ), HudScale( 11 ), 143, 143, 54, 255 );
+		UTIL_FillRect( cx + cw, cy + HudScale( 18 ), HudScale( 1 ), HudScale( 13 ), 143, 143, 54, 255 );
 		
 		pcent = 100.0f * ( flTime - m_sCounters[i].fStart ) / m_sCounters[i].fTotal;
 		if( pcent > 100 )
@@ -220,7 +223,7 @@ int CHudCounter::Draw( float flTime )
 			smallProgressFaderBad->GetColor( pcent, r, g, b );
 		else
 			smallProgressFaderGood->GetColor( pcent, r, g, b );
-		UTIL_FillRect( 12, 145 + m_iNumCnts * SMALL_CNT_HEIGHT + 20, (XRES(80)-4)/m_sCounters[i].fTotal*(flTime-m_sCounters[i].fStart), 9, r, g, b, 255 );
+		UTIL_FillRect( cx + HudScale( 2 ), cy + HudScale( 20 ), (cw - HudScale( 4 ))/m_sCounters[i].fTotal*(flTime-m_sCounters[i].fStart), HudScale( 9 ), r, g, b, 255 );
 
 		m_iNumCnts++;		
 	}
@@ -231,14 +234,17 @@ int CHudCounter::Draw( float flTime )
 			return 1;
 
 		// Rand
-		UTIL_FillRect( PGS-4, ScreenHeight * 0.5 - 12-4, PGW+4+4, 1, 255, 255, 255, 255 );
-		UTIL_FillRect( PGS-4, ScreenHeight * 0.5 - 12+24+4, PGW+4+4, 1, 255, 255, 255, 255 );
-		UTIL_FillRect( PGS-4, ScreenHeight * 0.5 - 12-4, 1, 24+4+4, 255, 255, 255, 255 );
-		UTIL_FillRect( PGS+PGW+3, ScreenHeight * 0.5 - 12-4, 1, 24+4+4, 255, 255, 255, 255 );
+		int ph = HudScale( 24 );
+		int pp = HudScale( 4 );
+		int py = (int)(ScreenHeight * 0.5f) - ph / 2;
+		UTIL_FillRect( PGS - pp, py - pp, PGW + pp * 2, HudScale( 1 ), 255, 255, 255, 255 );
+		UTIL_FillRect( PGS - pp, py + ph + pp, PGW + pp * 2, HudScale( 1 ), 255, 255, 255, 255 );
+		UTIL_FillRect( PGS - pp, py - pp, HudScale( 1 ), ph + pp * 2, 255, 255, 255, 255 );
+		UTIL_FillRect( PGS + PGW + pp - HudScale( 1 ), py - pp, HudScale( 1 ), ph + pp * 2, 255, 255, 255, 255 );
 		
 		// Counter
 		progressFader->GetColor( flTime, r, g, b );
-		UTIL_FillRect( PGS, ScreenHeight * 0.5 - 12, m_iProgress, 24, r, g, b, 255 );
+		UTIL_FillRect( PGS, py, m_iProgress, ph, r, g, b, 255 );
 
 		return 1;
 	}

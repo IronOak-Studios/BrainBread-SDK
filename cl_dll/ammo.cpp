@@ -20,6 +20,7 @@
 
 #include "hud.h"
 #include "cl_util.h"
+#include "hud_scale.h"
 #include "parsemsg.h"
 #include "pm_shared.h"
 
@@ -916,8 +917,7 @@ int CHudAmmo::Draw(float flTime)
 	rect.left = 0;
 	int rs = 255, gs = 255, bs = 255, as = 255;
 	ScaleColors(rs, gs, bs, as );
-	SPR_Set( g_sprHUD1, rs, gs, bs );
-	SPR_DrawHoles( 0, ScreenWidth - ( rect.right - rect.left ), ScreenHeight - ( rect.bottom - rect.top ), &rect );
+	ScaledSPR_DrawHoles( g_sprHUD1, 0, ScreenWidth - HudScale( rect.right - rect.left ), ScreenHeight - HudScale( rect.bottom - rect.top ), &rect, rs, gs, bs );
 
 	if (!(m_iFlags & HUD_ACTIVE))
 		return 0;
@@ -934,7 +934,7 @@ int CHudAmmo::Draw(float flTime)
 
 	int iFlags = DHN_DRAWZERO; // draw 0 values
 
-	AmmoWidth = gHUD.GetSpriteRect(gHUD.m_HUD_number_0).right - gHUD.GetSpriteRect(gHUD.m_HUD_number_0).left;
+	AmmoWidth = HudScale( gHUD.GetSpriteRect(gHUD.m_HUD_number_0).right - gHUD.GetSpriteRect(gHUD.m_HUD_number_0).left );
 
 	a = (int) max( MIN_ALPHA, m_fFade );
 
@@ -947,7 +947,7 @@ int CHudAmmo::Draw(float flTime)
 	ScaleColors(r, g, b, a );
 
 	// Does this weapon have a clip?
-	y = ScreenHeight - 53;//gHUD.m_iFontHeight - gHUD.m_iFontHeight/2;
+	y = ScreenHeight - HudScale( 53 );
 
 	// Does weapon have any ammo at all?
 	int iIconWidth = 0;
@@ -967,26 +967,14 @@ int CHudAmmo::Draw(float flTime)
 		
 		if (pw->iClip >= 0)
 		{
-			// room for the number and the '|' and the current ammo
-			
-			x = ScreenWidth - 93;//(8 * AmmoWidth) - iIconWidth;
-			x = gHUD.DrawHudNumber(x, y, iFlags | DHN_2DIGITS, pw->iClip, 255, 255, 255);//r,g,b
+			x = ScreenWidth - HudScale( 93 );
+			x = gHUD.DrawHudNumber(x, y, iFlags | DHN_2DIGITS, pw->iClip, 255, 255, 255);
 
-			wrect_t rc;
-			rc.top = 0;
-			rc.left = 0;
-			rc.right = AmmoWidth;
-			rc.bottom = 100;
-
-			int iBarWidth =  AmmoWidth/10;
-
+			int iBarWidth = AmmoWidth/10;
 			x += AmmoWidth/2;
-
-			//UnpackRGB(r,g,b, RGB_YELLOWISH);
 			r = 255; g = 255; b = 255;
 
-			// draw the | bar
-			FillRGBA(x, y, iBarWidth, gHUD.m_iFontHeight, 255, 255, 255, 255);//r,g,b,a
+			FillRGBA(x, y, iBarWidth, HudScale( gHUD.m_iFontHeight ), 255, 255, 255, 255);
 
 			x += iBarWidth + AmmoWidth/2;;
 
@@ -1009,33 +997,21 @@ int CHudAmmo::Draw(float flTime)
 		SPR_DrawAdditive(0, x, y - iOffset, &m_pWeapon->rcAmmo);*/
 	}
 
-	y = ScreenHeight - 25;//2*gHUD.m_iFontHeight - gHUD.m_iFontHeight;
+	y = ScreenHeight - HudScale( 25 );
 	if( m_pWeapon->iAmmo2Type > 0 )
 	{
 		//int iIconWidth = m_pWeapon->rcAmmo2.right - m_pWeapon->rcAmmo2.left;
 		
 		if (pw->iClip2 >= 0)
 		{
-			// room for the number and the '|' and the current ammo
-			
-			x = ScreenWidth - 93;//(8 * AmmoWidth) - iIconWidth;
-			x = gHUD.DrawHudNumber(x, y, iFlags | DHN_2DIGITS, pw->iClip2, 255, 255, 255);//r,g,b
+			x = ScreenWidth - HudScale( 93 );
+			x = gHUD.DrawHudNumber(x, y, iFlags | DHN_2DIGITS, pw->iClip2, 255, 255, 255);
 
-			wrect_t rc;
-			rc.top = 0;
-			rc.left = 0;
-			rc.right = AmmoWidth;
-			rc.bottom = 100;
-
-			int iBarWidth =  AmmoWidth/10;
-
+			int iBarWidth = AmmoWidth/10;
 			x += AmmoWidth/2;
-
-			//UnpackRGB(r,g,b, RGB_YELLOWISH);
 			r = 255; g = 255; b = 255;
 
-			// draw the | bar
-			FillRGBA(x, y, iBarWidth, gHUD.m_iFontHeight, 255, 255, 255, 255);//r,g,b,a
+			FillRGBA(x, y, iBarWidth, HudScale( gHUD.m_iFontHeight ), 255, 255, 255, 255);
 
 			x += iBarWidth + AmmoWidth/2;;
 

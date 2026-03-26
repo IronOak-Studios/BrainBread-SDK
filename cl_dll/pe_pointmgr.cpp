@@ -1,5 +1,6 @@
 #include "hud.h"
 #include "cl_util.h"
+#include "hud_scale.h"
 #include "parsemsg.h"
 #include "pe_helper.h"
 #include "pe_notify.h"
@@ -87,10 +88,10 @@ int cPEPointMgr::Draw( float time )
 
   g_font->SetFont( FONT_WEAPONMENU );
 
-  int xpos = XRES(320) - 104;
-  int ypos = ScreenHeight - 74;
+  int xpos = XRES(320) - HudScale( 104 );
+  int ypos = ScreenHeight - HudScale( 74 );
   rect_s rect;
-  int xreh = ScreenWidth - 167;
+  int xreh = ScreenWidth - HudScale( 167 );
   int yreh = 0;
   int ydone = ( g_iUser1 ? XRES(32) : 0 );
 
@@ -102,8 +103,7 @@ int cPEPointMgr::Draw( float time )
     rect.top = 37;
     rect.bottom = 98;
 
-	  SPR_Set( spr[0], 255, 255, 255 );
-	  SPR_DrawHoles( 0, xreh, yreh, &rect );
+	  ScaledSPR_DrawHoles( spr[0], 0, xreh, yreh, &rect, 255, 255, 255 );
   }
 
   if( done_selection == 1 )
@@ -113,8 +113,7 @@ int cPEPointMgr::Draw( float time )
 	rect.top = 97;
 	rect.bottom = 158;
 
-	  SPR_Set( spr[1], 255, 255, 255 );
-	  SPR_DrawHoles( 0, xreh, ydone, &rect );
+	  ScaledSPR_DrawHoles( spr[1], 0, xreh, ydone, &rect, 255, 255, 255 );
   }
   else if( done_selection == 2 )
   {
@@ -123,8 +122,7 @@ int cPEPointMgr::Draw( float time )
 	rect.top = 177;
 	rect.bottom = 238;
 
-	  SPR_Set( spr[1], 255, 255, 255 );
-	  SPR_DrawHoles( 0, xreh, ydone, &rect );
+	  ScaledSPR_DrawHoles( spr[1], 0, xreh, ydone, &rect, 255, 255, 255 );
   }  
   
   // Stats anzeige
@@ -136,19 +134,16 @@ int cPEPointMgr::Draw( float time )
     rect.top = 182;
   rect.bottom = rect.top + 74;
 
-	SPR_Set( spr[0], 255, 255, 255 );
-	SPR_DrawHoles( 0, xpos, ypos, &rect );
+	ScaledSPR_DrawHoles( spr[0], 0, xpos, ypos, &rect, 255, 255, 255 );
 
   // EXP balken
-  //SPR_EnableScissor( xpos + 14, ypos + ( 74 - 28 ), (int)( points / 100 * 172 ), 28 );
 	rect.left = 38;
 	rect.right = rect.left + (int)( points / 100 * 172 );	
   rect.top = 7;
   rect.bottom = rect.top + 14;
   if( rect.left < rect.right )
   {
-	  SPR_Set( spr[0], 255, 255, 255 );
-	  SPR_DrawHoles( 0, xpos + 14, ypos + 54, &rect );
+	  ScaledSPR_DrawHoles( spr[0], 0, xpos + HudScale( 14 ), ypos + HudScale( 54 ), &rect, 255, 255, 255 );
   }
 
   //SPR_DisableScissor( );
@@ -159,31 +154,31 @@ int cPEPointMgr::Draw( float time )
   
   //sprintf( text, "%d", lvl );  
   //g_font->DrawString( xpos +  58, ypos + 13, text, 140, 140, 140 );
-  gHUD.DrawHudNumber( 61, ScreenHeight - 53, DHN_DRAWZERO | DHN_3DIGITS, lvl, 255, 255, 255);
+  gHUD.DrawHudNumber( HudScale( 61 ), ScreenHeight - HudScale( 53 ), DHN_DRAWZERO | DHN_3DIGITS, lvl, 255, 255, 255);
   sprintf( text, "%d", stats );  
-  g_font->DrawString( xpos + 150, ypos + 27, text, 140, 140, 140 );
+  g_font->DrawString( xpos + HudScale( 150 ), ypos + HudScale( 27 ), text, 140, 140, 140 );
   sprintf( text, "%d", hp );  
-  g_font->DrawString( xpos +  33, ypos + 27, text, 140, 140, 140 );
+  g_font->DrawString( xpos + HudScale( 33 ), ypos + HudScale( 27 ), text, 140, 140, 140 );
   sprintf( text, "%d%%", spd );
-  g_font->DrawString( xpos +  70, ypos + 27, text, 140, 140, 140 );
+  g_font->DrawString( xpos + HudScale( 70 ), ypos + HudScale( 27 ), text, 140, 140, 140 );
   sprintf( text, "%d", dmg );  
-  g_font->DrawString( xpos + 111, ypos + 27, text, 140, 140, 140 );
+  g_font->DrawString( xpos + HudScale( 111 ), ypos + HudScale( 27 ), text, 140, 140, 140 );
 
   if( g_Mouse1r )
   {
-    if( between( g_MouseY, ypos + 20, ypos + 44 ) )
+    if( between( g_MouseY, ypos + HudScale( 20 ), ypos + HudScale( 44 ) ) )
     {
-      if(      between( g_MouseX, xpos +  28, xpos +  63 ) )
+      if(      between( g_MouseX, xpos + HudScale( 28 ), xpos + HudScale( 63 ) ) )
 		  	  ClientCmd( "hpup" );
-      else if( between( g_MouseX, xpos +  67, xpos + 102 ) )
+      else if( between( g_MouseX, xpos + HudScale( 67 ), xpos + HudScale( 102 ) ) )
 		  	  ClientCmd( "spdup" );
-      else if( between( g_MouseX, xpos + 107, xpos + 142 ) )
+      else if( between( g_MouseX, xpos + HudScale( 107 ), xpos + HudScale( 142 ) ) )
 		  	  ClientCmd( "dmgup" );
       g_Mouse1r = FALSE;
     }
-    else if( rehuman && between( g_MouseY, yreh, yreh + 61 ) )
+    else if( rehuman && between( g_MouseY, yreh, yreh + HudScale( 61 ) ) )
     {
-      if( between( g_MouseX, xreh, xreh + 167 ) )
+      if( between( g_MouseX, xreh, xreh + HudScale( 167 ) ) )
       {
         strcpy( gHUD.m_Notify.m_sText1, "BRAAIINNSSS!!! (respawning as human after death)" );
     	  ClientCmd( "rehuman" );
@@ -191,9 +186,9 @@ int cPEPointMgr::Draw( float time )
       }
       g_Mouse1r = FALSE;
     }
-    else if( done_selection && between( g_MouseY, ydone, ydone + 61 ) )
+    else if( done_selection && between( g_MouseY, ydone, ydone + HudScale( 61 ) ) )
     {
-      if( between( g_MouseX, xreh, xreh + 167 ) )
+      if( between( g_MouseX, xreh, xreh + HudScale( 167 ) ) )
       {
 		  ClientCmd( ( done_selection == 1 ? "dzombie" : "dspectate" ) );
         done_selection = 0;

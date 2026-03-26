@@ -1,5 +1,6 @@
 #include "hud.h"
 #include "cl_util.h"
+#include "hud_scale.h"
 #include "parsemsg.h"
 #include <string.h>
 #include <stdio.h>
@@ -309,7 +310,7 @@ int CHudNotify::Draw( float flTime )
 		//SPR_DrawHoles( 0, ScreenWidth - 70, 2, &gHUD.GetSpriteRect( m_sprMate ) );
 		sprintf( text, "TeamBonus x %d", m_iMates );
 		g_font->SetFont( FONT_NOTIFY );
-    g_font->DrawString( ScreenWidth - ( g_font->GetWidth( text ) + 10 ), 20, text, 0, 255.0f, 0, (int)( 80 + 175.0f / 16.0f * m_iMates ) ); 
+    g_font->DrawString( ScreenWidth - ( g_font->GetWidth( text ) + HudScale( 10 ) ), HudScale( 20 ), text, 0, 255.0f, 0, (int)( 80 + 175.0f / 16.0f * m_iMates ) ); 
 
 	}
 	if( g_IsSpecial[gEngfuncs.GetLocalPlayer( )->index] == 1 )
@@ -319,15 +320,14 @@ int CHudNotify::Draw( float flTime )
 		rect.top = 134;
 		rect.right = 65;
 		rect.left = 0;
-		SPR_Set( g_sprHUD2, 255, 255, 255 );
-		SPR_DrawHoles( 0, 10, ( (float)ScreenHeight / 2.0 ) - ( (float)( rect.bottom - rect.top ) / 2.0 ), &rect );
+		ScaledSPR_DrawHoles( g_sprHUD2, 0, HudScale( 10 ), ( (float)ScreenHeight / 2.0 ) - ( HudScaleF( (float)( rect.bottom - rect.top ) ) / 2.0 ), &rect, 255, 255, 255 );
 	}
 
 	g_font->SetFont( FONT_NOTIFY );
 	if( m_flDur2 > flTime )
 	{
 		pulseFader->GetColor( flTime, r, g, b, a );
-		g_font->DrawString( 35, 2, m_sText1, c[0], c[1], c[2], a );
+		g_font->DrawString( HudScale( 35 ), HudScale( 2 ), m_sText1, c[0], c[1], c[2], a );
 	}
 	g_font->SetFont( FONT_NOTIFY_MID );
 
@@ -356,15 +356,15 @@ int CHudNotify::Draw( float flTime )
 			col[1] = 0;
 		}
 		col[2] = 0;
-		int ym = 0, xm = 150;
+		int ym = 0, xm = HudScale( 150 );
 		if( g_iUser1 == 3 )
 		{
-			xm = 15;
+			xm = HudScale( 15 );
 			ym = YRES(60);
 		}
 		
 		sprintf( text, "%s(%s): %d Health, %d Armor", m_sName, ( m_iTeam == 1 ) ? "alive" : "ZOMBIE", m_iHlth, m_iArmo );
-		g_font->DrawString( xm, ScreenHeight - ym - 20, text, col[0], col[1], col[2], 128 );
+		g_font->DrawString( xm, ScreenHeight - ym - HudScale( 20 ), text, col[0], col[1], col[2], 128 );
 	}
 	return TRUE;
 }

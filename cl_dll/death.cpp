@@ -17,6 +17,7 @@
 //
 #include "hud.h"
 #include "cl_util.h"
+#include "hud_scale.h"
 #include "parsemsg.h"
 
 #include <string.h>
@@ -116,22 +117,23 @@ int CHudDeathNotice :: Draw( float flTime )
 		if ( gViewPort && gViewPort->AllowedToPrintText() )
 		{
 			// Draw the death notice
-			y = YRES(DEATHNOTICE_TOP) + 2 + (20 * i);  //!!!
+			y = YRES(DEATHNOTICE_TOP) + HudScale( 2 ) + (HudScale( 20 ) * i);  //!!!
 
 			int id = (rgDeathNoticeList[i].iId == -1) ? m_HUD_d_skull : rgDeathNoticeList[i].iId;
 			int head = rgDeathNoticeList[i].iHead;
-			x = ScreenWidth - ConsoleStringLen(rgDeathNoticeList[i].szVictim) - (gHUD.GetSpriteRect(id).right - gHUD.GetSpriteRect(id).left);
+			int sprW = HudScale( gHUD.GetSpriteRect(id).right - gHUD.GetSpriteRect(id).left );
+			x = ScreenWidth - ConsoleStringLen(rgDeathNoticeList[i].szVictim) - sprW;
 			if( head >= 0 )
-				x -= ( gHUD.GetSpriteRect( head ).right - gHUD.GetSpriteRect( head ).left );
+				x -= HudScale( gHUD.GetSpriteRect( head ).right - gHUD.GetSpriteRect( head ).left );
 
 			if ( !rgDeathNoticeList[i].iSuicide )
 			{
-				x -= (5 + ConsoleStringLen( rgDeathNoticeList[i].szKiller ) );
+				x -= (HudScale( 5 ) + ConsoleStringLen( rgDeathNoticeList[i].szKiller ) );
 
 				// Draw killers name
 				if ( rgDeathNoticeList[i].KillerColor )
 					gEngfuncs.pfnDrawSetTextColor( rgDeathNoticeList[i].KillerColor[0], rgDeathNoticeList[i].KillerColor[1], rgDeathNoticeList[i].KillerColor[2] );
-				x = 5 + DrawConsoleString( x, y, rgDeathNoticeList[i].szKiller );
+				x = HudScale( 5 ) + DrawConsoleString( x, y, rgDeathNoticeList[i].szKiller );
 			}
 
 			r = 255;  g = 80;	b = 0;
@@ -141,17 +143,16 @@ int CHudDeathNotice :: Draw( float flTime )
 			}
 
 			// Draw death weapon
-			SPR_Set( gHUD.GetSprite(id), r, g, b );
-			SPR_DrawAdditive( 0, x, y, &gHUD.GetSpriteRect(id) );
+			ScaledSPR_DrawAdditive( gHUD.GetSprite(id), 0, x, y, &gHUD.GetSpriteRect(id), r, g, b );
 
-			x += (gHUD.GetSpriteRect(id).right - gHUD.GetSpriteRect(id).left);
+			x += sprW;
 			
 			if( head >= 0 )
 			{
-				SPR_Set( gHUD.GetSprite(head), r, g, b );
-				SPR_DrawAdditive( 0, x, y, &gHUD.GetSpriteRect(head) );
+				int headW = HudScale( gHUD.GetSpriteRect(head).right - gHUD.GetSpriteRect(head).left );
+				ScaledSPR_DrawAdditive( gHUD.GetSprite(head), 0, x, y, &gHUD.GetSpriteRect(head), r, g, b );
 
-				x += (gHUD.GetSpriteRect(head).right - gHUD.GetSpriteRect(head).left);
+				x += headW;
 			}
 
 			// Draw victims name (if it was a player that was killed)

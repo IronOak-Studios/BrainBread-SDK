@@ -18,6 +18,7 @@
 #include <math.h>
 #include "hud.h"
 #include "cl_util.h"
+#include "hud_scale.h"
 #include "pe_fader.h"
 #include "pe_helper.h"
 
@@ -88,6 +89,8 @@ void CHud::Think(void)
 // returns 1 if they've changed, 0 otherwise
 int CHud :: Redraw( float flTime, int intermission )
 {
+	HudScale_Update();
+
 	m_fOldTime = m_flTime;	// save time of previous redraw
 	m_flTime = flTime;
 	m_flTimeDelta = (double)m_flTime - m_fOldTime;
@@ -268,134 +271,63 @@ int CHud :: DrawHudStringReverse( int xpos, int ypos, int iMinX, char *szString,
 	return xpos;
 }
 
+void CHud :: DrawScaledDigit( int digit, int x, int y, int r, int g, int b )
+{
+	ScaledSPR_DrawHoles( GetSprite(m_HUD_number_0 + digit), 0, x, y,
+		&GetSpriteRect(m_HUD_number_0 + digit), r, g, b );
+}
+
+void CHud :: DrawScaledDigitLarge( int digit, int x, int y, int r, int g, int b )
+{
+	ScaledSPR_DrawHoles( GetSprite(m_HUD_number_0large + digit), 0, x, y,
+		&GetSpriteRect(m_HUD_number_0large + digit), r, g, b );
+}
+
 int CHud :: DrawHudNumber( int x, int y, int iFlags, int iNumber, int r, int g, int b)
 {
-	int iWidth = GetSpriteRect(m_HUD_number_0).right - GetSpriteRect(m_HUD_number_0).left;
+	int iWidth = HudScale( GetSpriteRect(m_HUD_number_0).right - GetSpriteRect(m_HUD_number_0).left );
 	int k;
 	
-	if (iNumber> 0 || ((iFlags & (DHN_3DIGITS | DHN_2DIGITS)) && (iFlags &DHN_PREZERO)))
+	if (iNumber > 0 || ((iFlags & (DHN_3DIGITS | DHN_2DIGITS)) && (iFlags & DHN_PREZERO)))
 	{
-
-		// SPR_Draw 100000's		
 		if (iNumber >= 100000 || ((iFlags & DHN_6DIGITS) && (iFlags & DHN_PREZERO)))
-		{
-			k = (iNumber%1000000)/100000;
-			SPR_Set(GetSprite(m_HUD_number_0 + k), r, g, b );
-			SPR_DrawHoles( 0, x, y, &GetSpriteRect(m_HUD_number_0 + k));
-			x += iWidth;
-		}
+		{ k = (iNumber%1000000)/100000; DrawScaledDigit(k, x, y, r, g, b); x += iWidth; }
 		else if (iFlags & (DHN_6DIGITS))
-		{
-			//SPR_SPR_DrawHoles( 0, x, y, &rc );
-			x += iWidth;
-		}
+		{ x += iWidth; }
 
-		// SPR_Draw 10000's		
 		if (iNumber >= 10000 || ((iFlags & DHN_5DIGITS) && (iFlags & DHN_PREZERO)))
-		{
-			k = (iNumber%100000)/10000;
-			SPR_Set(GetSprite(m_HUD_number_0 + k), r, g, b );
-			SPR_DrawHoles( 0, x, y, &GetSpriteRect(m_HUD_number_0 + k));
-			x += iWidth;
-		}
+		{ k = (iNumber%100000)/10000; DrawScaledDigit(k, x, y, r, g, b); x += iWidth; }
 		else if (iFlags & (DHN_5DIGITS))
-		{
-			//SPR_DrawHoles( 0, x, y, &rc );
-			x += iWidth;
-		}
+		{ x += iWidth; }
 
-		// SPR_Draw 1000's		
 		if (iNumber >= 1000 || ((iFlags & DHN_4DIGITS) && (iFlags & DHN_PREZERO)))
-		{
-			k = (iNumber%10000)/1000;
-			SPR_Set(GetSprite(m_HUD_number_0 + k), r, g, b );
-			SPR_DrawHoles( 0, x, y, &GetSpriteRect(m_HUD_number_0 + k));
-			x += iWidth;
-		}
+		{ k = (iNumber%10000)/1000; DrawScaledDigit(k, x, y, r, g, b); x += iWidth; }
 		else if (iFlags & (DHN_4DIGITS))
-		{
-			//SPR_DrawHoles( 0, x, y, &rc );
-			x += iWidth;
-		}
-		
+		{ x += iWidth; }
 
-		// SPR_Draw 100's
-		
 		if (iNumber >= 100 || ((iFlags & DHN_3DIGITS) && (iFlags & DHN_PREZERO)))
-		{
-			k = (iNumber%1000)/100;
-			SPR_Set(GetSprite(m_HUD_number_0 + k), r, g, b );
-			SPR_DrawHoles( 0, x, y, &GetSpriteRect(m_HUD_number_0 + k));
-			x += iWidth;
-		}
+		{ k = (iNumber%1000)/100; DrawScaledDigit(k, x, y, r, g, b); x += iWidth; }
 		else if (iFlags & (DHN_3DIGITS))
-		{
-			//SPR_DrawHoles( 0, x, y, &rc );
-			x += iWidth;
-		}
+		{ x += iWidth; }
 
-		// SPR_Draw 10's
-		
 		if (iNumber >= 10 || ((iFlags & (DHN_3DIGITS | DHN_2DIGITS)) && (iFlags & DHN_PREZERO)))
-		{
-			k = (iNumber % 100)/10;
-			SPR_Set(GetSprite(m_HUD_number_0 + k), r, g, b );
-			SPR_DrawHoles( 0, x, y, &GetSpriteRect(m_HUD_number_0 + k));
-			x += iWidth;
-		}
+		{ k = (iNumber%100)/10; DrawScaledDigit(k, x, y, r, g, b); x += iWidth; }
 		else if (iFlags & (DHN_3DIGITS | DHN_2DIGITS))
-		{
-			//SPR_DrawHoles( 0, x, y, &rc );
-			x += iWidth;
-		}
+		{ x += iWidth; }
 
-		// SPR_Draw ones
 		k = iNumber % 10;
-		SPR_Set(GetSprite(m_HUD_number_0 + k), r, g, b );
-		SPR_DrawHoles(0,  x, y, &GetSpriteRect(m_HUD_number_0 + k));
+		DrawScaledDigit(k, x, y, r, g, b);
 		x += iWidth;
 	} 
 	else if (iFlags & DHN_DRAWZERO) 
 	{
-		SPR_Set(GetSprite(m_HUD_number_0), r, g, b );
+		if (iFlags & (DHN_6DIGITS)) x += iWidth;
+		if (iFlags & (DHN_5DIGITS)) x += iWidth;
+		if (iFlags & (DHN_4DIGITS)) x += iWidth;
+		if (iFlags & (DHN_3DIGITS)) x += iWidth;
+		if (iFlags & (DHN_3DIGITS | DHN_2DIGITS)) x += iWidth;
 
-		// SPR_Draw 100000's
-		if (iFlags & (DHN_6DIGITS))
-		{
-			//SPR_DrawHoles( 0, x, y, &rc );
-			x += iWidth;
-		}
-
-		// SPR_Draw 10000's
-		if (iFlags & (DHN_5DIGITS))
-		{
-			//SPR_DrawHoles( 0, x, y, &rc );
-			x += iWidth;
-		}
-
-		// SPR_Draw 1000's
-		if (iFlags & (DHN_4DIGITS))
-		{
-			//SPR_DrawHoles( 0, x, y, &rc );
-			x += iWidth;
-		}
-
-		// SPR_Draw 100's
-		if (iFlags & (DHN_3DIGITS))
-		{
-			//SPR_DrawHoles( 0, x, y, &rc );
-			x += iWidth;
-		}
-
-		if (iFlags & (DHN_3DIGITS | DHN_2DIGITS))
-		{
-			//SPR_DrawHoles( 0, x, y, &rc );
-			x += iWidth;
-		}
-
-		// SPR_Draw ones
-		
-		SPR_DrawHoles( 0,  x, y, &GetSpriteRect(m_HUD_number_0));
+		DrawScaledDigit(0, x, y, r, g, b);
 		x += iWidth;
 	}
 
@@ -404,132 +336,49 @@ int CHud :: DrawHudNumber( int x, int y, int iFlags, int iNumber, int r, int g, 
 
 int CHud :: DrawHudNumberLarge( int x, int y, int iFlags, int iNumber, int r, int g, int b)
 {
-	int iWidth = GetSpriteRect(m_HUD_number_0large).right - GetSpriteRect(m_HUD_number_0large).left;
+	int iWidth = HudScale( GetSpriteRect(m_HUD_number_0large).right - GetSpriteRect(m_HUD_number_0large).left );
 	int k;
 	
-	if (iNumber> 0 || ((iFlags & (DHN_3DIGITS | DHN_2DIGITS)) && (iFlags &DHN_PREZERO)))
+	if (iNumber > 0 || ((iFlags & (DHN_3DIGITS | DHN_2DIGITS)) && (iFlags & DHN_PREZERO)))
 	{
-
-		// SPR_Draw 100000's		
 		if (iNumber >= 100000 || ((iFlags & DHN_6DIGITS) && (iFlags & DHN_PREZERO)))
-		{
-			k = (iNumber%1000000)/100000;
-			SPR_Set(GetSprite(m_HUD_number_0large + k), r, g, b );
-			SPR_DrawHoles( 0, x, y, &GetSpriteRect(m_HUD_number_0large + k));
-			x += iWidth;
-		}
+		{ k = (iNumber%1000000)/100000; DrawScaledDigitLarge(k, x, y, r, g, b); x += iWidth; }
 		else if (iFlags & (DHN_6DIGITS))
-		{
-			//SPR_SPR_DrawHoles( 0, x, y, &rc );
-			x += iWidth;
-		}
+		{ x += iWidth; }
 
-		// SPR_Draw 10000's		
 		if (iNumber >= 10000 || ((iFlags & DHN_5DIGITS) && (iFlags & DHN_PREZERO)))
-		{
-			k = (iNumber%100000)/10000;
-			SPR_Set(GetSprite(m_HUD_number_0large + k), r, g, b );
-			SPR_DrawHoles( 0, x, y, &GetSpriteRect(m_HUD_number_0large + k));
-			x += iWidth;
-		}
+		{ k = (iNumber%100000)/10000; DrawScaledDigitLarge(k, x, y, r, g, b); x += iWidth; }
 		else if (iFlags & (DHN_5DIGITS))
-		{
-			//SPR_DrawHoles( 0, x, y, &rc );
-			x += iWidth;
-		}
+		{ x += iWidth; }
 
-		// SPR_Draw 1000's		
 		if (iNumber >= 1000 || ((iFlags & DHN_4DIGITS) && (iFlags & DHN_PREZERO)))
-		{
-			k = (iNumber%10000)/1000;
-			SPR_Set(GetSprite(m_HUD_number_0large + k), r, g, b );
-			SPR_DrawHoles( 0, x, y, &GetSpriteRect(m_HUD_number_0large + k));
-			x += iWidth;
-		}
+		{ k = (iNumber%10000)/1000; DrawScaledDigitLarge(k, x, y, r, g, b); x += iWidth; }
 		else if (iFlags & (DHN_4DIGITS))
-		{
-			//SPR_DrawHoles( 0, x, y, &rc );
-			x += iWidth;
-		}
-		
+		{ x += iWidth; }
 
-		// SPR_Draw 100's
-		
 		if (iNumber >= 100 || ((iFlags & DHN_3DIGITS) && (iFlags & DHN_PREZERO)))
-		{
-			k = (iNumber%1000)/100;
-			SPR_Set(GetSprite(m_HUD_number_0large + k), r, g, b );
-			SPR_DrawHoles( 0, x, y, &GetSpriteRect(m_HUD_number_0large + k));
-			x += iWidth;
-		}
+		{ k = (iNumber%1000)/100; DrawScaledDigitLarge(k, x, y, r, g, b); x += iWidth; }
 		else if (iFlags & (DHN_3DIGITS))
-		{
-			//SPR_DrawHoles( 0, x, y, &rc );
-			x += iWidth;
-		}
+		{ x += iWidth; }
 
-		// SPR_Draw 10's
-		
 		if (iNumber >= 10 || ((iFlags & (DHN_3DIGITS | DHN_2DIGITS)) && (iFlags & DHN_PREZERO)))
-		{
-			k = (iNumber % 100)/10;
-			SPR_Set(GetSprite(m_HUD_number_0large + k), r, g, b );
-			SPR_DrawHoles( 0, x, y, &GetSpriteRect(m_HUD_number_0large + k));
-			x += iWidth;
-		}
+		{ k = (iNumber%100)/10; DrawScaledDigitLarge(k, x, y, r, g, b); x += iWidth; }
 		else if (iFlags & (DHN_3DIGITS | DHN_2DIGITS))
-		{
-			//SPR_DrawHoles( 0, x, y, &rc );
-			x += iWidth;
-		}
+		{ x += iWidth; }
 
-		// SPR_Draw ones
 		k = iNumber % 10;
-		SPR_Set(GetSprite(m_HUD_number_0large + k), r, g, b );
-		SPR_DrawHoles(0,  x, y, &GetSpriteRect(m_HUD_number_0large + k));
+		DrawScaledDigitLarge(k, x, y, r, g, b);
 		x += iWidth;
 	} 
 	else if (iFlags & DHN_DRAWZERO) 
 	{
-		SPR_Set(GetSprite(m_HUD_number_0large), r, g, b );
+		if (iFlags & (DHN_6DIGITS)) x += iWidth;
+		if (iFlags & (DHN_5DIGITS)) x += iWidth;
+		if (iFlags & (DHN_4DIGITS)) x += iWidth;
+		if (iFlags & (DHN_3DIGITS)) x += iWidth;
+		if (iFlags & (DHN_3DIGITS | DHN_2DIGITS)) x += iWidth;
 
-		// SPR_Draw 100000's
-		if (iFlags & (DHN_6DIGITS))
-		{
-			//SPR_DrawHoles( 0, x, y, &rc );
-			x += iWidth;
-		}
-
-		// SPR_Draw 10000's
-		if (iFlags & (DHN_5DIGITS))
-		{
-			//SPR_DrawHoles( 0, x, y, &rc );
-			x += iWidth;
-		}
-
-		// SPR_Draw 1000's
-		if (iFlags & (DHN_4DIGITS))
-		{
-			//SPR_DrawHoles( 0, x, y, &rc );
-			x += iWidth;
-		}
-
-		// SPR_Draw 100's
-		if (iFlags & (DHN_3DIGITS))
-		{
-			//SPR_DrawHoles( 0, x, y, &rc );
-			x += iWidth;
-		}
-
-		if (iFlags & (DHN_3DIGITS | DHN_2DIGITS))
-		{
-			//SPR_DrawHoles( 0, x, y, &rc );
-			x += iWidth;
-		}
-
-		// SPR_Draw ones
-		
-		SPR_DrawHoles( 0,  x, y, &GetSpriteRect(m_HUD_number_0large));
+		DrawScaledDigitLarge(0, x, y, r, g, b);
 		x += iWidth;
 	}
 

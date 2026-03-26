@@ -1,5 +1,6 @@
 #include "hud.h"
 #include "cl_util.h"
+#include "hud_scale.h"
 #include "parsemsg.h"
 #include "pe_notify.h"
 #include "triangleapi.h"
@@ -75,8 +76,8 @@ int CHudRadar::CalcRadar(  )
 		if (y2 < -50) y2 = -50;
 		if (y2 > 50) y2 = 50;
 
-		x2 += 51;
-		y2 += 51;
+		x2 = HudScale( x2 + 51 );
+		y2 = HudScale( y2 + 51 );
 		cur->origin2d[0] = x2;
 		cur->origin2d[1] = y2;
 
@@ -130,8 +131,8 @@ int CHudRadar::Init()
 #define SPR_BOTTOMLEFT 1
 #define SPR_BOTTOMRIGHT 2
 
-#define RADAR_XPOS 15
-#define RADAR_YPOS 30
+#define RADAR_XPOS HudScale( 15 )
+#define RADAR_YPOS HudScale( 30 )
 
 int CHudRadar::VidInit()
 {
@@ -155,10 +156,10 @@ int CHudRadar::VidInit()
 }
 
 #define RD_TOP 0
-#define RD_BOTTOM (ScreenHeight - 48)
+#define RD_BOTTOM (ScreenHeight - HudScale( 48 ))
 #define RD_LEFT 0
-#define RD_RIGHT (ScreenWidth - 48)
-#define RD_EDGE 20
+#define RD_RIGHT (ScreenWidth - HudScale( 48 ))
+#define RD_EDGE HudScale( 20 )
 
 int GetSprite( int x, int y )
 {
@@ -254,11 +255,9 @@ int CHudRadar::Draw( float flTime )
 	rect.left = 131;
 	int rs = 255, gs = 255, bs = 255, as = 255;
 	ScaleColors(rs, gs, bs, as );
-	SPR_Set( g_sprHUD2, rs, gs, bs );
-	SPR_DrawHoles( 0, 0, 0, &rect );
+	ScaledSPR_DrawHoles( g_sprHUD2, 0, 0, 0, &rect, rs, gs, bs );
 
-	SPR_Set( m_hSprite[0], r, g, b );
-	SPR_DrawAdditive( 0,  RADAR_XPOS, RADAR_YPOS, &gHUD.GetSpriteRect( m_hSprite[0] ) );	
+	ScaledSPR_DrawAdditive( m_hSprite[0], 0, RADAR_XPOS, RADAR_YPOS, NULL, r, g, b );
 
     int x2,y2,isvis,spr,col;
 	vec3_t screen, origin;
@@ -285,8 +284,8 @@ int CHudRadar::Draw( float flTime )
 
 	while( cur )
 	{
-		x2 = RADAR_XPOS - 3;
-		y2 = RADAR_YPOS - 3;
+		x2 = RADAR_XPOS - HudScale( 3 );
+		y2 = RADAR_YPOS - HudScale( 3 );
 
 		if( cur->blinktime == 1 )
 			cur->blinktime = flTime + 2;
@@ -334,8 +333,7 @@ int CHudRadar::Draw( float flTime )
 		y2 += cur->origin2d[1];
 
 		ScaleColors(r, g, b, a);
-		SPR_Set( m_hSprite[col == RADAR_BLINK_TEMP ? 2 : 1], r, g, b );
-		SPR_DrawAdditive( 0,  x2, y2, &rect );
+		ScaledSPR_DrawAdditive( m_hSprite[col == RADAR_BLINK_TEMP ? 2 : 1], 0, x2, y2, &rect, r, g, b );
 
 		if( col != RADAR_BLINK && col != RADAR_TERMINAL && !( g_iTeamNumber == 2 && col == RADAR_ENEMY ) )
 		{
@@ -382,10 +380,9 @@ int CHudRadar::Draw( float flTime )
       else
         spr = TARGET;
 			ScaleColors( r, g, b, a );
-      SPR_Set( m_hSprite[spr], r, g, b );
-			x -= SPR_Width( m_hSprite[spr], 0 ) / 2;
-			y -= SPR_Height( m_hSprite[spr], 0 ) / 2;
-			SPR_DrawAdditive( 0,  x, y, &gHUD.GetSpriteRect( m_hSprite[spr] ) );
+			x -= HudScale( SPR_Width( m_hSprite[spr], 0 ) ) / 2;
+			y -= HudScale( SPR_Height( m_hSprite[spr], 0 ) ) / 2;
+			ScaledSPR_DrawAdditive( m_hSprite[spr], 0, x, y, NULL, r, g, b );
 		}
     else
     {
@@ -395,8 +392,7 @@ int CHudRadar::Draw( float flTime )
 	    arrowrect.right = 32;
 	    arrowrect.left = 0;
 			ScaleColors( r, g, b, a + 50 );
-			SPR_Set( m_hSprite[ARROWS], r, g, b );
-			SPR_DrawAdditive( spr,  x, y, &arrowrect );
+			ScaledSPR_DrawAdditive( m_hSprite[ARROWS], spr, x, y, &arrowrect, r, g, b );
     }
 		cur = cur->next;
 	}
@@ -405,7 +401,7 @@ int CHudRadar::Draw( float flTime )
     char text[128];
     sprintf( text, "BlackHawks distance to escapezone is %d meters", (int)( ( bh - ez ).Length( ) / 10 ) );
     g_font->SetFont( FONT_NOTIFY );
-		g_font->DrawString( 10, 160, text, 0, 255.0f, 0, 180 );
+		g_font->DrawString( HudScale( 10 ), HudScale( 160 ), text, 0, 255.0f, 0, 180 );
   }
 	return 1; 
 }

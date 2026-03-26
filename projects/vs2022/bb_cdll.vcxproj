@@ -73,8 +73,8 @@
       </BaseAddress>
     </Link>
     <PostBuildEvent>
-      <Command>call ..\..\filecopy.bat $(TargetPath) ..\..\..\game\brainbread\cl_dlls\$(TargetName).dll
-call ..\..\filecopy.bat $(TargetDir)\$(TargetName).pdb ..\..\..\game\brainbread\cl_dlls\$(TargetName).pdb</Command>
+      <Command>if not "$(GameInstallDir)"=="" call ..\..\filecopy.bat $(TargetPath) $(GameInstallDir)\cl_dlls\$(TargetName).dll
+if not "$(GameInstallDir)"=="" call ..\..\filecopy.bat $(TargetDir)$(TargetName).pdb $(GameInstallDir)\cl_dlls\$(TargetName).pdb</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Copying $(TargetName) to game directory</Message>
@@ -103,8 +103,8 @@ call ..\..\filecopy.bat $(TargetDir)\$(TargetName).pdb ..\..\..\game\brainbread\
       </BaseAddress>
     </Link>
     <PostBuildEvent>
-      <Command>call ..\..\filecopy.bat $(TargetPath) ..\..\..\game\brainbread\cl_dlls\$(TargetName).dll
-call ..\..\filecopy.bat $(TargetDir)\$(TargetName).pdb ..\..\..\game\brainbread\cl_dlls\$(TargetName).pdb</Command>
+      <Command>if not "$(GameInstallDir)"=="" call ..\..\filecopy.bat $(TargetPath) $(GameInstallDir)\cl_dlls\$(TargetName).dll
+if not "$(GameInstallDir)"=="" call ..\..\filecopy.bat $(TargetDir)$(TargetName).pdb $(GameInstallDir)\cl_dlls\$(TargetName).pdb</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Copying $(TargetName) to game directory</Message>
@@ -135,6 +135,7 @@ call ..\..\filecopy.bat $(TargetDir)\$(TargetName).pdb ..\..\..\game\brainbread\
     <ClCompile Include="..\..\cl_dll\hud.cpp" />
     <ClCompile Include="..\..\cl_dll\hud_msg.cpp" />
     <ClCompile Include="..\..\cl_dll\hud_redraw.cpp" />
+    <ClCompile Include="..\..\cl_dll\hud_scale.cpp" />
     <ClCompile Include="..\..\cl_dll\hud_servers.cpp" />
     <ClCompile Include="..\..\cl_dll\hud_spectator.cpp" />
     <ClCompile Include="..\..\cl_dll\hud_update.cpp" />

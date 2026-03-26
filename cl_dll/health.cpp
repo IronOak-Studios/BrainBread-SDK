@@ -24,6 +24,7 @@
 
 #include "hud.h"
 #include "cl_util.h"
+#include "hud_scale.h"
 #include "parsemsg.h"
 #include <string.h>
 #include "demo_api.h"
@@ -252,10 +253,9 @@ int CHudHealth::Draw(float flTime)
 		rect.left = 0;
 		int rs = 255, gs = 255, bs = 255, as = 255;
 		ScaleColors(rs, gs, bs, as );
-		SPR_Set( g_sprHUD1, rs, gs, bs );
-		SPR_DrawHoles( 0, 0, ScreenHeight - ( rect.bottom - rect.top ), &rect );
+		ScaledSPR_DrawHoles( g_sprHUD1, 0, 0, ScreenHeight - HudScale( rect.bottom - rect.top ), &rect, rs, gs, bs );
 
-		gHUD.DrawHudNumber( 61, ScreenHeight - 25, DHN_3DIGITS, m_iHealth, 255, 255, 255);//r,g,b
+		gHUD.DrawHudNumber( HudScale( 61 ), ScreenHeight - HudScale( 25 ), DHN_3DIGITS, m_iHealth, 255, 255, 255);
 		//gHUD.DrawHudNumber( 61, ScreenHeight - 64, DHN_3DIGITS, gHUD.m_Battery.m_iBat, r, g, b);
 	}
 
@@ -268,15 +268,22 @@ int CHudHealth::Draw(float flTime)
 		g_iShots -= 2;
 	}
 	
-	float displacement = ( 6.0f + ( CROSS_SPREAD / 160.0f ) * (float)g_iShots );
-	float yoff = -3;
+	float s = g_flHudScale;
+	float displacement = ( 6.0f * s + ( CROSS_SPREAD / 160.0f ) * (float)g_iShots * s );
+	float yoff = -3 * s;
+	int lw = (int)(6 * s + 0.5f);
+	int lh = (int)(1 * s + 0.5f);
+	int vw = (int)(1 * s + 0.5f);
+	int vh = (int)(4 * s + 0.5f);
+	int dw = (int)(3 * s + 0.5f);
+	int dh = (int)(2 * s + 0.5f);
 
-	UTIL_FillRect((int)(ScreenWidth * 0.5f - displacement - 6.0f), ScreenHeight * 0.5 - displacement + 6 + yoff, 6, 1, 0, 255, 0, 255);
-	UTIL_FillRect((int)(ScreenWidth * 0.5f + displacement), ScreenHeight * 0.5 - displacement + 6 + yoff, 6, 1, 0, 255, 0, 255);
+	UTIL_FillRect((int)(ScreenWidth * 0.5f - displacement - lw), (int)(ScreenHeight * 0.5f - displacement + lw + yoff), lw, lh, 0, 255, 0, 255);
+	UTIL_FillRect((int)(ScreenWidth * 0.5f + displacement), (int)(ScreenHeight * 0.5f - displacement + lw + yoff), lw, lh, 0, 255, 0, 255);
 	
-	UTIL_FillRect(ScreenWidth * 0.5, (int)(ScreenHeight * 0.5f - displacement - 4.0f) + yoff, 1, 4, 0, 255, 0, 255);
-	UTIL_FillRect(ScreenWidth * 0.5, (int)(ScreenHeight * 0.5f) - 1 + yoff, 1, 2, 0, 255, 0, 255);
-	UTIL_FillRect(ScreenWidth * 0.5 - 1, (int)(ScreenHeight * 0.5f) + yoff, 3, 1, 0, 255, 0, 255);
+	UTIL_FillRect((int)(ScreenWidth * 0.5f), (int)(ScreenHeight * 0.5f - displacement - vh) + yoff, vw, vh, 0, 255, 0, 255);
+	UTIL_FillRect((int)(ScreenWidth * 0.5f), (int)(ScreenHeight * 0.5f) - lh + yoff, vw, dh, 0, 255, 0, 255);
+	UTIL_FillRect((int)(ScreenWidth * 0.5f - vw), (int)(ScreenHeight * 0.5f) + yoff, dw, lh, 0, 255, 0, 255);
 	return DrawPain(flTime);
 }
 

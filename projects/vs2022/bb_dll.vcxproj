@@ -69,8 +69,8 @@
       <ModuleDefinitionFile>$(ProjectDir)..\..\dlls\bb.def</ModuleDefinitionFile>
     </Link>
     <PostBuildEvent>
-      <Command>call ..\..\filecopy.bat $(TargetPath) ..\..\..\game\brainbread\dlls\$(TargetName).dll
-call ..\..\filecopy.bat $(TargetDir)\$(TargetName).pdb ..\..\..\game\brainbread\dlls\$(TargetName).pdb</Command>
+      <Command>if not "$(GameInstallDir)"=="" call ..\..\filecopy.bat $(TargetPath) $(GameInstallDir)\dlls\$(TargetName).dll
+if not "$(GameInstallDir)"=="" call ..\..\filecopy.bat $(TargetDir)$(TargetName).pdb $(GameInstallDir)\dlls\$(TargetName).pdb</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Copying $(TargetName) to game directory</Message>
@@ -97,8 +97,8 @@ call ..\..\filecopy.bat $(TargetDir)\$(TargetName).pdb ..\..\..\game\brainbread\
       <ModuleDefinitionFile>$(ProjectDir)..\..\dlls\bb.def</ModuleDefinitionFile>
     </Link>
     <PostBuildEvent>
-      <Command>call ..\..\filecopy.bat $(TargetPath) ..\..\..\game\brainbread\dlls\$(TargetName).dll
-call ..\..\filecopy.bat $(TargetDir)\$(TargetName).pdb ..\..\..\game\brainbread\dlls\$(TargetName).pdb</Command>
+      <Command>if not "$(GameInstallDir)"=="" call ..\..\filecopy.bat $(TargetPath) $(GameInstallDir)\dlls\$(TargetName).dll
+if not "$(GameInstallDir)"=="" call ..\..\filecopy.bat $(TargetDir)$(TargetName).pdb $(GameInstallDir)\dlls\$(TargetName).pdb</Command>
     </PostBuildEvent>
     <PostBuildEvent>
       <Message>Copying $(TargetName) to game directory</Message>

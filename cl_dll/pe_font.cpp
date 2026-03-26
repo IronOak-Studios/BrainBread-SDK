@@ -1,5 +1,6 @@
 #include "hud.h"
 #include "cl_util.h"
+#include "hud_scale.h"
 
 #include "pe_font.h"
 
@@ -171,8 +172,8 @@ int cPEFontMgr::GetWidth( char chr )
 		return 0;
 
 	if( (int)chr < PE_FONT_START || (int)chr > PE_FONT_END )
-		return SPACE_WIDTH;
-	return curfont->charWidth[ chr - PE_FONT_START ];
+		return HudScale( SPACE_WIDTH );
+	return HudScale( curfont->charWidth[ chr - PE_FONT_START ] );
 }
 
 int cPEFontMgr::GetWidth( char *string )
@@ -216,8 +217,7 @@ void cPEFontMgr::DrawChar( int x, int y, char chr, int r, int g, int b )
 	rect.left = curfont->charXPos[chr];
 	rect.right = rect.left + curfont->charWidth[chr];
 
-	SPR_Set( curfont->charSprite, r, g, b );
-	SPR_DrawAdditive( 0, x, y, &rect );
+	ScaledSPR_DrawAdditive( curfont->charSprite, 0, x, y, &rect, r, g, b );
 }
 
 int cPEFontMgr::DrawString( int x, int y, char *string, int r, int g, int b, int a )
@@ -241,7 +241,7 @@ int cPEFontMgr::DrawStringML( int x, int y, char *string, int r, int g, int b, i
 	{
 		if( *string == '\n' )
 		{
-			y += curfont->height;
+			y += HudScale( curfont->height );
 			curx = x;
 			continue;
 		}
@@ -332,7 +332,7 @@ int cPEFontMgr::DrawStringML( int x, int y, char *string )
 
 		if( *string == '\n' )
 		{
-			y += curfont->height;
+			y += HudScale( curfont->height );
 			curx = x;
 			continue;
 		}
@@ -346,7 +346,7 @@ int cPEFontMgr::GetHeight( )
 {
 	if( !curfont || !curfont->ready )
 		return 0;
-	return curfont->height;
+	return HudScale( curfont->height );
 }
 
 int cPEFontMgr::GetHeightML( char *string )
@@ -360,5 +360,5 @@ int cPEFontMgr::GetHeightML( char *string )
 			count++;
 	}
 	count++;
-	return count * curfont->height;
+	return count * HudScale( curfont->height );
 }
