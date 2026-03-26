@@ -326,8 +326,8 @@ int CHudAmmo::VidInit(void)
 	g_sprHUD2 = LoadSprite( "sprites/hud/hud2.spr" );
 
 	ghsprBuckets = gHUD.GetSprite(m_HUD_bucket0);
-	giBucketWidth = gHUD.GetSpriteRect(m_HUD_bucket0).right - gHUD.GetSpriteRect(m_HUD_bucket0).left;
-	giBucketHeight = gHUD.GetSpriteRect(m_HUD_bucket0).bottom - gHUD.GetSpriteRect(m_HUD_bucket0).top;
+	giBucketWidth = HudScale( gHUD.GetSpriteRect(m_HUD_bucket0).right - gHUD.GetSpriteRect(m_HUD_bucket0).left );
+	giBucketHeight = HudScale( gHUD.GetSpriteRect(m_HUD_bucket0).bottom - gHUD.GetSpriteRect(m_HUD_bucket0).top );
 
 	gHR.iHistoryGap = max( gHR.iHistoryGap, gHUD.GetSpriteRect(m_HUD_bucket0).bottom - gHUD.GetSpriteRect(m_HUD_bucket0).top);
 
@@ -336,13 +336,13 @@ int CHudAmmo::VidInit(void)
 
 	if (ScreenWidth >= 640)
 	{
-		giABWidth = 20;
-		giABHeight = 4;
+		giABWidth = HudScale( 20 );
+		giABHeight = HudScale( 4 );
 	}
 	else
 	{
-		giABWidth = 10;
-		giABHeight = 2;
+		giABWidth = HudScale( 10 );
+		giABHeight = HudScale( 2 );
 	}
 
 	return 1;
@@ -953,12 +953,16 @@ int CHudAmmo::Draw(float flTime)
 	int iIconWidth = 0;
 	if( m_pWeapon->iId == 9 || m_pWeapon->iId == 26 || m_pWeapon->iId == 29 ) // 9 == WEAPON_MINIGUN
 	{
-		UTIL_FillRect( XRES(400), ScreenHeight-12-10, XRES(220), 1, 255, 255, 255, 255 );
-		UTIL_FillRect( XRES(400), ScreenHeight-10,    XRES(220), 1, 255, 255, 255, 255 );
-		UTIL_FillRect( XRES(400), ScreenHeight-12-10, 1, 12, 255, 255, 255, 255 );
-		UTIL_FillRect( XRES(620)-1, ScreenHeight-12-10, 1, 12, 255, 255, 255, 255 );
+		int mbx = XRES(400);
+		int mbw = XRES(220);
+		int mbh = HudScale( 12 );
+		int mby = ScreenHeight - mbh - HudScale( 10 );
+		UTIL_FillRect( mbx, mby, mbw, HudScale( 1 ), 255, 255, 255, 255 );
+		UTIL_FillRect( mbx, mby + mbh, mbw, HudScale( 1 ), 255, 255, 255, 255 );
+		UTIL_FillRect( mbx, mby, HudScale( 1 ), mbh, 255, 255, 255, 255 );
+		UTIL_FillRect( mbx + mbw - HudScale( 1 ), mby, HudScale( 1 ), mbh, 255, 255, 255, 255 );
 		
-    UTIL_FillRect( XRES(400), ScreenHeight-12-10, ((float)XRES(220)/pw->iMax1)*( 10 * pw->iClip + pw->iClip2 ), 12, 255, 255, 255, 255 );
+    UTIL_FillRect( mbx, mby, ((float)mbw/pw->iMax1)*( 10 * pw->iClip + pw->iClip2 ), mbh, 255, 255, 255, 255 );
 		//AlertMessage( at_console, "%d %d\n", pw->iClip, pw->iClip2 );
 	}
 	else if( m_pWeapon->iAmmoType > 0 )
@@ -1109,7 +1113,7 @@ void DrawAmmoBar(WEAPON *p, int x, int y, int width, int height)
 		{
 			f = (float)gWR.CountAmmo(p->iAmmo2Type)/(float)p->iMax2;
 
-			x += 5; //!!!
+			x += HudScale( 5 ); //!!!
 
 			DrawBar(x, y, width, height, f);
 		}
@@ -1137,8 +1141,8 @@ int CHudAmmo::DrawWList(float flTime)
 		iActiveSlot = gpActiveSel->iSlot;
 
 	//Spin position coz of radar
-	x = 128 + 15; // ex: 10
-	y = 30; // ex: 30
+	x = HudScale( 143 ); // ex: 10
+	y = HudScale( 30 ); // ex: 30
 	
 
 	// Ensure that there are available choices in the active slot
@@ -1164,33 +1168,32 @@ int CHudAmmo::DrawWList(float flTime)
 			a = 192;
 
 		ScaleColors(r, g, b, 255);
-		SPR_Set(gHUD.GetSprite(m_HUD_bucket0 + i), r, g, b );
 
 		// make active slot wide enough to accomodate gun pictures
 		if ( i == iActiveSlot )
 		{
 			WEAPON *p = gWR.GetFirstPos(iActiveSlot);
 			if ( p )
-				iWidth = p->rcActive.right - p->rcActive.left;
+				iWidth = HudScale( p->rcActive.right - p->rcActive.left );
 			else
 				iWidth = giBucketWidth;
 		}
 		else
 			iWidth = giBucketWidth;
 
-		SPR_DrawAdditive(0, x, y, &gHUD.GetSpriteRect(m_HUD_bucket0 + i));
+		ScaledSPR_DrawAdditive(gHUD.GetSprite(m_HUD_bucket0 + i), 0, x, y, &gHUD.GetSpriteRect(m_HUD_bucket0 + i), r, g, b);
 		
-		x += iWidth + 5;
+		x += iWidth + HudScale( 5 );
 	}
 
 	//Spin position coz of radar
 	a = 128; //!!!
-	x = 128 + 15; // ex: 10
+	x = HudScale( 128 ) + HudScale( 15 ); // ex: 10
 
 	// Draw all of the buckets
 	for (i = 0; i < MAX_WEAPON_SLOTS; i++)
 	{
-		y = giBucketHeight + 30;
+		y = giBucketHeight + HudScale( 30 );
 		//                   ^ ex 1
 
 		// If this is the active slot, draw the bigger pictures,
@@ -1200,7 +1203,7 @@ int CHudAmmo::DrawWList(float flTime)
 			WEAPON *p = gWR.GetFirstPos( i );
 			int iWidth = giBucketWidth;
 			if ( p )
-				iWidth = p->rcActive.right - p->rcActive.left;
+				iWidth = HudScale( p->rcActive.right - p->rcActive.left );
 
 			for ( int iPos = 0; iPos < MAX_WEAPON_POSITIONS; iPos++ )
 			{
@@ -1218,11 +1221,9 @@ int CHudAmmo::DrawWList(float flTime)
 
 				if ( gpActiveSel == p )
 				{
-					SPR_Set(p->hActive, r, g, b );
-					SPR_DrawAdditive(0, x, y, &p->rcActive);
+					ScaledSPR_DrawAdditive(p->hActive, 0, x, y, &p->rcActive, r, g, b);
 
-					SPR_Set(gHUD.GetSprite(m_HUD_selection), r, g, b );
-					SPR_DrawAdditive(0, x, y, &gHUD.GetSpriteRect(m_HUD_selection));
+					ScaledSPR_DrawAdditive(gHUD.GetSprite(m_HUD_selection), 0, x, y, &gHUD.GetSpriteRect(m_HUD_selection), r, g, b);
 				}
 				else
 				{
@@ -1236,18 +1237,17 @@ int CHudAmmo::DrawWList(float flTime)
 						ScaleColors(r, g, b, 128);
 					}
 
-					SPR_Set( p->hInactive, r, g, b );
-					SPR_DrawAdditive( 0, x, y, &p->rcInactive );
+					ScaledSPR_DrawAdditive( p->hInactive, 0, x, y, &p->rcInactive, r, g, b );
 				}
 
 				// Draw Ammo Bar
 
 				DrawAmmoBar(p, x + giABWidth/2, y, giABWidth, giABHeight);
 				
-				y += p->rcActive.bottom - p->rcActive.top + 5;
+				y += HudScale( p->rcActive.bottom - p->rcActive.top ) + HudScale( 5 );
 			}
 
-			x += iWidth + 5;
+			x += iWidth + HudScale( 5 );
 
 		}
 		else
@@ -1278,10 +1278,10 @@ int CHudAmmo::DrawWList(float flTime)
 
 				FillRGBA( x, y, giBucketWidth, giBucketHeight, r, g, b, a );
 
-				y += giBucketHeight + 5;
+				y += giBucketHeight + HudScale( 5 );
 			}
 
-			x += giBucketWidth + 5;
+			x += giBucketWidth + HudScale( 5 );
 		}
 	}	
 

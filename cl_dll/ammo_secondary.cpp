@@ -20,6 +20,7 @@
 
 #include "hud.h"
 #include "cl_util.h"
+#include "hud_scale.h"
 #include <string.h>
 #include <stdio.h>
 #include "parsemsg.h"
@@ -66,24 +67,23 @@ int CHudAmmoSecondary :: Draw(float flTime)
 		m_fFade -= (gHUD.m_flTimeDelta * 20);  // slowly lower alpha to fade out icons
 	ScaleColors( r, g, b, a );
 
-	AmmoWidth = gHUD.GetSpriteRect(gHUD.m_HUD_number_0).right - gHUD.GetSpriteRect(gHUD.m_HUD_number_0).left;
+	AmmoWidth = HudScale( gHUD.GetSpriteRect(gHUD.m_HUD_number_0).right - gHUD.GetSpriteRect(gHUD.m_HUD_number_0).left );
 
-	y = ScreenHeight - (gHUD.m_iFontHeight*4);  // this is one font height higher than the weapon ammo values
+	y = ScreenHeight - HudScale( gHUD.m_iFontHeight * 4 );
 	x = ScreenWidth - AmmoWidth;
 
 	if ( m_HUD_ammoicon )
 	{
 		// Draw the ammo icon
-		x -= (gHUD.GetSpriteRect(m_HUD_ammoicon).right - gHUD.GetSpriteRect(m_HUD_ammoicon).left);
-		y -= (gHUD.GetSpriteRect(m_HUD_ammoicon).top - gHUD.GetSpriteRect(m_HUD_ammoicon).bottom);
+		x -= HudScale( gHUD.GetSpriteRect(m_HUD_ammoicon).right - gHUD.GetSpriteRect(m_HUD_ammoicon).left );
+		y -= HudScale( gHUD.GetSpriteRect(m_HUD_ammoicon).top - gHUD.GetSpriteRect(m_HUD_ammoicon).bottom );
 
-		SPR_Set( gHUD.GetSprite(m_HUD_ammoicon), r, g, b );
-		SPR_DrawAdditive( 0, x, y, &gHUD.GetSpriteRect(m_HUD_ammoicon) );
+		ScaledSPR_DrawAdditive( gHUD.GetSprite(m_HUD_ammoicon), 0, x, y, &gHUD.GetSpriteRect(m_HUD_ammoicon), r, g, b );
 	}
 	else
 	{  // move the cursor by the '0' char instead, since we don't have an icon to work with
 		x -= AmmoWidth;
-		y -= (gHUD.GetSpriteRect(gHUD.m_HUD_number_0).top - gHUD.GetSpriteRect(gHUD.m_HUD_number_0).bottom);
+		y -= HudScale( gHUD.GetSpriteRect(gHUD.m_HUD_number_0).top - gHUD.GetSpriteRect(gHUD.m_HUD_number_0).bottom );
 	}
 
 	// draw the ammo counts, in reverse order, from right to left
@@ -103,7 +103,7 @@ int CHudAmmoSecondary :: Draw(float flTime)
 		{
 			// draw the divider bar
 			x -= (AmmoWidth / 2);
-			FillRGBA(x, y, (AmmoWidth/10), gHUD.m_iFontHeight, r, g, b, a);
+			FillRGBA(x, y, (AmmoWidth/10), HudScale( gHUD.m_iFontHeight ), r, g, b, a);
 		}
 	}
 

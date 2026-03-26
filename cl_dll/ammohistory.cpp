@@ -19,6 +19,7 @@
 
 #include "hud.h"
 #include "cl_util.h"
+#include "hud_scale.h"
 #include "parsemsg.h"
 
 #include <string.h>
@@ -28,9 +29,9 @@
 
 HistoryResource gHR;
 
-#define AMMO_PICKUP_GAP (gHR.iHistoryGap+5)
-#define AMMO_PICKUP_PICK_HEIGHT		(32 + (gHR.iHistoryGap * 2))
-#define AMMO_PICKUP_HEIGHT_MAX		(ScreenHeight - 100)
+#define AMMO_PICKUP_GAP (HudScale(gHR.iHistoryGap + 5))
+#define AMMO_PICKUP_PICK_HEIGHT		(HudScale(32 + gHR.iHistoryGap * 2))
+#define AMMO_PICKUP_HEIGHT_MAX		(ScreenHeight - HudScale(100))
 
 #define MAX_ITEM_NAME	32
 int HISTORY_DRAW_TIME = 5;
@@ -130,15 +131,14 @@ int HistoryResource :: DrawAmmoHistory( float flTime )
 
 				// Draw the pic
 				int ypos = ScreenHeight - (AMMO_PICKUP_PICK_HEIGHT + (AMMO_PICKUP_GAP * i));
-				int xpos = ScreenWidth - (rcPic.right - rcPic.left) - 4;
+				int xpos = ScreenWidth - HudScale(rcPic.right - rcPic.left) - HudScale( 4 );
 				if ( spr && *spr )    // weapon isn't loaded yet so just don't draw the pic
 				{ // the dll has to make sure it has sent info the weapons you need
-					SPR_Set( *spr, r, g, b );
-					SPR_DrawAdditive( 0, xpos, ypos, &rcPic );
+					ScaledSPR_DrawAdditive( *spr, 0, xpos, ypos, &rcPic, r, g, b );
 				}
 
 				// Draw the number
-				gHUD.DrawHudNumberString( xpos - 10, ypos, xpos - 100, rgAmmoHistory[i].iCount, r, g, b );
+				gHUD.DrawHudNumberString( xpos - HudScale( 10 ), ypos, xpos - HudScale( 100 ), rgAmmoHistory[i].iCount, r, g, b );
 			}
 			else if ( rgAmmoHistory[i].type == HISTSLOT_WEAP )
 			{
@@ -157,9 +157,8 @@ int HistoryResource :: DrawAmmoHistory( float flTime )
 				ScaleColors(r, g, b, min((int)scale, 255) );
 
 				int ypos = ScreenHeight - (AMMO_PICKUP_PICK_HEIGHT + (AMMO_PICKUP_GAP * i));
-				int xpos = ScreenWidth - (weap->rcInactive.right - weap->rcInactive.left);
-				SPR_Set( weap->hInactive, r, g, b );
-				SPR_DrawAdditive( 0, xpos, ypos, &weap->rcInactive );
+				int xpos = ScreenWidth - HudScale(weap->rcInactive.right - weap->rcInactive.left);
+				ScaledSPR_DrawAdditive( weap->hInactive, 0, xpos, ypos, &weap->rcInactive, r, g, b );
 			}
 			else if ( rgAmmoHistory[i].type == HISTSLOT_ITEM )
 			{
@@ -175,10 +174,9 @@ int HistoryResource :: DrawAmmoHistory( float flTime )
 				ScaleColors(r, g, b, min((int)scale, 255) );
 
 				int ypos = ScreenHeight - (AMMO_PICKUP_PICK_HEIGHT + (AMMO_PICKUP_GAP * i));
-				int xpos = ScreenWidth - (rect.right - rect.left) - 10;
+				int xpos = ScreenWidth - HudScale(rect.right - rect.left) - HudScale( 10 );
 
-				SPR_Set( gHUD.GetSprite( rgAmmoHistory[i].iId ), r, g, b );
-				SPR_DrawAdditive( 0, xpos, ypos, &rect );
+				ScaledSPR_DrawAdditive( gHUD.GetSprite( rgAmmoHistory[i].iId ), 0, xpos, ypos, &rect, r, g, b );
 			}
 		}
 	}
