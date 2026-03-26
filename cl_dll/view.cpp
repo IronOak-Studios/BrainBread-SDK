@@ -536,7 +536,8 @@ void V_CalcNormalRefdef ( struct ref_params_s *pparams )
 
 	// refresh position
 	VectorCopy ( pparams->simorg, pparams->vieworg );
-	pparams->vieworg[2] += ( bob );
+	if ( cl_bobtilt && cl_bobtilt->value )
+		pparams->vieworg[2] += ( bob );
 	VectorAdd( pparams->vieworg, pparams->viewheight, pparams->vieworg );
 
 	VectorCopy ( pparams->cl_viewangles, pparams->viewangles );
@@ -613,7 +614,8 @@ void V_CalcNormalRefdef ( struct ref_params_s *pparams )
 
 	pparams->vieworg[2] += waterOffset;
 	
-	V_CalcViewRoll ( pparams );
+	if ( cl_bobtilt && cl_bobtilt->value )
+		V_CalcViewRoll ( pparams );
 	
 	V_AddIdle ( pparams );
 
@@ -665,11 +667,14 @@ void V_CalcNormalRefdef ( struct ref_params_s *pparams )
 	// Let the viewmodel shake at about 10% of the amplitude
 	gEngfuncs.V_ApplyShake( view->origin, view->angles, 0.9 );
 
-	for ( i = 0; i < 3; i++ )
+	if ( cl_bobtilt && cl_bobtilt->value )
 	{
-		view->origin[ i ] += bob * 0.4 * pparams->forward[ i ];
+		for ( i = 0; i < 3; i++ )
+		{
+			view->origin[ i ] += bob * 0.4 * pparams->forward[ i ];
+		}
+		view->origin[2] += bob;
 	}
-	view->origin[2] += bob;
 
 	// throw in a little tilt (can be disabled to reduce motion sickness).
 	if ( cl_bobtilt && cl_bobtilt->value )
