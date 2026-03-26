@@ -77,6 +77,8 @@ public:
 	float  m_flAvoidRemaining;	// Sideways distance left in current burst (0 = not avoiding)
 	Vector m_vecAvoidEnemyPos;	// Enemy pos when m_iLastAvoidDir was set (for 80-unit reset)
 
+	float m_fAnimTimeout;
+
 	void PainSound( void );
 	void AlertSound( void );
 	void IdleSound( void );
@@ -810,6 +812,7 @@ void CZombie :: Spawn()
   m_iLastAvoidDir = 0;
   m_flAvoidRemaining = 0;
   m_vecAvoidEnemyPos = Vector( 0, 0, 0 );
+  m_fAnimTimeout = gpGlobals->time + 4;
 
   /*MESSAGE_BEGIN( MSG_PVS, gmsgSpray, pev->origin );
 		WRITE_BYTE( SPRAY_BURN );
@@ -827,7 +830,7 @@ void CZombie :: Spawn()
 
 void CZombie::SpawningThink( )
 {
-	if( !m_fSequenceFinished && m_flFrameRate > 0 )
+	if( !m_fSequenceFinished && m_flFrameRate > 0 && m_fAnimTimeout > gpGlobals->time )
 	{
 		StudioFrameAdvance();
 		pev->nextthink = gpGlobals->time + 0.1;
