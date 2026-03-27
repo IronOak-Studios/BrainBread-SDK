@@ -1,0 +1,205 @@
+#
+# BrainBread client DLL Makefile for x86 Linux
+#
+# Based on Makefile.hl_cdll — customized source list for BrainBread.
+#
+
+HL_SRC_DIR=$(SOURCE_DIR)/cl_dll
+HL_SERVER_SRC_DIR=$(SOURCE_DIR)/dlls
+GAME_SHARED_SRC_DIR=$(SOURCE_DIR)/game_shared
+PM_SHARED_SRC_DIR=$(SOURCE_DIR)/pm_shared
+
+BB_CDLL_OBJ_DIR=$(BUILD_OBJ_DIR)/bb_client
+PUBLIC_OBJ_DIR=$(BB_CDLL_OBJ_DIR)/public
+COMMON_OBJ_DIR=$(BB_CDLL_OBJ_DIR)/common
+GAME_SHARED_OBJ_DIR=$(BB_CDLL_OBJ_DIR)/game_shared
+BB_SERVER_OBJ_DIR=$(BB_CDLL_OBJ_DIR)/server
+PM_SHARED_OBJ_DIR=$(BB_CDLL_OBJ_DIR)/pm_shared
+BB_OUTPUT_DIR=$(SOURCE_DIR)/../game/brainbread
+
+CFLAGS=$(BASE_CFLAGS) $(ARCH_CFLAGS) -DCLIENT_DLL -DCLIENT_WEAPONS -DHL_DLL -I/usr/include/malloc -D_snwprintf=swprintf \
+		 -DDISABLE_JUMP_ORIGIN -DDISABLE_VEC_ORIGIN
+
+INCLUDEDIRS=-I$(HL_SRC_DIR) -I$(HL_SRC_DIR)/glstub -I$(HL_SRC_DIR)/glext/include -I../dlls -I../tfc -I$(COMMON_SRC_DIR) -I$(PUBLIC_SRC_DIR) -I../pm_shared -I../engine -I../utils/vgui/include -I ../game_shared -I../external
+
+ifeq ($(OS),Darwin)
+LDFLAGS=$(SHLIBLDFLAGS) $(CPP_LIB) -framework Carbon $(CFG)/vgui.dylib -L. -lSDL2-2.0.0
+else
+LDFLAGS=$(SHLIBLDFLAGS) $(CPP_LIB) -L$(CFG) vgui.so -L. -lSDL2
+endif
+
+DO_CC=$(CPLUS) $(INCLUDEDIRS) $(CFLAGS) -o $@ -c $<
+DO_PUBLIC_CC=$(CPLUS) $(COMMON_INCLUDEDIRS) $(CFLAGS) $(SHLIBCFLAGS) -o $@ -c $<
+DO_COMMON_CC=$(CPLUS) $(INCLUDEDIRS)  $(CFLAGS) $(SHLIBCFLAGS) -o $@ -c $<
+DO_PM_SHARED_CC=$(CC) $(INCLUDEDIRS)  $(CFLAGS) $(SHLIBCFLAGS) -o $@ -c $<
+
+#####################################################################
+
+BB_CDLL_OBJS = \
+	$(BB_CDLL_OBJ_DIR)/hud_spectator.o \
+	$(BB_CDLL_OBJ_DIR)/ev_hldm.o \
+	$(BB_CDLL_OBJ_DIR)/hl/hl_baseentity.o \
+	$(BB_CDLL_OBJ_DIR)/hl/hl_events.o \
+	$(BB_CDLL_OBJ_DIR)/hl/hl_objects.o \
+	$(BB_CDLL_OBJ_DIR)/hl/hl_weapons.o \
+	$(BB_CDLL_OBJ_DIR)/hud.o \
+	$(BB_CDLL_OBJ_DIR)/inputw32.o \
+	$(BB_CDLL_OBJ_DIR)/ammo.o \
+	$(BB_CDLL_OBJ_DIR)/ammo_secondary.o \
+	$(BB_CDLL_OBJ_DIR)/ammohistory.o \
+	$(BB_CDLL_OBJ_DIR)/battery.o \
+	$(BB_CDLL_OBJ_DIR)/bb_blood.o \
+	$(BB_CDLL_OBJ_DIR)/cdll_int.o \
+	$(BB_CDLL_OBJ_DIR)/com_weapons.o \
+	$(BB_CDLL_OBJ_DIR)/death.o \
+	$(BB_CDLL_OBJ_DIR)/demo.o \
+	$(BB_CDLL_OBJ_DIR)/entity.o \
+	$(BB_CDLL_OBJ_DIR)/ev_common.o \
+	$(BB_CDLL_OBJ_DIR)/events.o \
+	$(BB_CDLL_OBJ_DIR)/flashlight.o \
+	$(BB_CDLL_OBJ_DIR)/GameStudioModelRenderer.o \
+	$(BB_CDLL_OBJ_DIR)/geiger.o \
+	$(BB_CDLL_OBJ_DIR)/health.o \
+	$(BB_CDLL_OBJ_DIR)/hud_msg.o \
+	$(BB_CDLL_OBJ_DIR)/hud_redraw.o \
+	$(BB_CDLL_OBJ_DIR)/hud_scale.o \
+	$(BB_CDLL_OBJ_DIR)/hud_servers.o \
+	$(BB_CDLL_OBJ_DIR)/hud_update.o \
+	$(BB_CDLL_OBJ_DIR)/in_camera.o \
+	$(BB_CDLL_OBJ_DIR)/input.o \
+	$(BB_CDLL_OBJ_DIR)/interpolation.o \
+	$(BB_CDLL_OBJ_DIR)/menu.o \
+	$(BB_CDLL_OBJ_DIR)/message.o \
+	$(BB_CDLL_OBJ_DIR)/pe_counter.o \
+	$(BB_CDLL_OBJ_DIR)/pe_fader.o \
+	$(BB_CDLL_OBJ_DIR)/pe_font.o \
+	$(BB_CDLL_OBJ_DIR)/pe_helper.o \
+	$(BB_CDLL_OBJ_DIR)/pe_lensflare.o \
+	$(BB_CDLL_OBJ_DIR)/pe_music.o \
+	$(BB_CDLL_OBJ_DIR)/pe_notify.o \
+	$(BB_CDLL_OBJ_DIR)/pe_pointmgr.o \
+	$(BB_CDLL_OBJ_DIR)/pe_radar.o \
+	$(BB_CDLL_OBJ_DIR)/saytext.o \
+	$(BB_CDLL_OBJ_DIR)/status_icons.o \
+	$(BB_CDLL_OBJ_DIR)/statusbar.o \
+	$(BB_CDLL_OBJ_DIR)/studio_util.o \
+	$(BB_CDLL_OBJ_DIR)/StudioModelRenderer.o \
+	$(BB_CDLL_OBJ_DIR)/text_message.o \
+	$(BB_CDLL_OBJ_DIR)/train.o \
+	$(BB_CDLL_OBJ_DIR)/tri.o \
+	$(BB_CDLL_OBJ_DIR)/util.o \
+	$(BB_CDLL_OBJ_DIR)/view.o \
+	$(BB_CDLL_OBJ_DIR)/vgui_int.o \
+	$(BB_CDLL_OBJ_DIR)/vgui_ClassMenu.o \
+	$(BB_CDLL_OBJ_DIR)/vgui_ConsolePanel.o \
+	$(BB_CDLL_OBJ_DIR)/vgui_ControlConfigPanel.o \
+	$(BB_CDLL_OBJ_DIR)/vgui_CustomObjects.o \
+	$(BB_CDLL_OBJ_DIR)/vgui_equip.o \
+	$(BB_CDLL_OBJ_DIR)/vgui_MOTDWindow.o \
+	$(BB_CDLL_OBJ_DIR)/vgui_SchemeManager.o \
+	$(BB_CDLL_OBJ_DIR)/vgui_ScorePanel.o \
+	$(BB_CDLL_OBJ_DIR)/vgui_ServerBrowser.o \
+	$(BB_CDLL_OBJ_DIR)/vgui_TeamFortressViewport.o \
+	$(BB_CDLL_OBJ_DIR)/vgui_SpectatorPanel.o \
+	$(BB_CDLL_OBJ_DIR)/vgui_teammenu.o \
+	$(BB_CDLL_OBJ_DIR)/voice_status.o \
+
+DLL_OBJS = \
+	$(BB_SERVER_OBJ_DIR)/bb_wpn_flame.o \
+	$(BB_SERVER_OBJ_DIR)/bb_wpn_hand.o \
+	$(BB_SERVER_OBJ_DIR)/pe_wpn_ak47.o \
+	$(BB_SERVER_OBJ_DIR)/pe_wpn_benelli.o \
+	$(BB_SERVER_OBJ_DIR)/pe_wpn_beretta.o \
+	$(BB_SERVER_OBJ_DIR)/pe_wpn_beretta_a.o \
+	$(BB_SERVER_OBJ_DIR)/pe_wpn_deagle.o \
+	$(BB_SERVER_OBJ_DIR)/pe_wpn_glock.o \
+	$(BB_SERVER_OBJ_DIR)/pe_wpn_glock_auto_a.o \
+	$(BB_SERVER_OBJ_DIR)/pe_wpn_hegrenade.o \
+	$(BB_SERVER_OBJ_DIR)/pe_wpn_knife.o \
+	$(BB_SERVER_OBJ_DIR)/pe_wpn_m16.o \
+	$(BB_SERVER_OBJ_DIR)/pe_wpn_microuzi.o \
+	$(BB_SERVER_OBJ_DIR)/pe_wpn_microuzi_a.o \
+	$(BB_SERVER_OBJ_DIR)/pe_wpn_minigun.o \
+	$(BB_SERVER_OBJ_DIR)/pe_wpn_mp5_10.o \
+	$(BB_SERVER_OBJ_DIR)/pe_wpn_p225.o \
+	$(BB_SERVER_OBJ_DIR)/pe_wpn_sig550.o \
+	$(BB_SERVER_OBJ_DIR)/pe_wpn_spas12.o \
+	$(BB_SERVER_OBJ_DIR)/pe_wpn_stoner.o \
+	$(BB_SERVER_OBJ_DIR)/pe_wpn_tavor.o \
+	$(BB_SERVER_OBJ_DIR)/pe_wpn_usp.o \
+
+PUBLIC_OBJS = \
+	$(PUBLIC_OBJ_DIR)/interface.o \
+
+COMMON_OBJS = \
+	$(COMMON_OBJ_DIR)/parsemsg.o \
+
+GAME_SHARED_OBJS = \
+	$(GAME_SHARED_OBJ_DIR)/vgui_checkbutton2.o \
+	$(GAME_SHARED_OBJ_DIR)/vgui_grid.o \
+	$(GAME_SHARED_OBJ_DIR)/vgui_helpers.o \
+	$(GAME_SHARED_OBJ_DIR)/vgui_listbox.o \
+	$(GAME_SHARED_OBJ_DIR)/vgui_loadtga.o \
+	$(GAME_SHARED_OBJ_DIR)/vgui_scrollbar2.o \
+	$(GAME_SHARED_OBJ_DIR)/vgui_slider2.o \
+	$(GAME_SHARED_OBJ_DIR)/voice_banmgr.o \
+	$(GAME_SHARED_OBJ_DIR)/voice_vgui_tweakdlg.o \
+
+PM_SHARED_OBJS = \
+	$(PM_SHARED_OBJ_DIR)/pm_debug.o \
+	$(PM_SHARED_OBJ_DIR)/pm_shared.o \
+	$(PM_SHARED_OBJ_DIR)/pm_math.o \
+
+
+all: client.$(SHLIBEXT)
+
+client.$(SHLIBEXT): $(BB_CDLL_OBJS) $(PUBLIC_OBJS) $(COMMON_OBJS) $(GAME_SHARED_OBJS) $(DLL_OBJS) $(PM_SHARED_OBJS)
+	$(CLINK) -o $(BUILD_DIR)/$@ $(BB_CDLL_OBJS) $(PUBLIC_OBJS) $(COMMON_OBJS) $(GAME_SHARED_OBJS) $(DLL_OBJS) $(PM_SHARED_OBJS) $(LDFLAGS) $(CPP_LIB)
+	mkdir -p $(BB_OUTPUT_DIR)/cl_dlls
+	$(P4_EDIT_START) $(BB_OUTPUT_DIR)/cl_dlls/$@ $(P4_EDIT_END)
+	cp $(BUILD_DIR)/$@  $(BB_OUTPUT_DIR)/cl_dlls
+	./gendbg.sh $(BB_OUTPUT_DIR)/cl_dlls/client.$(SHLIBEXT)
+
+$(BB_CDLL_OBJ_DIR):
+	mkdir -p $(BB_CDLL_OBJ_DIR)
+	mkdir -p $(BB_CDLL_OBJ_DIR)/hl
+
+$(BB_SERVER_OBJ_DIR):
+	mkdir -p $(BB_SERVER_OBJ_DIR)
+
+$(PUBLIC_OBJ_DIR):
+	mkdir -p $(PUBLIC_OBJ_DIR)
+
+$(COMMON_OBJ_DIR):
+	mkdir -p $(COMMON_OBJ_DIR)
+
+$(GAME_SHARED_OBJ_DIR):
+	mkdir -p $(GAME_SHARED_OBJ_DIR)
+
+$(PM_SHARED_OBJ_DIR):
+	mkdir -p $(PM_SHARED_OBJ_DIR)
+
+$(BB_CDLL_OBJ_DIR)/%.o: $(HL_SRC_DIR)/%.cpp $(filter-out $(wildcard  $(BB_CDLL_OBJ_DIR)),  $(BB_CDLL_OBJ_DIR))
+	$(DO_CC)
+
+$(BB_SERVER_OBJ_DIR)/%.o: $(HL_SERVER_SRC_DIR)/%.cpp $(filter-out $(wildcard  $(BB_SERVER_OBJ_DIR)),  $(BB_SERVER_OBJ_DIR))
+	$(DO_CC)
+
+$(BB_CDLL_OBJ_DIR)/%.o: $(HL_SRC_DIR)/hl/%.cpp $(filter-out $(wildcard  $(BB_CDLL_OBJ_DIR)),  $(BB_CDLL_OBJ_DIR))
+	$(DO_CC)
+
+$(PUBLIC_OBJ_DIR)/%.o : $(PUBLIC_SRC_DIR)/%.cpp $(filter-out $(wildcard  $(PUBLIC_OBJ_DIR)),  $(PUBLIC_OBJ_DIR))
+	$(DO_PUBLIC_CC)
+
+$(COMMON_OBJ_DIR)/%.o : $(COMMON_SRC_DIR)/%.cpp $(filter-out $(wildcard  $(COMMON_OBJ_DIR)),  $(COMMON_OBJ_DIR))
+	$(DO_COMMON_CC)
+
+$(GAME_SHARED_OBJ_DIR)/%.o : $(GAME_SHARED_SRC_DIR)/%.cpp $(filter-out $(wildcard  $(GAME_SHARED_OBJ_DIR)),  $(GAME_SHARED_OBJ_DIR))
+	$(DO_COMMON_CC)
+
+$(PM_SHARED_OBJ_DIR)/%.o : $(PM_SHARED_SRC_DIR)/%.c $(filter-out $(wildcard  $(PM_SHARED_OBJ_DIR)),  $(PM_SHARED_OBJ_DIR))
+	$(DO_PM_SHARED_CC)
+
+clean:
+	-rm -rf $(BB_CDLL_OBJ_DIR)
+	-rm -f client.$(SHLIBEXT)

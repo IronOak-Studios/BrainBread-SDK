@@ -27,6 +27,10 @@
 #define RGB_REDISH 0x00FF1010 //255,160,0
 #define RGB_GREENISH 0x0000A000 //0,160,0
 
+#ifndef _WIN32
+#define _cdecl 
+#endif
+
 #include "wrect.h"
 #include "cl_dll.h"
 #include "ammo.h"

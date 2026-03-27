@@ -116,7 +116,7 @@ s_helpitem *cPEHelper::ShowHelp( int type, char *cfgfile, bool more )
 s_helpitem *cPEHelper::ForceShowHelp( char *cfgfile )
 {
   if( !CVAR_GET_FLOAT( "cl_helpsys" ) )
-    return false;
+    return NULL;
 	char token[1024] = "";
 	char *pstart = (char*)gEngfuncs.COM_LoadFile( cfgfile, 5, NULL);
 	char *pfile = pstart;
