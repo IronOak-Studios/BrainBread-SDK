@@ -58,9 +58,10 @@ int CHudMusic::Init( )
 	CVAR_CREATE( "cl_helpsys", "1", FCVAR_ARCHIVE );
 	CVAR_CREATE( "cl_fadesys", "1", FCVAR_ARCHIVE );
 	CVAR_CREATE( "cl_fontsys", "1", FCVAR_ARCHIVE );
-  CVAR_CREATE( "cl_lensflare", "1", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_newfont", "1", FCVAR_ARCHIVE);
+	CVAR_CREATE( "cl_lensflare", "1", FCVAR_ARCHIVE );
 
-  CVAR_CREATE( "cl_blood", "3", FCVAR_CLIENTDLL );
+	CVAR_CREATE( "cl_blood", "3", FCVAR_CLIENTDLL );
 
 	m_iFlags |= HUD_ACTIVE;
 	gHUD.AddHudElem(this);

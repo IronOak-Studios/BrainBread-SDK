@@ -101,21 +101,18 @@ void cPEFontMgr::LoadFont( s_font *fnt )
 	if( !fnt )
 		return;
 
-	// Pick asset scale: use 2x variant for resolutions above 720p tier,
-	// fall back to 1x if the 2x cfg file doesn't exist.
-	int wantScale = (g_flHudScale >= 1.0f) ? 2 : 1;
-
 	char file[512];
 	char *pstart = NULL;
 
-	if( wantScale == 2 )
+	fnt->scale = 1;
+	if (CVAR_GET_FLOAT("cl_newfont"))
 	{
-		sprintf( file, "sprites/hud/%s2x.cfg", fnt->basename );
+		sprintf( file, "sprites/hud/%s_solid.cfg", fnt->basename );
 		pstart = (char*)gEngfuncs.COM_LoadFile( file, 5, NULL );
-		if( !pstart )
-			wantScale = 1;	// 2x cfg not found, fall back to 1x
+		if (pstart)
+			fnt->scale = 2;
 	}
-	if( wantScale == 1 )
+	if (!pstart)
 	{
 		sprintf( file, "sprites/hud/%s.cfg", fnt->basename );
 		pstart = (char*)gEngfuncs.COM_LoadFile( file, 5, NULL );
@@ -124,8 +121,6 @@ void cPEFontMgr::LoadFont( s_font *fnt )
 	char *pfile = pstart;
 	if( !pfile )
 		return;
-
-	fnt->scale = wantScale;
 
 	char token[1024];
 	bool nl = false;
@@ -152,8 +147,8 @@ void cPEFontMgr::LoadFont( s_font *fnt )
 		pfile = gEngfuncs.COM_ParseFile( pfile, token );
 	}
 
-	if( wantScale == 2 )
-		sprintf( file, "sprites/hud/%s2x.spr", fnt->basename );
+	if( fnt->scale == 2 )
+		sprintf( file, "sprites/hud/%s_solid.spr", fnt->basename );
 	else
 		sprintf( file, "sprites/hud/%s.spr", fnt->basename );
 
@@ -247,9 +242,12 @@ void cPEFontMgr::DrawChar( int x, int y, char chr, int r, int g, int b )
 	rect.top = curfont->charYPos[chr];
 	rect.bottom = rect.top + curfont->height;
 	rect.left = curfont->charXPos[chr];
-	rect.right = rect.left + curfont->charWidth[chr];
-
-	ScaledSPR_DrawAdditive( curfont->charSprite, 0, x, y, &rect, r, g, b, (float)curfont->scale );
+	rect.right = rect.left + curfont->charWidth[chr] + 1;
+	
+	if (curfont->scale > 1)
+		ScaledSPR_DrawHoles( curfont->charSprite, 0, x, y, &rect, r, g, b, (float)curfont->scale );
+	else
+		ScaledSPR_DrawAdditive(curfont->charSprite, 0, x, y, &rect, r, g, b, (float)curfont->scale);
 }
 
 int cPEFontMgr::DrawString( int x, int y, char *string, int r, int g, int b, int a )

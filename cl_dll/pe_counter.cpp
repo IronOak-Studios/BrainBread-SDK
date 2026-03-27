@@ -212,11 +212,19 @@ int CHudCounter::Draw( float flTime )
 		int cy = HudScale( 145 ) + m_iNumCnts * SMALL_CNT_HEIGHT;
 		int cx = HudScale( 10 );
 		int cw = XRES(80);
-		g_font->DrawString( cx, cy, m_sCounters[i].sName, 143, 143, 54 );
-		UTIL_FillRect( cx, cy + HudScale( 18 ), cw, HudScale( 1 ), 143, 143, 54, 255 );
-		UTIL_FillRect( cx, cy + HudScale( 30 ), cw, HudScale( 1 ), 143, 143, 54, 255 );
-		UTIL_FillRect( cx, cy + HudScale( 19 ), HudScale( 1 ), HudScale( 11 ), 143, 143, 54, 255 );
-		UTIL_FillRect( cx + cw, cy + HudScale( 18 ), HudScale( 1 ), HudScale( 13 ), 143, 143, 54, 255 );
+		int r = 143, g = 143, b = 54;
+		if (CVAR_GET_FLOAT("cl_newfont"))
+		{
+			r = g = 255;
+			// progress bar background
+			gEngfuncs.pfnFillRGBABlend(cx, cy + HudScale(18), cw, HudScale(13), 0, 0, 0, 180);
+		}
+		g_font->DrawString( cx, cy, m_sCounters[i].sName, r, g, b );
+
+		UTIL_FillRect( cx, cy + HudScale( 18 ), cw, HudScale( 1 ), r, g, b, 255 );
+		UTIL_FillRect( cx, cy + HudScale( 30 ), cw, HudScale( 1 ), r, g, b, 255 );
+		UTIL_FillRect( cx, cy + HudScale( 19 ), HudScale( 1 ), HudScale( 11 ), r, g, b, 255 );
+		UTIL_FillRect( cx + cw, cy + HudScale( 18 ), HudScale( 1 ), HudScale( 13 ), r, g, b, 255 );
 		
 		pcent = 100.0f * ( flTime - m_sCounters[i].fStart ) / m_sCounters[i].fTotal;
 		if( pcent > 100 )

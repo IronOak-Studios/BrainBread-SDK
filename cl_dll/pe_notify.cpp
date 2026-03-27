@@ -57,7 +57,7 @@ int CHudNotify::VidInit(void)
 	m_iSpecialSprite = gHUD.GetSpriteIndex( "htool" );
 	m_sprMate = gHUD.GetSpriteIndex( "mate" );
 	m_iSpecial = 0;
-	pulseFader->Start( "pulse", 0, 1 );
+	pulseFader->Start(CVAR_GET_FLOAT("cl_newfont") ? "pulse_solid" : "pulse", 0, 1);
 
 	for( int i = 0; i < ( MAX_PLAYERS + 1 ); i++ )
 		g_IsSpecial[i] = 0;
@@ -279,7 +279,7 @@ int CHudNotify::Draw( float flTime )
 		if( dur1 )
     {
 			m_flDur1 = flTime + ( m_flDur1 == -1 ? 999999 : m_flDur1 );
-   		notifyFader->Start( "mid", flTime, m_flDur1 );
+   		notifyFader->Start( CVAR_GET_FLOAT("cl_newfont") ? "mid_solid" : "mid", flTime, m_flDur1 );
     }
 		if( dur2 )
       m_flDur2 = flTime + ( m_flDur2 == -1 ? 999999 : m_flDur2 );
