@@ -158,14 +158,15 @@ so the HUD can reinitialize itself.
 */
 int CL_DLLEXPORT HUD_VidInit( void )
 {
-	if( !g_font )
-		g_font = new cPEFontMgr( );
-	else
-		g_font->Reload( );
-  cPEFader::DeleteAll( );
+	cPEFader::DeleteAll( );
 	cPEFader::Init( );
 //	RecClHudVidInit();
 	gHUD.VidInit();
+
+	if (!g_font)
+		g_font = new cPEFontMgr();
+	else
+		g_font->Reload();
 
 	VGui_Startup();
 

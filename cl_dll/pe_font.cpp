@@ -13,6 +13,13 @@ cPEFontMgr *g_font = NULL;
 s_font *fntBlueHighway = NULL;
 //s_font *fntWepmenu = NULL;
 
+// Scale a font-space value to screen pixels, accounting for the asset's
+// native scale so that a 2x sprite at 2x HUD scale produces 1:1 pixels.
+static inline int FontScale( const s_font *fnt, int v )
+{
+	return (int)( v * g_flHudScale / fnt->scale + 0.5f );
+}
+
 cPEFontMgr::cPEFontMgr( )
 {
 	ffont = NULL;
@@ -94,12 +101,32 @@ void cPEFontMgr::LoadFont( s_font *fnt )
 	if( !fnt )
 		return;
 
+	// Pick asset scale: use 2x variant for resolutions above 720p tier,
+	// fall back to 1x if the 2x cfg file doesn't exist.
+	int wantScale = (g_flHudScale >= 1.0f) ? 2 : 1;
+
 	char file[512];
-	sprintf( file, "sprites/hud/%s.cfg\0", fnt->basename );
-	char *pstart = (char*)gEngfuncs.COM_LoadFile( file, 5, NULL);
+	char *pstart = NULL;
+
+	if( wantScale == 2 )
+	{
+		sprintf( file, "sprites/hud/%s2x.cfg", fnt->basename );
+		pstart = (char*)gEngfuncs.COM_LoadFile( file, 5, NULL );
+		if( !pstart )
+			wantScale = 1;	// 2x cfg not found, fall back to 1x
+	}
+	if( wantScale == 1 )
+	{
+		sprintf( file, "sprites/hud/%s.cfg", fnt->basename );
+		pstart = (char*)gEngfuncs.COM_LoadFile( file, 5, NULL );
+	}
+
 	char *pfile = pstart;
 	if( !pfile )
 		return;
+
+	fnt->scale = wantScale;
+
 	char token[1024];
 	bool nl = false;
 
@@ -114,17 +141,22 @@ void cPEFontMgr::LoadFont( s_font *fnt )
 		if( i >= 0 && i <= ( PE_FONT_END - PE_FONT_START ) )
 		{
 			pfile = gEngfuncs.COM_ParseFile( pfile, token );
-      fnt->charYPos[i] = atoi( token );
+			fnt->charYPos[i] = atoi( token );
 			pfile = gEngfuncs.COM_ParseFile( pfile, token );
 			fnt->charXPos[i] = atoi( token );
 			pfile = gEngfuncs.COM_ParseFile( pfile, token );
-      endx = atoi( token );
+			endx = atoi( token );
 			fnt->charWidth[i] = endx - fnt->charXPos[i];
 		}
 		i++;
 		pfile = gEngfuncs.COM_ParseFile( pfile, token );
 	}
-	sprintf( file, "sprites/hud/%s.spr\0", fnt->basename );
+
+	if( wantScale == 2 )
+		sprintf( file, "sprites/hud/%s2x.spr", fnt->basename );
+	else
+		sprintf( file, "sprites/hud/%s.spr", fnt->basename );
+
 	fnt->charSprite = LoadSprite( file );
 	fnt->ready = true;
 	gEngfuncs.COM_FreeFile( pstart );
@@ -173,7 +205,7 @@ int cPEFontMgr::GetWidth( char chr )
 
 	if( (int)chr < PE_FONT_START || (int)chr > PE_FONT_END )
 		return HudScale( SPACE_WIDTH );
-	return HudScale( curfont->charWidth[ chr - PE_FONT_START ] );
+	return FontScale( curfont, curfont->charWidth[ chr - PE_FONT_START ] );
 }
 
 int cPEFontMgr::GetWidth( char *string )
@@ -217,7 +249,7 @@ void cPEFontMgr::DrawChar( int x, int y, char chr, int r, int g, int b )
 	rect.left = curfont->charXPos[chr];
 	rect.right = rect.left + curfont->charWidth[chr];
 
-	ScaledSPR_DrawAdditive( curfont->charSprite, 0, x, y, &rect, r, g, b );
+	ScaledSPR_DrawAdditive( curfont->charSprite, 0, x, y, &rect, r, g, b, (float)curfont->scale );
 }
 
 int cPEFontMgr::DrawString( int x, int y, char *string, int r, int g, int b, int a )
@@ -241,7 +273,7 @@ int cPEFontMgr::DrawStringML( int x, int y, char *string, int r, int g, int b, i
 	{
 		if( *string == '\n' )
 		{
-			y += HudScale( curfont->height );
+			y += FontScale( curfont, curfont->height );
 			curx = x;
 			continue;
 		}
@@ -332,7 +364,7 @@ int cPEFontMgr::DrawStringML( int x, int y, char *string )
 
 		if( *string == '\n' )
 		{
-			y += HudScale( curfont->height );
+			y += FontScale( curfont, curfont->height );
 			curx = x;
 			continue;
 		}
@@ -346,7 +378,7 @@ int cPEFontMgr::GetHeight( )
 {
 	if( !curfont || !curfont->ready )
 		return 0;
-	return HudScale( curfont->height );
+	return FontScale( curfont, curfont->height );
 }
 
 int cPEFontMgr::GetHeightML( char *string )
@@ -360,5 +392,5 @@ int cPEFontMgr::GetHeightML( char *string )
 			count++;
 	}
 	count++;
-	return count * HudScale( curfont->height );
+	return count * FontScale( curfont, curfont->height );
 }

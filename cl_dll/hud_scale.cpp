@@ -71,7 +71,8 @@ void HudScale_Update( void )
 // Calls SPR_Set internally so callers don't need to.
 // ---------------------------------------------------------------------------
 static void DrawScaledSprite( HSPRITE hSprite, int frame, int x, int y,
-	const struct rect_s *prc, int blendSrc, int blendDst, int r, int g, int b )
+	const struct rect_s *prc, int blendSrc, int blendDst, int r, int g, int b,
+	float assetScale )
 {
 	if( !hSprite )
 		return;
@@ -84,15 +85,19 @@ static void DrawScaledSprite( HSPRITE hSprite, int frame, int x, int y,
 
 	SPR_Set( hSprite, r, g, b );
 
-	int scaledFullW = (int)( fullW * g_flHudScale + 0.5f );
-	int scaledFullH = (int)( fullH * g_flHudScale + 0.5f );
+	// Effective scale: HUD scale divided by asset scale.
+	// e.g. 2x HUD scale with a 2x asset = 1.0 (no GPU scaling).
+	float effectiveScale = g_flHudScale / assetScale;
+
+	int scaledFullW = (int)( fullW * effectiveScale + 0.5f );
+	int scaledFullH = (int)( fullH * effectiveScale + 0.5f );
 
 	if( prc )
 	{
-		int clipW = (int)( ( prc->right - prc->left ) * g_flHudScale + 0.5f );
-		int clipH = (int)( ( prc->bottom - prc->top ) * g_flHudScale + 0.5f );
-		int drawX = x - (int)( prc->left * g_flHudScale + 0.5f );
-		int drawY = y - (int)( prc->top * g_flHudScale + 0.5f );
+		int clipW = (int)( ( prc->right - prc->left ) * effectiveScale + 0.5f );
+		int clipH = (int)( ( prc->bottom - prc->top ) * effectiveScale + 0.5f );
+		int drawX = x - (int)( prc->left * effectiveScale + 0.5f );
+		int drawY = y - (int)( prc->top * effectiveScale + 0.5f );
 
 		SPR_EnableScissor( x, y, clipW, clipH );
 		gEngfuncs.pfnSPR_DrawGeneric( frame, drawX, drawY, NULL,
@@ -117,15 +122,15 @@ inline rect_s SPR_Rect(HSPRITE spr, int frame = 0)
 }
 
 void ScaledSPR_DrawHoles( HSPRITE hSprite, int frame, int x, int y,
-	const struct rect_s *prc, int r, int g, int b )
+	const struct rect_s *prc, int r, int g, int b, float assetScale )
 {
 	DrawScaledSprite( hSprite, frame, x, y, prc,
-		GL_BLEND_SRC_ALPHA, GL_BLEND_ONE_MINUS_SRC_ALPHA, r, g, b );
+		GL_BLEND_SRC_ALPHA, GL_BLEND_ONE_MINUS_SRC_ALPHA, r, g, b, assetScale );
 }
 
 void ScaledSPR_DrawAdditive( HSPRITE hSprite, int frame, int x, int y,
-	const struct rect_s *prc, int r, int g, int b )
+	const struct rect_s *prc, int r, int g, int b, float assetScale )
 {
 	DrawScaledSprite( hSprite, frame, x, y, prc,
-		GL_BLEND_ONE, GL_BLEND_ONE, r, g, b );
+		GL_BLEND_ONE, GL_BLEND_ONE, r, g, b, assetScale );
 }

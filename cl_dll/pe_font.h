@@ -34,6 +34,7 @@ struct s_font
 	char basename[MAX_NAME_LEN];
 
 	int charSprite;
+	int scale;		// asset scale factor (1 = original, 2 = hi-res variant)
 	bool ready;
 
 	s_font *next;

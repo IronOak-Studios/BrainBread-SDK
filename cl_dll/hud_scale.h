@@ -32,10 +32,10 @@ void HudScale_Update( void );
 // --------------------------------------------------------------------------
 
 void ScaledSPR_DrawHoles( HSPRITE hSprite, int frame, int x, int y,
-	const struct rect_s *prc, int r, int g, int b );
+	const struct rect_s *prc, int r, int g, int b, float assetScale = 1.0f );
 
 void ScaledSPR_DrawAdditive( HSPRITE hSprite, int frame, int x, int y,
-	const struct rect_s *prc, int r, int g, int b );
+	const struct rect_s *prc, int r, int g, int b, float assetScale = 1.0f );
 
 // --------------------------------------------------------------------------
 // Scale a value from 720p design space to current screen pixels.
