@@ -73,7 +73,9 @@
       </BaseAddress>
     </Link>
     <PostBuildEvent>
-      <Command>if not "$(GameInstallDir)"=="" call ..\..\filecopy.bat $(TargetPath) $(GameInstallDir)\cl_dlls\$(TargetName).dll
+      <Command>call ..\..\filecopy.bat $(TargetPath) ..\..\..\game\brainbread\cl_dlls\$(TargetName).dll
+call ..\..\filecopy.bat $(TargetDir)$(TargetName).pdb ..\..\..\game\brainbread\cl_dlls\$(TargetName).pdb
+if not "$(GameInstallDir)"=="" call ..\..\filecopy.bat $(TargetPath) $(GameInstallDir)\cl_dlls\$(TargetName).dll
 if not "$(GameInstallDir)"=="" call ..\..\filecopy.bat $(TargetDir)$(TargetName).pdb $(GameInstallDir)\cl_dlls\$(TargetName).pdb</Command>
     </PostBuildEvent>
     <PostBuildEvent>
@@ -103,7 +105,9 @@ if not "$(GameInstallDir)"=="" call ..\..\filecopy.bat $(TargetDir)$(TargetName)
       </BaseAddress>
     </Link>
     <PostBuildEvent>
-      <Command>if not "$(GameInstallDir)"=="" call ..\..\filecopy.bat $(TargetPath) $(GameInstallDir)\cl_dlls\$(TargetName).dll
+      <Command>call ..\..\filecopy.bat $(TargetPath) ..\..\..\game\brainbread\cl_dlls\$(TargetName).dll
+call ..\..\filecopy.bat $(TargetDir)$(TargetName).pdb ..\..\..\game\brainbread\cl_dlls\$(TargetName).pdb
+if not "$(GameInstallDir)"=="" call ..\..\filecopy.bat $(TargetPath) $(GameInstallDir)\cl_dlls\$(TargetName).dll
 if not "$(GameInstallDir)"=="" call ..\..\filecopy.bat $(TargetDir)$(TargetName).pdb $(GameInstallDir)\cl_dlls\$(TargetName).pdb</Command>
     </PostBuildEvent>
     <PostBuildEvent>

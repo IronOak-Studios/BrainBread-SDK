@@ -42,6 +42,7 @@
 #include "pe_rules.h"
 #include "pe_rules_hacker.h"
 #include "pe_rules_vip.h"
+#include "build.h"
 
 edict_t *EntSelectSpawnPoint( CBasePlayer *pPlayer );
 extern DLL_GLOBAL ULONG		g_ulModelIndexPlayer;
@@ -482,9 +483,9 @@ void Host_Say( edict_t *pEntity, int teamonly )
 		sprintf( ans, "Next map in cycle: %s\n", g_sNextMap );
 		answer = 1;
 	}
-	else if( !strcmp( p, "peversion" ) )
+	else if( !strcmp( p, "peversion" ) || !strcmp(p, "peversion") )
 	{
-	//	sprintf( ans, "%s, %s", peversion.string, BUILD );
+		sprintf( ans, "%s, %s", peversion.string, BUILD );
 		answer = 1;
 	}
 	

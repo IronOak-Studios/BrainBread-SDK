@@ -327,7 +327,7 @@ int CHudNotify::Draw( float flTime )
 	if( m_flDur2 > flTime )
 	{
 		pulseFader->GetColor( flTime, r, g, b, a );
-		g_font->DrawString( HudScale( 35 ), HudScale( 2 ), m_sText1, c[0], c[1], c[2], a );
+		g_font->DrawString( HudScale( 37 ), HudScale( 4 ), m_sText1, c[0], c[1], c[2], a );
 	}
 	g_font->SetFont( FONT_NOTIFY_MID );
 

@@ -69,7 +69,9 @@
       <ModuleDefinitionFile>$(ProjectDir)..\..\dlls\bb.def</ModuleDefinitionFile>
     </Link>
     <PostBuildEvent>
-      <Command>if not "$(GameInstallDir)"=="" call ..\..\filecopy.bat $(TargetPath) $(GameInstallDir)\dlls\$(TargetName).dll
+      <Command>call ..\..\filecopy.bat $(TargetPath) ..\..\..\game\brainbread\dlls\$(TargetName).dll
+call ..\..\filecopy.bat $(TargetDir)$(TargetName).pdb ..\..\..\game\brainbread\dlls\$(TargetName).pdb
+if not "$(GameInstallDir)"=="" call ..\..\filecopy.bat $(TargetPath) $(GameInstallDir)\dlls\$(TargetName).dll
 if not "$(GameInstallDir)"=="" call ..\..\filecopy.bat $(TargetDir)$(TargetName).pdb $(GameInstallDir)\dlls\$(TargetName).pdb</Command>
     </PostBuildEvent>
     <PostBuildEvent>
@@ -77,6 +79,10 @@ if not "$(GameInstallDir)"=="" call ..\..\filecopy.bat $(TargetDir)$(TargetName)
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <PreBuildEvent>
+      <Command>call "$(ProjectDir)increment_build.bat" "$(ProjectDir)..\..\dlls\build.h"</Command>
+      <Message>Incrementing build number</Message>
+    </PreBuildEvent>
     <ClCompile>
       <WarningLevel>Level3</WarningLevel>
       <PrecompiledHeader>
@@ -97,7 +103,9 @@ if not "$(GameInstallDir)"=="" call ..\..\filecopy.bat $(TargetDir)$(TargetName)
       <ModuleDefinitionFile>$(ProjectDir)..\..\dlls\bb.def</ModuleDefinitionFile>
     </Link>
     <PostBuildEvent>
-      <Command>if not "$(GameInstallDir)"=="" call ..\..\filecopy.bat $(TargetPath) $(GameInstallDir)\dlls\$(TargetName).dll
+      <Command>call ..\..\filecopy.bat $(TargetPath) ..\..\..\game\brainbread\dlls\$(TargetName).dll
+call ..\..\filecopy.bat $(TargetDir)$(TargetName).pdb ..\..\..\game\brainbread\dlls\$(TargetName).pdb
+if not "$(GameInstallDir)"=="" call ..\..\filecopy.bat $(TargetPath) $(GameInstallDir)\dlls\$(TargetName).dll
 if not "$(GameInstallDir)"=="" call ..\..\filecopy.bat $(TargetDir)$(TargetName).pdb $(GameInstallDir)\dlls\$(TargetName).pdb</Command>
     </PostBuildEvent>
     <PostBuildEvent>
@@ -200,6 +208,9 @@ if not "$(GameInstallDir)"=="" call ..\..\filecopy.bat $(TargetDir)$(TargetName)
     <ClCompile Include="..\..\pm_shared\pm_debug.c" />
     <ClCompile Include="..\..\pm_shared\pm_math.c" />
     <ClCompile Include="..\..\pm_shared\pm_shared.c" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\..\dlls\build.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
