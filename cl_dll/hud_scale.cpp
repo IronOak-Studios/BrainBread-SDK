@@ -24,7 +24,7 @@ static cvar_t *s_pCvarHudScale = NULL;
 
 void HudScale_Init( void )
 {
-	// 0 = automatic (ScreenWidth / 1280), >0 = manual multiplier
+	// 0 = automatic (ScreenHeight / 720), >0 = manual multiplier
 	s_pCvarHudScale = CVAR_CREATE( "hud_scale", "0", FCVAR_ARCHIVE );
 }
 
@@ -44,15 +44,15 @@ void HudScale_Update( void )
 	}
 	else
 	{
-		g_flHudScale = (float)ScreenWidth / HUD_BASE_WIDTH;
+		g_flHudScale = (float)ScreenHeight / HUD_BASE_HEIGHT;
 		if( g_flHudScale < 1.0f )
 			g_flHudScale = 1.0f;
 	}
 
 	if( g_flHudScale != oldScale )
 	{
-		gEngfuncs.Con_Printf( "HudScale: %.2f (ScreenWidth=%d, cvar=%.1f)\n",
-			g_flHudScale, ScreenWidth, manual );
+		gEngfuncs.Con_Printf( "HudScale: %.2f (ScreenHeight=%d, cvar=%.1f)\n",
+			g_flHudScale, ScreenHeight, manual );
 	}
 }
 

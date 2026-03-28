@@ -3,8 +3,8 @@
 *   hud_scale.h
 *
 *   HUD scaling support for modern resolutions.
-*   Base design resolution is 1280x720 -- the HUD looks correct
-*   at 720p with the existing 640-tier sprite assets.
+ *   Base design height is 720 -- the HUD looks correct at 720p
+ *   with the existing 640-tier sprite assets.
 *
 ****/
 
@@ -14,9 +14,9 @@
 #include "wrect.h"
 #include "cl_dll.h"
 
-#define HUD_BASE_WIDTH  1280.f
+#define HUD_BASE_HEIGHT 720.f
 
-// Global HUD scale factor (ScreenWidth / 1280.0 by default, clamped >= 1).
+// Global HUD scale factor (ScreenHeight / 720.0 by default, clamped >= 1).
 // Updated every frame from the "hud_scale" cvar.
 extern float g_flHudScale;
 
