@@ -26,6 +26,9 @@ void CL_DLLEXPORT HUD_ChatInputPosition( int *x, int *y )
 {
 //	RecClChatInputPosition( x, y );
 
+	// Position chat input at ~75% down the screen
+	*y = YRES_HD( 500 );
+
 	if ( g_iUser1 != 0 || gEngfuncs.IsSpectateOnly() )
 	{
 		if ( gHUD.m_Spectator.m_pip->value == INSET_OFF )
