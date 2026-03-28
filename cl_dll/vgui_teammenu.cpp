@@ -23,6 +23,7 @@
 
 #include "hud.h"
 #include "cl_util.h"
+#include "hud_scale.h"
 #include "vgui_TeamFortressViewport.h"
 
 // Team Menu Dimensions
@@ -111,9 +112,15 @@ CTeamMenuPanel::CTeamMenuPanel(int iTrans, int iRemoveMe, int x,int y,int wide,i
     //m_pModelImages[i-1]->setSize( TEAMMENU_BUTTON_SIZE_X, TEAMMENU_BUTTON_SIZE_Y );
     butX = m_pModelImages[i]->getImageWide( );
     butY = m_pModelImages[i]->getImageTall( );
+    // Scale the image panel to match the HUD scale factor
+    m_pModelImages[i]->setContentFitted( false );
+    m_pModelImages[i]->setSize( HudScale( butX ), HudScale( butY ) );
 	  m_pModelImages[i]->setContentAlignment( vgui::Label::a_west );
 	  m_pModelImages[i]->setParent( this );
   }
+  // Use scaled dimensions for button hit areas
+  butX = HudScale( butX );
+  butY = HudScale( butY );
 
 	// Team Menu buttons
 	for( i = 1; i <= 3; i++)
@@ -293,8 +300,10 @@ void CTeamMenuPanel::Update( void )
 				m_pButtons[i]->setVisible( true );
 				m_pButtons[i]->setPos( TEAMMENU_TOPLEFT_BUTTON_X, iYPos );
         m_pModelImages[curmdl-1]->setVisible( true );
-        m_pModelImages[curmdl-1]->setPos( TEAMMENU_TOPLEFT_BUTTON_X, iYPos - 4 );
-				iYPos += TEAMMENU_BUTTON_SIZE_Y + TEAMMENU_BUTTON_SPACER_Y;
+        m_pModelImages[curmdl-1]->setPos( TEAMMENU_TOPLEFT_BUTTON_X, iYPos );
+				int btnW, btnH;
+				m_pButtons[i]->getSize( btnW, btnH );
+				iYPos += btnH + TEAMMENU_BUTTON_SPACER_Y;
 
 				// Start with the first option up
 				if (!m_iCurrentInfo)

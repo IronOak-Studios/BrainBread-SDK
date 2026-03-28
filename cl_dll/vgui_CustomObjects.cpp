@@ -17,6 +17,7 @@
 //=============================================================================
 
 #include "VGUI_Font.h"
+#include "VGUI_SurfaceBase.h"
 
 #include "hud.h"
 #include "cl_util.h"
@@ -33,6 +34,17 @@
 #include "vgui_TeamFortressViewport.h"
 #include "vgui_ServerBrowser.h"
 #include "vgui_loadtga.h"
+
+// ---------------------------------------------------------------------------
+// Helper to access Bitmap's protected _rgba pointer.
+// Bitmap::_rgba is protected, so a subclass can reach it.
+// The cast is safe because BitmapTGA derives from Bitmap with no extra data.
+// ---------------------------------------------------------------------------
+class BitmapAccess : public vgui::Bitmap
+{
+public:
+	uchar* getRGBA( void ) { return _rgba; }
+};
 
 // Arrow filenames
 const char *sArrowFilenames[] =
@@ -330,6 +342,8 @@ int ClassButton::IsNotValid()
 // Button with Class image beneath it
 CImageLabel::CImageLabel( const char* pImageName,int x,int y ) : Label( "", x,y )
 {
+	m_iTexId = 0;
+	m_bTexUploaded = false;
 	setContentFitted(true);
 	m_pTGA = LoadTGAForRes(pImageName);
 	setImage( m_pTGA );
@@ -337,6 +351,8 @@ CImageLabel::CImageLabel( const char* pImageName,int x,int y ) : Label( "", x,y 
 
 CImageLabel::CImageLabel( const char* pImageName,int x,int y,int wide,int tall ) : Label( "", x,y,wide,tall )
 {
+	m_iTexId = 0;
+	m_bTexUploaded = false;
 	setContentFitted(true);
 	m_pTGA = LoadTGAForRes(pImageName);
 	setImage( m_pTGA );
@@ -401,6 +417,66 @@ void CImageLabel::LoadImage(const char * pImageName)
 
 	setSize( XRES (w),YRES (t) );
 	setImage( m_pTGA );
+}
+
+//===========================================================
+// Scaled paint -- draws the TGA texture stretched to fill the
+// panel's current size.  Falls back to Label::paint() if no
+// TGA is loaded.
+//===========================================================
+void CImageLabel::paint( void )
+{
+	if( !m_pTGA )
+	{
+		Label::paint();
+		return;
+	}
+
+	int wide, tall;
+	getPaintSize( wide, tall );
+
+	int nativeW, nativeH;
+	m_pTGA->getSize( nativeW, nativeH );
+
+	// If panel size matches native size, just use default path
+	if( wide == nativeW && tall == nativeH )
+	{
+		Label::paint();
+		return;
+	}
+
+	// Allocate a texture ID from the engine on first use
+	if( !m_iTexId )
+	{
+		SurfaceBase *sb = getSurfaceBase();
+		if( sb )
+			m_iTexId = sb->createNewTextureID();
+		if( !m_iTexId )
+		{
+			Label::paint();
+			return;
+		}
+	}
+
+	if( !m_bTexUploaded )
+	{
+		uchar *rgba = ((BitmapAccess *)m_pTGA)->getRGBA();
+		if( rgba )
+		{
+			drawSetTextureRGBA( m_iTexId, (const char *)rgba, nativeW, nativeH );
+			m_bTexUploaded = true;
+		}
+		else
+		{
+			// Fallback -- let Bitmap handle it
+			Label::paint();
+			return;
+		}
+	}
+
+	drawSetTexture( m_iTexId );
+	drawSetColor( 255, 255, 255, 0 );
+	drawTexturedRect( 0, 0, wide, tall );
 }
 
 //===========================================================

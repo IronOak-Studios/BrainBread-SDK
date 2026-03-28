@@ -108,6 +108,8 @@ class CImageLabel : public Label
 {
 public:
 	BitmapTGA	*m_pTGA;
+	int			m_iTexId;
+	bool		m_bTexUploaded;
 
 public:
 	void LoadImage(const char * pImageName);
@@ -121,6 +123,8 @@ public:
 	{
 		// Do nothing, so the background's left transparent.
 	}
+
+	virtual void paint();
 };
 
 // Command Label
