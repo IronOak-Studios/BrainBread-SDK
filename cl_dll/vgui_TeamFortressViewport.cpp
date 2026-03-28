@@ -1364,12 +1364,8 @@ void TeamFortressViewport::ShowScoreBoard( void )
 {
 	if (m_pScoreBoard)
 	{
-		// No Scoreboard in single-player
-		if ( gEngfuncs.GetMaxClients() > 1 )
-		{
-			m_pScoreBoard->Open();
-			UpdateCursorState();
-		}
+		m_pScoreBoard->Open();
+		UpdateCursorState();
 	}
 }
 
