@@ -13,6 +13,7 @@ HLWPN_OBJ_DIR=$(HLDLL_OBJ_DIR)/wpn_shared
 SQLITE_OBJ_DIR=$(HLDLL_OBJ_DIR)/sqlite
 PM_OBJ_DIR=$(HLDLL_OBJ_DIR)/pm_shared
 GAME_SHARED_OBJ_DIR=$(HLDLL_OBJ_DIR)/game_shared
+COMMON_OBJ_DIR=$(HLDLL_OBJ_DIR)/common
 BB_OUTPUT_DIR=$(SOURCE_DIR)/../game/brainbread
 
 CFLAGS=$(BASE_CFLAGS)  $(ARCH_CFLAGS) -fPIC -DCLIENT_WEAPONS
@@ -27,6 +28,7 @@ LDFLAGS= -lm -lstdc++
 DO_HLDLL_CC=$(CC) $(HLDLL_INCLUDEDIRS) $(CFLAGS) -o $@ -c $<
 DO_PM_CC=$(CC) $(PM_INCLUDEDIRS) $(CFLAGS) -o $@ -c $<
 DO_GAME_SHARED_CC=$(CC) $(GAME_SHARED_INCLUDEDIRS) $(CFLAGS) -o $@ -c $<
+DO_COMMON_CC=$(CC) $(HLDLL_INCLUDEDIRS) $(CFLAGS) -o $@ -c $<
 
 #####################################################################
 
@@ -129,6 +131,9 @@ PM_OBJS = \
 GAME_SHARED_OBJS = \
 	$(GAME_SHARED_OBJ_DIR)/voice_gamemgr.o
 
+COMMON_OBJS = \
+	$(COMMON_OBJ_DIR)/interface.o
+
 all: dirs bb.$(SHLIBEXT)
 
 dirs:
@@ -137,9 +142,10 @@ dirs:
 	-mkdir -p $(SQLITE_OBJ_DIR)
 	-mkdir -p $(PM_OBJ_DIR)
 	-mkdir -p $(GAME_SHARED_OBJ_DIR)
+	-mkdir -p $(COMMON_OBJ_DIR)
 
-bb.$(SHLIBEXT): $(HLDLL_OBJS) $(SQLITE_OBJS) $(PM_OBJS) $(GAME_SHARED_OBJS)
-	$(CC) $(LDFLAGS) $(SHLIBLDFLAGS) -o $(BUILD_DIR)/$@ $(HLDLL_OBJS) $(SQLITE_OBJS) $(PM_OBJS) $(GAME_SHARED_OBJS)
+bb.$(SHLIBEXT): $(HLDLL_OBJS) $(SQLITE_OBJS) $(PM_OBJS) $(GAME_SHARED_OBJS) $(COMMON_OBJS)
+	$(CC) $(LDFLAGS) $(SHLIBLDFLAGS) -o $(BUILD_DIR)/$@ $(HLDLL_OBJS) $(SQLITE_OBJS) $(PM_OBJS) $(GAME_SHARED_OBJS) $(COMMON_OBJS)
 	-mkdir -p $(BB_OUTPUT_DIR)/dlls
 	-cp $(BUILD_DIR)/$@  $(BB_OUTPUT_DIR)/dlls/bb.$(SHLIBEXT)
 	-./gendbg.sh $(BB_OUTPUT_DIR)/dlls/bb.$(SHLIBEXT)
@@ -156,7 +162,11 @@ $(PM_OBJ_DIR)/%.o : $(PM_SRC_DIR)/%.c
 $(GAME_SHARED_OBJ_DIR)/%.o : $(GAME_SHARED_SRC_DIR)/%.cpp
 	$(DO_GAME_SHARED_CC)
 
+$(COMMON_OBJ_DIR)/%.o : $(COMMON_SRC_DIR)/%.cpp
+	$(DO_COMMON_CC)
+
 clean:
+	-rm -rf $(COMMON_OBJ_DIR)
 	-rm -rf $(GAME_SHARED_OBJ_DIR)
 	-rm -rf $(PM_OBJ_DIR)
 	-rm -rf $(SQLITE_OBJ_DIR)
