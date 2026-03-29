@@ -1194,7 +1194,7 @@ void SetupVisibility( edict_t *pViewEntity, edict_t *pClient, unsigned char **pv
 
     // Verfolgende Spectators benutzen das PVS ihres Ziels
     CBasePlayer *pPlayer = (CBasePlayer *)CBaseEntity::Instance( pClient );
-    if( pPlayer->IsObserver( ) && ( pPlayer->pev->iuser2 != 0 ) && (pPlayer->m_hObserverTarget != NULL) )
+    if( pPlayer && pPlayer->IsObserver( ) && ( pPlayer->pev->iuser2 != 0 ) && (pPlayer->m_hObserverTarget != NULL) )
     {
 		pView = pPlayer->m_hObserverTarget->edict();
     }

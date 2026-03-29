@@ -1065,7 +1065,7 @@ void PM_WalkMove ()
 
 	for (i=0 ; i<2 ; i++)       // Determine x and y parts of velocity
 //		wishvel[i] = pmove->forward[i]*fmove + pmove->right[i]*smove;
-		wishvel[i] = pmove->forward[i]*fmove + (int)((float)pmove->right[i]*((float)smove*0.9f));
+		wishvel[i] = pmove->forward[i]*fmove + pmove->right[i]*(smove*0.9f);
 	
 	wishvel[2] = 0;             // Zero out z part of velocity
 
