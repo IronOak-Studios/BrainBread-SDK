@@ -77,6 +77,10 @@ public:
 	float  m_flAvoidRemaining;	// Sideways distance left in current burst (0 = not avoiding)
 	Vector m_vecAvoidEnemyPos;	// Enemy pos when m_iLastAvoidDir was set (for 80-unit reset)
 
+	// Small-obstacle clip-through
+	float  m_flClipRemaining;	// Distance left to clip through (0 = not clipping)
+	Vector m_vecClipDir;		// Direction to clip through (unit vector, 2D)
+
 	float m_fAnimTimeout;
 
 	void PainSound( void );
@@ -812,6 +816,8 @@ void CZombie :: Spawn()
   m_iLastAvoidDir = 0;
   m_flAvoidRemaining = 0;
   m_vecAvoidEnemyPos = Vector( 0, 0, 0 );
+  m_flClipRemaining = 0;
+  m_vecClipDir = Vector( 0, 0, 0 );
   m_fAnimTimeout = gpGlobals->time + 4;
 
   /*MESSAGE_BEGIN( MSG_PVS, gmsgSpray, pev->origin );
@@ -867,14 +873,10 @@ void CZombie::SpawningThink( )
 }
 
 //=========================================================
-// Move - zombie override with simple obstacle avoidance.
+// Move - zombie override with obstacle avoidance.
 //
-// Normal movement via CBaseMonster::Move(). If the zombie
-// hasn't moved for 1 second, it starts a sideways burst
-// (66-196 units) to get around the obstacle. The burst
-// runs across multiple frames at the zombie's normal speed.
-// Once done, control returns to normal movement. On the
-// next stuck event it goes the opposite direction.
+// When stuck for 1s, tries clip-through first (small
+// obstacles the head can see over), then sidestep burst.
 //=========================================================
 void CZombie::Move( float flInterval )
 {
@@ -882,6 +884,36 @@ void CZombie::Move( float flInterval )
 	if ( zombie_behavior.value == 0 )
 	{
 		CBaseMonster::Move( flInterval );
+		return;
+	}
+
+	// --- Clipping through a small obstacle ---
+	if ( m_flClipRemaining > 0 )
+	{
+		if ( !FRouteClear() && m_movementGoal != MOVEGOAL_NONE )
+		{
+			MakeIdealYaw( m_Route[ m_iRouteIndex ].vecLocation );
+			ChangeYaw( pev->yaw_speed );
+		}
+		if ( m_IdealActivity != m_movementActivity )
+			m_IdealActivity = m_movementActivity;
+
+		float flDist = m_flGroundSpeed * pev->framerate * flInterval;
+		if ( flDist > m_flClipRemaining )
+			flDist = m_flClipRemaining;
+
+		UTIL_SetOrigin( pev, pev->origin + m_vecClipDir * flDist );
+		m_flClipRemaining -= flDist;
+
+		if ( m_flClipRemaining <= 0 )
+		{
+			m_flClipRemaining = 0;
+			m_vecStuckCheckPos = pev->origin;
+			m_flStuckStartTime = 0;
+			if ( m_hEnemy != NULL )
+				m_vecEnemyLKP = m_hEnemy->pev->origin;
+			FRefreshRoute();
+		}
 		return;
 	}
 
@@ -1021,15 +1053,56 @@ void CZombie::Move( float flInterval )
 	if ( gpGlobals->time - m_flStuckStartTime < 1.0 )
 		return;
 
-	// --- Stuck for 1 second: start a sideways burst ---
-
-	// Compute direction toward goal
+	// --- Stuck for 1s: try clip-through, then sidestep ---
 	Vector vecToGoal = ( m_Route[ m_iRouteIndex ].vecLocation - pev->origin );
 	vecToGoal.z = 0;
 	float flGoalDist = vecToGoal.Length();
 	if ( flGoalDist < 1.0 )
 		return;
 	vecToGoal = vecToGoal / flGoalDist;
+
+	// --- Small-obstacle clip-through (behavior >= 2) ---
+	// Head-level line trace rejects full walls.  If head is clear,
+	// a reverse human_hull trace from ahead back to the zombie finds
+	// the first position past the obstacle where the hull fits.
+	// Z offset is half the zombie's height so the BSP human_hull
+	// (centered, extends -36 to +36) doesn't clip the floor.
+	if ( zombie_behavior.value >= 2 )
+	{
+		float flHalfZ = pev->size.z * 0.5f;
+		Vector vecEye = pev->origin + Vector( 0, 0, pev->size.z * 0.75f );
+
+		TraceResult trHead;
+		UTIL_TraceLine( vecEye, vecEye + vecToGoal * 80, ignore_monsters, ENT( pev ), &trHead );
+
+		if ( trHead.flFraction == 1.0 && !trHead.fStartSolid && !trHead.fAllSolid )
+		{
+			Vector vecFar  = pev->origin + vecToGoal * 45 + Vector( 0, 0, flHalfZ );
+			Vector vecNear = pev->origin + Vector( 0, 0, flHalfZ );
+
+			TraceResult trRev;
+			UTIL_TraceHull( vecFar, vecNear, dont_ignore_monsters, human_hull, ENT( pev ), &trRev );
+
+			if ( !trRev.fStartSolid && !trRev.fAllSolid && trRev.flFraction < 1.0 )
+			{
+				// Ground check at exit point
+				Vector vecExit = trRev.vecEndPos;
+				TraceResult trFloor;
+				UTIL_TraceLine( vecExit + Vector( 0, 0, flHalfZ ), vecExit - Vector( 0, 0, pev->size.z ), ignore_monsters, ENT( pev ), &trFloor );
+
+				if ( trFloor.flFraction < 1.0 )
+				{
+					m_flClipRemaining = ( vecExit - pev->origin ).Length2D() + 4;
+					m_vecClipDir = vecToGoal;
+					m_vecStuckCheckPos = pev->origin;
+					m_flStuckStartTime = 0;
+					return;
+				}
+			}
+		}
+	}
+
+	// --- Sidestep burst ---
 
 	// Perpendicular axis (right of goal direction)
 	Vector vecUp( 0, 0, 1 );

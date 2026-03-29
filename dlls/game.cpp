@@ -42,7 +42,7 @@ cvar_t	playerinfofile	= {"sv_playerinfofile", "players.lvl", FCVAR_SERVER };
 
 cvar_t	gibcnt	= {"sv_gibcount", "10", FCVAR_SERVER };
 cvar_t	zombiecnt	= {"sv_zombiecount", "65", FCVAR_SERVER };
-cvar_t	zombie_behavior	= {"sv_zombie_behavior", "1", FCVAR_SERVER };
+cvar_t	zombie_behavior	= {"sv_zombie_behavior", "2", FCVAR_SERVER };
 cvar_t	zombie_yawspeed	= {"sv_zombie_yawspeed", "10", FCVAR_SERVER };
 
 cvar_t	teamspect	= {"mp_teamspectator", "0", FCVAR_SERVER };
