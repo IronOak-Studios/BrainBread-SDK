@@ -64,8 +64,8 @@ EXCLUDE_DIRS = {
     "dlls",
     # Client-only: skybox TGAs, keyboard bindings, VGUI model images
     "gfx",
-    # Client-only: HUD sprites, weapon HUD layouts, sprite graphics
-    "sprites",
+    # sprites/ is included -- the engine loads .spr files server-side
+    # (e.g. Mod_NumForName for wallsmokepuff.spr, beam sprites, etc.)
     # Client-only: VGUI menus, loading screens, localization strings
     "resource",
     # Client-only: menu music / audio
