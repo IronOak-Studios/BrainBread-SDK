@@ -259,15 +259,18 @@ int CHudNotify::MsgFunc_Notify( const char *pszName, int iSize, void *pbuf )
 		break;
 
 	}
-  m_flDur1 = 0;
-  if( strlen( m_sText1 ) > 5 && dur1 )
-    m_flDur1 += 5;
-  else
-    m_flDur1 += 2;
-  if( strlen( m_sText2 ) > 5 && dur2 )
-    m_flDur1 += 5;
-  else
-    m_flDur1 += 2;
+  if( dur1 )
+  {
+    m_flDur1 = 0;
+    if( strlen( m_sText1 ) > 5 )
+      m_flDur1 += 5;
+    else
+      m_flDur1 += 2;
+    if( strlen( m_sText2 ) > 5 )
+      m_flDur1 += 5;
+    else
+      m_flDur1 += 2;
+  }
 	return 1;
 }
 
