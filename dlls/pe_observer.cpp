@@ -101,7 +101,7 @@ void CBasePlayer::StartObserver( )
                 m_pTank = NULL;
         }
 
-        // Message Cache des Anzugs löschen,
+        // Message Cache des Anzugs lÃ¶schen,
         // damit wir nicht weiterlabern ;-)
         SetSuitUpdate(NULL, FALSE, 0);
 
@@ -114,7 +114,7 @@ void CBasePlayer::StartObserver( )
 			WRITE_BYTE(0xFF);
         MESSAGE_END();
 
-        // Zoom zurücksetzen
+        // Zoom zurÃ¼cksetzen
         m_iFOV = m_iClientFOV = 0;
         pev->fov = m_iFOV;
         MESSAGE_BEGIN( MSG_ONE, gmsgSetFOV, NULL, pev );
@@ -218,7 +218,7 @@ void CBasePlayer::StopObserver( void )
 		}
 }
 
-// Den nächsten Client finden, den der Spieler anschaut
+// Den nÃ¤chsten Client finden, den der Spieler anschaut
 void CBasePlayer::Observer_FindNextPlayer( bool bReverse )
 {
 	int iStart;
@@ -288,7 +288,7 @@ void CBasePlayer::Observer_FindNextPlayer( bool bReverse )
 	}
 }
 
-// Tastatur-Eingaben für den Observermodus...
+// Tastatur-Eingaben fÃ¼r den Observermodus...
 void CBasePlayer::Observer_HandleButtons()
 {
 	// Mouse-Clicks verlangsamen
@@ -310,7 +310,7 @@ void CBasePlayer::Observer_HandleButtons()
 		m_flNextObserverInput = gpGlobals->time + 0.2;
 	}
 
-	// Attack wechselt zum nächsten Spieler
+	// Attack wechselt zum nÃ¤chsten Spieler
 	if ( m_afButtonPressed & IN_ATTACK && pev->iuser1 != OBS_ROAMING )
 	{
 		Observer_FindNextPlayer( false );
@@ -330,7 +330,7 @@ void CBasePlayer::Observer_HandleButtons()
 // Versuche, Observer-Modus zu wechseln
 void CBasePlayer::Observer_SetMode( int iMode )
 {
-        // Abbrechen, wenn wir bereits im gewünschten Modus sind
+        // Abbrechen, wenn wir bereits im gewÃ¼nschten Modus sind
         if ( ( m_hObserverTarget != NULL ) && ( iMode == pev->iuser1 ) )
                 return;
 

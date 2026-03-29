@@ -265,7 +265,7 @@ class CObHTool: public CBasePlayerWeapon
 LINK_ENTITY_TO_CLASS( pe_object_htool, CObHTool );
 
 //---------------------------------------
-// Escape Zone für V.I.P Scenario
+// Escape Zone fÃ¼r V.I.P Scenario
 //---------------------------------------
 LINK_ENTITY_TO_CLASS( pe_escapezone, cPEEscape );
 
@@ -297,7 +297,7 @@ void cPEEscape::Touch( CBaseEntity *pOther )
 	}
 }
 //---------------------------------------
-// Escape Zone für V.I.P Scenario
+// Escape Zone fÃ¼r V.I.P Scenario
 //---------------------------------------
 */
 class cPERain : public CBaseEntity
@@ -527,7 +527,7 @@ void EXPORT cPEHackerTerminal::Touch( CBaseEntity *pOther )
 		if( gpGlobals->time > m_fHackEnd )
 		{
 			pl->m_iHideHUD &= ~HIDEHUD_WEAPONS;
-			CountDown( pl, 0 ); // HACKHACK oder so :) der Countdown ist sonst zu früh fertig, whyever
+			CountDown( pl, 0 ); // HACKHACK oder so :) der Countdown ist sonst zu frÃ¼h fertig, whyever
 			if( m_pWeapon )
 			{
 				pl->m_pActiveItem = m_pWeapon;

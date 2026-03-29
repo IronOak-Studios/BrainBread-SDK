@@ -106,7 +106,7 @@ char radio2_text[8][64] =
 {
 	{ "Cease fire!\n" },
 	{ "Open fire!\n" },
-	{ "I´m hit!\n" },
+	{ "I'm hit!\n" },
 	{ "Need assistance!\n" },
 	{ "Hold and defend this position!\n" },
 	{ "Follow me!\n" },
@@ -280,7 +280,7 @@ void cPEHacking::CheckRoundEnd( )
 		m_iRoundStatus = ROUND_START;
     rounds++;
 	}
-  else if( UpdateCounter( ) ) // alles, das im abstand von 1 sec ausgeführt werden soll, hier hin
+  else if( UpdateCounter( ) ) // alles, das im abstand von 1 sec ausgefÃ¼hrt werden soll, hier hin
 	{
     if( nextSave <= gpGlobals->time )
     {
@@ -2728,7 +2728,7 @@ bool cPEHacking::CheckMission( )
   {
   case MISSION_RESCUE:
   {
-    // Rettungsstatus prüfen
+    // Rettungsstatus prÃ¼fen
     CBaseEntity *esc = UTIL_FindEntityByClassname( NULL, "bb_escapeair" );
     while ( esc != NULL )
     {
@@ -2787,7 +2787,7 @@ bool cPEHacking::CheckMission( )
   }
   case MISSION_FRAGS:
   {
-    // Frags prüfen
+    // Frags prÃ¼fen
     static int lastfrags = 0;
     int cl = m_iClients ? m_iClients : 1;
     int frags = (int)( pow( 0.97, cl ) * misReq[MISSION_FRAGS] * cl - misDone[MISSION_FRAGS] ) + 1 /*/ cl*/;
@@ -2800,12 +2800,12 @@ bool cPEHacking::CheckMission( )
     return FALSE;
   }
   case MISSION_FRED:
-    // Fred prüfen
+    // Fred prÃ¼fen
     if( misDone[MISSION_FRED] >= misReq[MISSION_FRED] )
       return TRUE;
     return FALSE;
   case MISSION_OBJECT:
-    // Object prüfen
+    // Object prÃ¼fen
     if( misDone[MISSION_OBJECT] >= misReq[MISSION_OBJECT] )
     {
       CBaseEntity *respawn = UTIL_FindEntityByClassname( NULL, "weaponbox" );

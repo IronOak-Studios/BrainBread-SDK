@@ -1,5 +1,5 @@
 //---------------------------------------
-// Escape Zone für V.I.P Scenario
+// Escape Zone fÃ¼r V.I.P Scenario
 //---------------------------------------
 /*class cPEEscape : public CBaseEntity
 {

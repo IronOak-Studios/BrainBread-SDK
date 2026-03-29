@@ -51,7 +51,7 @@ extern int gmsgSpectator;
 
 void cPEVip::CheckRoundEnd( )
 {
-	if( UpdateCounter( ) ) // alles, das im abstand von 1 sec ausgeführt werden soll, hier hin
+	if( UpdateCounter( ) ) // alles, das im abstand von 1 sec ausgefÃ¼hrt werden soll, hier hin
 	{
 		CalcTeamBonus( );
 		Recount( );

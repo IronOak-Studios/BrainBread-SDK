@@ -3638,7 +3638,7 @@ void CBasePlayer::InitRadar( )
 		re->clientcolor = re->color + 5;
 		re = re->next;
 	}*/
-	for( i = 1; i <= MAX_PLAYERS; i++ ) // Teammembers zum Radar hinzufügen
+	for( i = 1; i <= MAX_PLAYERS; i++ ) // Teammembers zum Radar hinzufÃ¼gen
 	{		
 		CBasePlayer *plr = (CBasePlayer *)UTIL_PlayerByIndex( i );
 
