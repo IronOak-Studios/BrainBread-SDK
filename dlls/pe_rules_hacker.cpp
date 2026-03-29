@@ -455,6 +455,9 @@ void cPEHacking::StartRound( )
 		//if( pPlayer->m_sInfo.team == 2 )
 		  pPlayer->m_sInfo.team = 1;
     pPlayer->m_bTransform = FALSE;
+    pPlayer->zombieKills = 0;
+    pPlayer->rehbutton = false;
+    pPlayer->m_fTransformTime = 0;
     if( pPlayer->m_iTeam != pPlayer->m_sInfo.team )
 			SetTeam( pPlayer->m_sInfo.team, pPlayer, 0 );
 
@@ -462,6 +465,10 @@ void cPEHacking::StartRound( )
   		  MESSAGE_BEGIN( MSG_ONE, gmsgNotify, NULL, pPlayer->edict( ) );
 			   WRITE_COORD( -1 );
 			   WRITE_BYTE( NTM_DONE_HIDE );
+		  MESSAGE_END( );
+		  MESSAGE_BEGIN( MSG_ONE, gmsgNotify, NULL, pPlayer->edict( ) );
+			   WRITE_COORD( -1 );
+			   WRITE_BYTE( NTM_REHUMAN_HIDE );
 		  MESSAGE_END( );
 
 		

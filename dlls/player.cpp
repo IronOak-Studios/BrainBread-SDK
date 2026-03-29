@@ -2248,7 +2248,7 @@ void CBasePlayer::PreThink(void)
   if( g_teamplay == 1 )
   {
     // Enough kills || enough time -> optional rehuman
-    if( !rehbutton && m_sInfo.team == 2 && m_fTransformTime && ( ( m_fTransformTime <= gpGlobals->time ) || ( zombieKills <= 0 ) ) && !m_bTransform )
+    if( !rehbutton && m_iTeam == 2 && m_sInfo.team == 2 && m_fTransformTime && ( ( m_fTransformTime <= gpGlobals->time ) || ( zombieKills <= 0 ) ) && !m_bTransform )
     {
       rehbutton = true;
       MESSAGE_BEGIN( MSG_ONE, gmsgNotify, NULL, edict( ) );
@@ -2258,7 +2258,7 @@ void CBasePlayer::PreThink(void)
     }
     
     // 2 * Enough kills -> force rehuman
-    if( m_sInfo.team == 2 && rehbutton && m_fTransformTime && ( ( zombieKills <= -REHUMAN_KILLS ) ) && !m_bTransform )
+    if( m_iTeam == 2 && m_sInfo.team == 2 && rehbutton && m_fTransformTime && ( ( zombieKills <= -REHUMAN_KILLS ) ) && !m_bTransform )
     {
         //m_fTransformTime = 0;
         m_sInfo.team = 1;

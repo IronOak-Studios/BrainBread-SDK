@@ -1,2 +1,2 @@
-#define BUILD    "Build 7505"
-#define BUILD_NR 7505
+#define BUILD    "Build 7506"
+#define BUILD_NR 7506

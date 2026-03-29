@@ -26,7 +26,7 @@ int __MsgFunc_Help( const char *pszName, int iSize, void *pbuf )
 }
 
 extern globalvars_t	Globals; 
-float reusetime[30];
+float reusetime[MAX_HELP_TYPES];
 
 
 cPEHelper::cPEHelper( )
@@ -36,7 +36,7 @@ cPEHelper::cPEHelper( )
 	fitem = NULL;
 	litem = NULL;
 	HOOK_MESSAGE( Help );
-	memset( reusetime, 0, 30 * sizeof(float) );
+	memset( reusetime, 0, sizeof(reusetime) );
 }
 
 cPEHelper::~cPEHelper( )
@@ -510,6 +510,8 @@ int cPEHelper::MsgFunc_Help( const char *pszName, int iSize, void *pbuf )
     force = -1;
   else
     force = type;
+  if( type < 0 || type >= MAX_HELP_TYPES )
+	  return FALSE;
   if( reusetime[type] > gpGlobals->time )
 	  return FALSE;
 
