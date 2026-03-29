@@ -198,6 +198,8 @@ class CBBAmmo : public CBaseEntity
       return;
 
     CBasePlayer *pp = (CBasePlayer*)pOther;
+    if( pp->m_iTeam == 2 )
+      return;
     if( !( pp->pev->button & ( IN_USE ) ) || gpGlobals->time < nextCharge || !pp || !pp->m_pActiveItem )
     {
       Help( HELP_AMMO, pp );
