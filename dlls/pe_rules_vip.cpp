@@ -517,7 +517,7 @@ void cPEVip::Think( )
 				ALERT( at_logged, "Client initialized\n" );
 
 			plr->m_iClientHideHUD = plr->m_iHideHUD;
-			plr->m_fKnownItem = FALSE;
+			plr->m_fKnownItem = TRUE; // defer WeaponList to Spawn
 		}
 	}
 

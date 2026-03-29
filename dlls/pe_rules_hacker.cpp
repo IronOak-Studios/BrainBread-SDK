@@ -989,11 +989,12 @@ BOOL cPEHacking::InitHUD( CBasePlayer *pPlayer )
 		}
 	}
 
-	CBaseEntity* rain = UTIL_FindEntityByClassname( NULL, "pe_rain" );
+	// Rain data disabled - client parser commented out
+	/*CBaseEntity* rain = UTIL_FindEntityByClassname( NULL, "pe_rain" );*/
 
 	MESSAGE_BEGIN( MSG_ONE, gmsgPlayMusic, NULL, pPlayer->edict( ) );
 		WRITE_BYTE( 1 );
-		while( rain != NULL )
+		/*while( rain != NULL )
 		{
 			WRITE_BYTE( rain->pev->iuser2 + 1 );
 			WRITE_SHORT( rain->pev->iuser1 );
@@ -1007,7 +1008,7 @@ BOOL cPEHacking::InitHUD( CBasePlayer *pPlayer )
 			WRITE_COORD( rain->pev->maxs.y );
 			WRITE_COORD( rain->pev->maxs.z );
 			rain = UTIL_FindEntityByClassname( rain, "pe_rain" );
-		}
+		}*/
 		WRITE_BYTE( 0 );
 	MESSAGE_END( );
 
@@ -2003,7 +2004,7 @@ void cPEHacking::Think( )
 			}
 
 			plr->m_iClientHideHUD = plr->m_iHideHUD;
-			plr->m_fKnownItem = FALSE;
+			plr->m_fKnownItem = TRUE; // defer WeaponList to Spawn
 		}
 	}
 

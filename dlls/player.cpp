@@ -3403,6 +3403,7 @@ void CBasePlayer::Spawn( void )
 {
   statsRatio = 1;
 	ResetRadar( );
+	m_fKnownItem = FALSE;    // Force weapon list resend to client
 
   if( m_iTeam == 2 )
   {
