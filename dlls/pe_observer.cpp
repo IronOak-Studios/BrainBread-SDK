@@ -44,7 +44,7 @@ void CBasePlayer::StartObserver( )
 	if( !pentSpawnSpot && !( pentSpawnSpot = EntSelectSpawnPoint( this ) ) )//g_pGameRules->GetPlayerSpawnSpot( this ) )
 	{
 		//ALERT( at_logged, "NO SPAWN SPOT FOUND!\n" );
-		//ClientPrint( pev, HUD_PRINTTALK, "No Observer Spawn point fount.\n" );
+		//ClientPrint( pev, HUD_PRINTTALK, "No observer spawn point found.\n" );
     m_iSpawnDelayed = 0;
 	}
 	else

@@ -3568,7 +3568,7 @@ void CBasePlayer::Spawn( void )
 	if( !pentSpawnSpot && !( pentSpawnSpot = EntSelectSpawnPoint( this ) ) )//g_pGameRules->GetPlayerSpawnSpot( this ) )
 	{
 		ALERT( at_logged, "NO SPAWN SPOT FOUND!\n" );
-		ClientPrint( pev, HUD_PRINTTALK, "No Spawn point fount. You will spawn delayed\n" );
+		ClientPrint( pev, HUD_PRINTTALK, "No spawn point found. You will spawn with a delay.\n" );
 		m_fSpawn = gpGlobals->time + 2;
 		m_iSpawnDelayed = 1;
 	}

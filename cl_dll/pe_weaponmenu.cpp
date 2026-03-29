@@ -719,7 +719,7 @@ void CHudShowMenuPE::ShowMenuNr( )
 			strcat( m_sMenu, "\\yCyberHeart:\n\\t\n\\w+ 20 HP\n\\w+ 2.5 HP every 1.5 seconds\n\\t\n\\t\n" );
 			break;
 		case 3:
-			strcat( m_sMenu, "\\yCyberBomb:\n\\t\n\\wExplodes on the players death\n\\wand damages enemys in a medium\n\\wrange.\n\\t\n\\wAttention: Can explode too\n\\wsoon in some special cases!\n\\t\n\\wCan be triggered, set the\n\\wactivation key in the\n\\wconfiguration menu\n\\t\n\\t\n" );
+			strcat( m_sMenu, "\\yCyberBomb:\n\\t\n\\wExplodes on the player's death\n\\wand damages enemies in a medium\n\\wrange.\n\\t\n\\wAttention: Can explode too\n\\wsoon in some special cases!\n\\t\n\\wCan be triggered, set the\n\\wactivation key in the\n\\wconfiguration menu\n\\t\n\\t\n" );
 			break;
 		case 4:
 			strcat( m_sMenu, "\\yCyberArms:\n\\t\n\\w+ 25 armor factor\n\\w+ 42% accuracy\n\\w+ 200% knife damage\n\\w+ 20% ammunition\n\\w+ 50% faster reload\n\\t\n\\t\n" );
@@ -737,10 +737,10 @@ void CHudShowMenuPE::ShowMenuNr( )
 			strcat( m_sMenu, "\\yCyberHead:\n\\t\n\\w+ 15 armor factor\n\\w+ 33% accuracy\n\\w- 25% head damage\n\\w+ 10 HP\n\\t\n\\t\n" );
 			break;
 		case 10:
-			strcat( m_sMenu, "\\ySentinel:\n\\t\n\\w+ Nighvision\n\\w+ Increased radar range\n\\w+ Targetting (see \"cl_target\"\n\\w  cvar desc. in the manual)\n\\t\n\\t\n" );
+			strcat( m_sMenu, "\\ySentinel:\n\\t\n\\w+ Nightvision\n\\w+ Increased radar range\n\\w+ Targetting (see \"cl_target\"\n\\w  cvar desc. in the manual)\n\\t\n\\t\n" );
 			break;
 		case 11:
-			strcat( m_sMenu, "\\yOrbitalDevice:\n\\t\n\\wShoots a high energetic beam\n\\won the selected ground target.\n\\wUseable once per round.\n\\t\n\\t\n" );
+			strcat( m_sMenu, "\\yOrbitalDevice:\n\\t\n\\wShoots a high-energy beam\n\\won the selected ground target.\n\\wUseable once per round.\n\\t\n\\t\n" );
 			break;
 		case 13:
 			strcat( m_sMenu, "\\yNano cyberport:\n\\t\n\\w+ 20 HP\n\\w+ Interface for nano technology\n\\w- Experimental technology\n\\t\n\\t\n" );

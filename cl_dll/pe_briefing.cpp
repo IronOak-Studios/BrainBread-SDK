@@ -69,11 +69,11 @@ int CHudBriefing::MsgFunc_Briefing( const char *pszName, int iSize, void *pbuf )
 			if( strlen( ch ) < 2048 )
 				strcpy( m_sBriefing, ch );
 			else
-				strcpy( m_sBriefing, "Mapbriefing-File is too large!");
+				strcpy( m_sBriefing, "Map briefing file is too large!");
 			gEngfuncs.COM_FreeFile( ch );
 		}
 		else
-			strcpy( m_sBriefing, "No mapbriefing available...");
+			strcpy( m_sBriefing, "No map briefing available...");
 	}
 	return 1;
 }

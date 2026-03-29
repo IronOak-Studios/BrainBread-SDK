@@ -271,7 +271,7 @@ s_helpitem *cPEHelper::ForceShowHelp( char *cfgfile )
 				pfile = gEngfuncs.COM_ParseFile( pfile, token );
 			if( token[0] == '}' )
 			{
-				// I just hope the cfg remains DOS formated... ^^
+				// I just hope the cfg remains DOS formatted... ^^
 				strncpy( ni->text, strt, min( MAX_HELPTEXT_LEN, (int)pfile - (int)strt - 1 ) );
 			}
 		}

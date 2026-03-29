@@ -186,7 +186,7 @@ void ClientKill( edict_t *pEntity )
   if( pl->m_bTransform )
 		return;
 	//if ( pl->m_fNextSuicideTime > gpGlobals->time )
-	//	return;  // prevent suiciding too ofter
+	//	return;  // prevent suiciding too often
 
 	pl->m_fNextSuicideTime = gpGlobals->time + 4;  // don't let them suicide for 5 seconds after suiciding
   ClientPrint( pl->pev, HUD_PRINTCENTER, "Killing self in 4 seconds."  );

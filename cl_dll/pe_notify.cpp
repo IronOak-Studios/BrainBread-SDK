@@ -179,7 +179,7 @@ int CHudNotify::MsgFunc_Notify( const char *pszName, int iSize, void *pbuf )
 		c[2] = 80;
 		break;
   case NTM_MISSION_RESCUE:
-		strcpy( m_sText2, "Use the the radio to order the helicopter" );
+		strcpy( m_sText2, "Use the radio to order the helicopter" );
 		strcpy( m_sText3, "and then try to reach the landing zone.");
 		g_helper->ShowHelp( HELP_HUMAN_RESCUE, "help/task_rescue.cfg" );
 		break;
@@ -191,7 +191,7 @@ int CHudNotify::MsgFunc_Notify( const char *pszName, int iSize, void *pbuf )
 		break;
   case NTM_MISSION_FRAGS:
 		strcpy( m_sText2, "Kill the requested amount of zombies" );
-		strcpy( m_sText3, "in order to get support of the military");
+		strcpy( m_sText3, "in order to get support from the military");
 		g_helper->ShowHelp( HELP_HUMAN_FRAG, "help/task_frag.cfg" );
 		break;
 	case NTC_MISSION_FRAGS:
@@ -202,7 +202,7 @@ int CHudNotify::MsgFunc_Notify( const char *pszName, int iSize, void *pbuf )
 		break;
   case NTM_MISSION_FRED:
 		strcpy( m_sText2, "Search and kill FRED the mutated zombie" );
-		strcpy( m_sText3, "the military needs his DNA");
+		strcpy( m_sText3, "The military needs his DNA.");
 		g_helper->ShowHelp( HELP_HUMAN_FRED, "help/task_fred.cfg" );
 		break;
 	case NTC_MISSION_FRED:
@@ -227,8 +227,8 @@ int CHudNotify::MsgFunc_Notify( const char *pszName, int iSize, void *pbuf )
 		strcpy( m_sText3, "It will be restored at a random spot" );
 		break;
   case NTM_REHUMAN:
-		sprintf( m_sText2, "You can now select to respawn as" );
-		strcpy( m_sText3, "a human after dieing." );
+		sprintf( m_sText2, "You can now choose to respawn as" );
+		strcpy( m_sText3, "a human after dying." );
     rehuman = 1;
 		break;
   case NTM_REHUMAN_HIDE:
@@ -238,12 +238,12 @@ int CHudNotify::MsgFunc_Notify( const char *pszName, int iSize, void *pbuf )
 		done_selection = 0;
 		break;
   case NTM_DONE_ZOMBIE:
-		sprintf( m_sText2, "You can now select to spawn in as" );
+		sprintf( m_sText2, "You can now choose to spawn as" );
 		strcpy( m_sText3, "a zombie for the rest of the round." );
 		done_selection = 1;
 		break;
   case NTM_DONE_SPECTATE:
-		sprintf( m_sText2, "You can now select to spectate" );
+		sprintf( m_sText2, "You can now choose to spectate" );
 		strcpy( m_sText3, "for the rest of the round." );
 		done_selection = 2;
 		break;

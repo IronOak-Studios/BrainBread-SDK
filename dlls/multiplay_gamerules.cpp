@@ -942,7 +942,7 @@ void CHalfLifeMultiplay::DeathNotice( CBasePlayer *pVictim, entvars_t *pKiller, 
 	if ( pKiller == pVictim->pev )
 	{
 		strcpy ( szText, STRING( pVictim->pev->netname ) );
-		strcat ( szText, " commited suicide.\n" );
+		strcat ( szText, " committed suicide.\n" );
 	}
 	else if ( pKiller->flags & FL_CLIENT )
 	{

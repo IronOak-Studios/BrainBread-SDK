@@ -237,7 +237,7 @@ void CFlame::WeaponIdle( void )
 	{
 		gEngfuncs.pEventAPI->EV_WeaponAnimation( FLAME_FIRESTOP, 2 );
 		//char text[512];
-		//sprintf( text, "stoping %f %f\n", flaming, gpGlobals->time );
+		//sprintf( text, "stopping %f %f\n", flaming, gpGlobals->time );
 		//gEngfuncs.pfnConsolePrint( text );
 		flaming = 0;
 	}

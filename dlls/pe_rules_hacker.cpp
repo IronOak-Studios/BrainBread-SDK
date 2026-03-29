@@ -394,7 +394,7 @@ void cPEHacking::CheckRoundEnd( )
 			{
 				NotifyAll( NTM_AUTOBAL );
 				m_bBalance = 1;
-				ALERT( at_logged, "Teams uneven, forcin autobalance next round.\n" );
+				ALERT( at_logged, "Teams uneven, forcing autobalance next round.\n" );
 			}
 			//ALERT( at_logged, "Teams even.\n" );
 		}*/
@@ -595,7 +595,7 @@ void cPEHacking::Recount( )
 			continue;
 
 		if( strlen( STRING( pPlayer->pev->netname ) ) <= 0 )
-		{ //Somethin went wrong on the players disconnect
+		{ //Something went wrong on the player's disconnect
 			pPlayer->m_iTeam = 0;
 			pPlayer->pev->deadflag = DEAD_DEAD;						
 			pPlayer->pev->iuser1 = 1;						
@@ -807,7 +807,7 @@ int cPEHacking::TeamsUneven( )
 		//ALERT( at_logged, "Team 2 has too many players (T1:%d T2:%d)\n", Players1( ), Players2( ) );
 		return TRUE;
 	}
-	//ALERT( at_logged, "Teams seem allright (T1:%d T2:%d)\n", Players1( ), Players2( )  );
+	//ALERT( at_logged, "Teams seem alright (T1:%d T2:%d)\n", Players1( ), Players2( )  );
 	return FALSE;
 }
 
@@ -1294,11 +1294,11 @@ BOOL cPEHacking::ClientCommand( CBasePlayer *pPlayer, const char *pcmd )
 	{
 		if( CMD_ARGC( ) < 2 )
 		{
-			ClientPrint( pPlayer->pev, HUD_PRINTCONSOLE, "Ingame help is %s\n", ( pPlayer->m_bHelp ? "on" : "off" ) );
+			ClientPrint( pPlayer->pev, HUD_PRINTCONSOLE, "In-game help is %s\n", ( pPlayer->m_bHelp ? "on" : "off" ) );
 			return TRUE;
 		}
 		pPlayer->m_bHelp = ( atoi( CMD_ARGV( 1 ) ) ? 1 : 0 );
-		ClientPrint( pPlayer->pev, HUD_PRINTCONSOLE, "Ingame help turned %s\n", ( pPlayer->m_bHelp ? "on" : "off" ) );
+		ClientPrint( pPlayer->pev, HUD_PRINTCONSOLE, "In-game help turned %s\n", ( pPlayer->m_bHelp ? "on" : "off" ) );
 		return TRUE;
 	}
 	else if( FStrEq( pcmd, "eqdata" ) )
@@ -1324,8 +1324,8 @@ BOOL cPEHacking::ClientCommand( CBasePlayer *pPlayer, const char *pcmd )
 				m_iYesVotes++;
 			else if( slot == 2 )
 				m_iNoVotes++;
-			UTIL_ClientPrintAll( HUD_PRINTTALK, UTIL_VarArgs( "Votes so far: %d Yes (need %d), %d No (%d havent voted yet)\n", m_iYesVotes, (int)((float)m_iClients/2.0 + 1), m_iNoVotes, m_iClients - ( m_iYesVotes + m_iNoVotes )  ) );
-			ALERT( at_logged, "Votes so far: %d Yes, %d No (%d havent voted yet)\n", m_iYesVotes, m_iNoVotes, m_iClients - ( m_iYesVotes + m_iNoVotes ) );
+			UTIL_ClientPrintAll( HUD_PRINTTALK, UTIL_VarArgs( "Votes so far: %d Yes (need %d), %d No (%d haven't voted yet)\n", m_iYesVotes, (int)((float)m_iClients/2.0 + 1), m_iNoVotes, m_iClients - ( m_iYesVotes + m_iNoVotes )  ) );
+			ALERT( at_logged, "Votes so far: %d Yes, %d No (%d haven't voted yet)\n", m_iYesVotes, m_iNoVotes, m_iClients - ( m_iYesVotes + m_iNoVotes ) );
 			pPlayer->m_nMenu = Menu_Equip;
 			return TRUE;
 		case Menu_VoteVar:
@@ -1333,8 +1333,8 @@ BOOL cPEHacking::ClientCommand( CBasePlayer *pPlayer, const char *pcmd )
 				m_iYesVarVotes++;
 			else if( slot == 2 )
 				m_iNoVarVotes++;
-			UTIL_ClientPrintAll( HUD_PRINTTALK, UTIL_VarArgs( "Votes so far: %d Yes (need %d), %d No (%d havent voted yet)\n", m_iYesVarVotes, (int)((float)m_iClients/2.0 + 1), m_iNoVarVotes, m_iClients - ( m_iYesVarVotes + m_iNoVarVotes )  ) );
-			ALERT( at_logged, "Votes so far: %d Yes, %d No (%d havent voted yet)\n", m_iYesVarVotes, m_iNoVarVotes, m_iClients - ( m_iYesVarVotes + m_iNoVarVotes ) );
+			UTIL_ClientPrintAll( HUD_PRINTTALK, UTIL_VarArgs( "Votes so far: %d Yes (need %d), %d No (%d haven't voted yet)\n", m_iYesVarVotes, (int)((float)m_iClients/2.0 + 1), m_iNoVarVotes, m_iClients - ( m_iYesVarVotes + m_iNoVarVotes )  ) );
+			ALERT( at_logged, "Votes so far: %d Yes, %d No (%d haven't voted yet)\n", m_iYesVarVotes, m_iNoVarVotes, m_iClients - ( m_iYesVarVotes + m_iNoVarVotes ) );
 			pPlayer->m_nMenu = Menu_Equip;
 			return TRUE;
 		
@@ -1619,7 +1619,7 @@ BOOL cPEHacking::ClientCommand( CBasePlayer *pPlayer, const char *pcmd )
 
 		if( gpGlobals->time <= m_fNextVote )
 		{
-			ClientPrint( pPlayer->pev, HUD_PRINTTALK, UTIL_VarArgs( "You have to wait %d seconds untill you can start a map vote again\n", (int)( m_fNextVote - gpGlobals->time ) ) );
+			ClientPrint( pPlayer->pev, HUD_PRINTTALK, UTIL_VarArgs( "You have to wait %d seconds until you can start a map vote again\n", (int)( m_fNextVote - gpGlobals->time ) ) );
 			return TRUE;
 		}
 		
@@ -1660,7 +1660,7 @@ BOOL cPEHacking::ClientCommand( CBasePlayer *pPlayer, const char *pcmd )
 		}
 		if( gpGlobals->time <= m_fNextVarVote )
 		{
-			ClientPrint( pPlayer->pev, HUD_PRINTTALK, UTIL_VarArgs( "You have to wait %d seconds untill you can start a variable vote again\n", (int)( m_fNextVarVote - gpGlobals->time ) ) );
+			ClientPrint( pPlayer->pev, HUD_PRINTTALK, UTIL_VarArgs( "You have to wait %d seconds until you can start a variable vote again\n", (int)( m_fNextVarVote - gpGlobals->time ) ) );
 			return TRUE;
 		}
 		
@@ -1821,7 +1821,7 @@ BOOL cPEHacking::ClientCommand( CBasePlayer *pPlayer, const char *pcmd )
 		}
 		if( pPlayer->m_fSpeedNormalize == -1 )
 		{
-			ClientPrint( pPlayer->pev, HUD_PRINTCENTER, "The Achilles' Heel are out of energy!"  );
+			ClientPrint( pPlayer->pev, HUD_PRINTCENTER, "The Achilles' Heel is out of energy!"  );
 			return TRUE;
 		}
 		if( pPlayer->m_fSpeedNormalize > 20 )
@@ -2061,7 +2061,7 @@ void cPEHacking::CheckVars( )
 			SetTeam( pPlayer->m_sInfo.team, pPlayer, 1 );
 			//ClassMenu( pPlayer );
 			ALERT( at_logged, "%s set to team not yet undead by admin\n", STRING( pPlayer->pev->netname ) );
-			UTIL_ClientPrintAll( HUD_PRINTTALK, UTIL_VarArgs( "%s set to team SecurityCorps by admin\n", STRING( pPlayer->pev->netname ) ) );
+			UTIL_ClientPrintAll( HUD_PRINTTALK, UTIL_VarArgs( "%s set to team Security Corps by admin\n", STRING( pPlayer->pev->netname ) ) );
 		}
 	}
 	if( setsyn.value > 0 )
@@ -2093,8 +2093,8 @@ void cPEHacking::CheckVars( )
 	}
 	if( restartround.value > 0 )
 	{
-		UTIL_ClientPrintAll( HUD_PRINTTALK, UTIL_VarArgs( "Reseting stats in %d second(s)\n", (int)restartround.value ) );
-		ALERT( at_logged, "Reseting stats in %d second(s)\n", (int)restartround.value );
+		UTIL_ClientPrintAll( HUD_PRINTTALK, UTIL_VarArgs( "Resetting stats in %d second(s)\n", (int)restartround.value ) );
+		ALERT( at_logged, "Resetting stats in %d second(s)\n", (int)restartround.value );
 		m_fResetTime = gpGlobals->time + restartround.value;
 		m_bDoReset = TRUE;
 		restartround.value = 0;
@@ -2140,8 +2140,8 @@ void cPEHacking::CheckVars( )
 				MESSAGE_END( );*/
 			}
 		}
-		UTIL_ClientPrintAll( HUD_PRINTTALK, "Stats have been reseted!\n" );
-		ALERT( at_logged, "Stats have been reseted!\n" );
+		UTIL_ClientPrintAll( HUD_PRINTTALK, "Stats have been reset!\n" );
+		ALERT( at_logged, "Stats have been reset!\n" );
 	}
 }
 
