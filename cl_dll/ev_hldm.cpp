@@ -2401,7 +2401,7 @@ void EV_FireHand( event_args_t *args )
 
 	if ( EV_IsLocal( idx ) )
 	{
-		gEngfuncs.pEventAPI->EV_WeaponAnimation( HAND_ATTACK, 0 );
+		gEngfuncs.pEventAPI->EV_WeaponAnimation( HAND_ATTACK + gEngfuncs.pfnRandomLong( 0, 1 ), 0 );
 	}
 }
 

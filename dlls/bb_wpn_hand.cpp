@@ -146,10 +146,12 @@ int CHand::Swing( int fFirst )
 	}
 #endif
 
-	PLAYBACK_EVENT_FULL( FEV_NOTHOST, m_pPlayer->edict(), m_usHand, 
-	0.0, (float *)&g_vecZero, (float *)&g_vecZero, 0, 0, 0,
-	0.0, 0, 0.0 );
-
+	if ( fFirst )
+	{
+		PLAYBACK_EVENT_FULL( FEV_NOTHOST, m_pPlayer->edict(), m_usHand, 
+		0.0, (float *)&g_vecZero, (float *)&g_vecZero, 0, 0, 0,
+		0.0, 0, 0.0 );
+	}
 
 	if ( tr.flFraction >= 1.0 )
 	{
@@ -173,9 +175,6 @@ int CHand::Swing( int fFirst )
 		case 2:
 			SendWeaponAnim( HAND_ATTACK3HIT ); break;
 		}*/
-		SendWeaponAnim( HAND_ATTACK2 );
-		
-
 		// player "shoot" animation
 		m_pPlayer->SetAnimation( PLAYER_ATTACK1 );
 		

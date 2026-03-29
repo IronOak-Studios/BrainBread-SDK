@@ -190,10 +190,12 @@ int CKnife::Swing( int fFirst )
 	}
 #endif
 
-	PLAYBACK_EVENT_FULL( FEV_NOTHOST, m_pPlayer->edict(), m_usKnife, 
-	0.0, (float *)&g_vecZero, (float *)&g_vecZero, 0, 0, 0,
-	0.0, 0, 0.0 );
-
+	if ( fFirst )
+	{
+		PLAYBACK_EVENT_FULL( FEV_NOTHOST, m_pPlayer->edict(), m_usKnife, 
+		0.0, (float *)&g_vecZero, (float *)&g_vecZero, 0, 0, 0,
+		0.0, 0, 0.0 );
+	}
 
 	if ( tr.flFraction >= 1.0 )
 	{
@@ -217,9 +219,6 @@ int CKnife::Swing( int fFirst )
 		case 2:
 			SendWeaponAnim( KNIFE_ATTACK3HIT ); break;
 		}*/
-		SendWeaponAnim( KNIFE_HIT1 + RANDOM_LONG( 0, 1 ) );
-		
-
 		// player "shoot" animation
 		m_pPlayer->SetAnimation( PLAYER_ATTACK1 );
 		

@@ -214,16 +214,6 @@ int CCrowbar::Swing( int fFirst )
 	}
 	else
 	{
-		switch( ((m_iSwing++) % 2) + 1 )
-		{
-		case 0:
-			SendWeaponAnim( CROWBAR_ATTACK1HIT ); break;
-		case 1:
-			SendWeaponAnim( CROWBAR_ATTACK2HIT ); break;
-		case 2:
-			SendWeaponAnim( CROWBAR_ATTACK3HIT ); break;
-		}
-
 		// player "shoot" animation
 		m_pPlayer->SetAnimation( PLAYER_ATTACK1 );
 		

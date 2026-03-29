@@ -147,10 +147,12 @@ int CCase::Swing( int fFirst )
 	}
 #endif
 
-	PLAYBACK_EVENT_FULL( FEV_NOTHOST, m_pPlayer->edict(), m_usCase, 
-	0.0, (float *)&g_vecZero, (float *)&g_vecZero, 0, 0, 0,
-	0.0, 0, 0.0 );
-
+	if ( fFirst )
+	{
+		PLAYBACK_EVENT_FULL( FEV_NOTHOST, m_pPlayer->edict(), m_usCase, 
+		0.0, (float *)&g_vecZero, (float *)&g_vecZero, 0, 0, 0,
+		0.0, 0, 0.0 );
+	}
 
 	if ( tr.flFraction >= 1.0 )
 	{
@@ -165,9 +167,7 @@ int CCase::Swing( int fFirst )
 	}
 	else
 	{
-		SendWeaponAnim( CASE_ATTACKHIT );
 		m_iSwing++;
-		
 
 		// player "shoot" animation
 		m_pPlayer->SetAnimation( PLAYER_ATTACK1 );
