@@ -414,12 +414,12 @@ void Host_Say( edict_t *pEntity, int teamonly )
 	{
 		if ( CMD_ARGC() >= 2 )
 		{
-			sprintf( szTemp, "%s %s", ( char * )pcmd, (char *)CMD_ARGS() );
+			snprintf( szTemp, sizeof(szTemp), "%s %s", ( char * )pcmd, (char *)CMD_ARGS() );
 		}
 		else
 		{
 			// Just a one word command, use the first word...sigh
-			sprintf( szTemp, "%s", ( char * )pcmd );
+			snprintf( szTemp, sizeof(szTemp), "%s", ( char * )pcmd );
 		}
 		p = szTemp;
 	}
@@ -441,20 +441,20 @@ void Host_Say( edict_t *pEntity, int teamonly )
 	if ( teamonly )
 	{
 		if( !pPlayer || !pPlayer->IsPlayer( ) )
-			sprintf( text, "%c(Spectator) %s: ", 2, STRING( pEntity->v.netname ) );
+			snprintf( text, sizeof(text), "%c(Spectator) %s: ", 2, STRING( pEntity->v.netname ) );
 		else if( pPlayer->m_iTeam == 1 )
-			sprintf( text, "%c(Human) %s%s: ", 2, STRING( pEntity->v.netname ), pPlayer->IsAlive( ) ? "" : "*DEAD*" );
+			snprintf( text, sizeof(text), "%c(Human) %s%s: ", 2, STRING( pEntity->v.netname ), pPlayer->IsAlive( ) ? "" : "*DEAD*" );
 		else if( pPlayer->m_iTeam == 2 )
-			sprintf( text, "%c(Zombie) %s%s: ", 2, STRING( pEntity->v.netname ), pPlayer->IsAlive( ) ? "" : "*DEAD*" );
+			snprintf( text, sizeof(text), "%c(Zombie) %s%s: ", 2, STRING( pEntity->v.netname ), pPlayer->IsAlive( ) ? "" : "*DEAD*" );
 		else
-			sprintf( text, "%c(Spectator) %s%s: ", 2, STRING( pEntity->v.netname ), pPlayer->IsAlive( ) ? "" : "*DEAD*" );
+			snprintf( text, sizeof(text), "%c(Spectator) %s%s: ", 2, STRING( pEntity->v.netname ), pPlayer->IsAlive( ) ? "" : "*DEAD*" );
 	}
 	else
 	{
 		if( pPlayer )
-			sprintf( text, "%c%s%s: ", 2, STRING( pEntity->v.netname ), pPlayer->IsAlive( ) ? "" : "*DEAD*" );
+			snprintf( text, sizeof(text), "%c%s%s: ", 2, STRING( pEntity->v.netname ), pPlayer->IsAlive( ) ? "" : "*DEAD*" );
 		else
-			sprintf( text, "%c%s: ", 2, STRING( pEntity->v.netname ) );
+			snprintf( text, sizeof(text), "%c%s: ", 2, STRING( pEntity->v.netname ) );
 	}
 
 	j = sizeof(text) - 2 - strlen(text);  // -2 for /n and null terminator

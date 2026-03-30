@@ -39,7 +39,7 @@ void bla( char *format, ... )
 	char str[1024];
 
 	va_start( argptr, format );
-	vsprintf( str, format, argptr );
+	vsnprintf( str, sizeof(str), format, argptr );
 	va_end( argptr );
 
 	ConsolePrint( str );	

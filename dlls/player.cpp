@@ -6198,11 +6198,17 @@ void CBasePlayer::AddDmgDone( int index, float amount, int hitgroup )
 			break;
 	}
 
+	if( i >= 32 )
+		return;
+
 	if( !VARS(INDEXENT(index)) || ( VARS(INDEXENT(index)) == pev ) )
 		return;
 
 	if( strlen(STRING( VARS(INDEXENT(index))->netname )) > 0 )
-		strcpy( dmgdone[i].name, STRING( VARS(INDEXENT(index))->netname ) );
+	{
+		strncpy( dmgdone[i].name, STRING( VARS(INDEXENT(index))->netname ), sizeof(dmgdone[i].name) - 1 );
+		dmgdone[i].name[sizeof(dmgdone[i].name) - 1] = '\0';
+	}
 	else
 		return;//strcpy( dmgdone[i].name, STRING( VARS(INDEXENT(index))->classname ) );
 	dmgdone[i].index = index;
@@ -6239,11 +6245,18 @@ void CBasePlayer::AddDmgReceived( int from_index, float amount, int hitgroup )
 		if( ( dmgreceived[i].index == from_index ) || ( dmgreceived[i].index == 0 ) )
 			break;
 	}
+
+	if( i >= 32 )
+		return;
+
 	if( !VARS(INDEXENT(from_index)) || ( VARS(INDEXENT(from_index)) == pev ) )
 		return;
 
 	if( strlen(STRING( VARS(INDEXENT(from_index))->netname )) > 0 )
-		strcpy( dmgreceived[i].name, STRING( VARS(INDEXENT(from_index))->netname ) );
+	{
+		strncpy( dmgreceived[i].name, STRING( VARS(INDEXENT(from_index))->netname ), sizeof(dmgreceived[i].name) - 1 );
+		dmgreceived[i].name[sizeof(dmgreceived[i].name) - 1] = '\0';
+	}
 	else
 		return;//strcpy( dmgreceived[i].name, STRING( VARS(INDEXENT(from_index))->classname ) );
 	dmgreceived[i].index = from_index;

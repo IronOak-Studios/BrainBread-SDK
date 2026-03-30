@@ -566,7 +566,7 @@ void CONSOLE_ECHO( char * pszMsg, ... )
 	static char szStr[1024];
 
 	va_start( argptr, pszMsg );
-	vsprintf( szStr, pszMsg, argptr );
+	vsnprintf( szStr, sizeof(szStr), pszMsg, argptr );
 	va_end( argptr );
 
 	(*g_engfuncs.pfnServerPrint)( szStr );
@@ -580,11 +580,11 @@ void CONSOLE_ECHO_LOGGED( char * pszMsg, ... )
 	static char szStr[1024];
 
 	va_start( argptr, pszMsg );
-	vsprintf( szStr, pszMsg, argptr );
+	vsnprintf( szStr, sizeof(szStr), pszMsg, argptr );
 	va_end( argptr );
 
 	(*g_engfuncs.pfnServerPrint)( szStr );
-	UTIL_LogPrintf( szStr );
+	UTIL_LogPrintf( "%s", szStr );
 }
 
 

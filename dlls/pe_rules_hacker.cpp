@@ -731,9 +731,9 @@ void cPEHacking::AutoTeam( )
 		
 			if( pl && pl->m_sInfo.team != team )
 			{
-				sprintf( text, "Auto-Team-Balance: %s set from team %d to team %d\n", STRING( pl->pev->netname ), pl->m_iTeam, team );
-				ALERT( at_logged, text );
-				ALERT( at_console, text );
+				snprintf( text, sizeof(text), "Auto-Team-Balance: %s set from team %d to team %d\n", STRING( pl->pev->netname ), pl->m_iTeam, team );
+				ALERT( at_logged, "%s", text );
+				ALERT( at_console, "%s", text );
 				pl->m_sInfo.team = team;
 				//SetTeam( team, pl, 0 );
 				count--;
@@ -1474,20 +1474,20 @@ BOOL cPEHacking::ClientCommand( CBasePlayer *pPlayer, const char *pcmd )
 			WRITE_BYTE( ENTINDEX( pPlayer->edict( ) ) );
 			WRITE_STRING( "Global Infos:\n" );
 		MESSAGE_END( );
-		sprintf( text, "Team1: %d Team2: %d NoTeam: %d Total: %d\n", m_iPlayers[1], m_iPlayers[2], m_iPlayers[0], m_iClients );
-		ALERT( at_logged, text );
+		snprintf( text, sizeof(text), "Team1: %d Team2: %d NoTeam: %d Total: %d\n", m_iPlayers[1], m_iPlayers[2], m_iPlayers[0], m_iClients );
+		ALERT( at_logged, "%s", text );
 		MESSAGE_BEGIN( MSG_ONE, gmsgSayText, NULL, pPlayer->pev );
 			WRITE_BYTE( ENTINDEX( pPlayer->edict( ) ) );
 			WRITE_STRING( text );
 		MESSAGE_END( );
-		sprintf( text, "Team1alive: %d Team2alive: %d Alive: %d\n", m_iPlrAlive[1], m_iPlrAlive[2], m_iPlrAlive[0] );
-		ALERT( at_logged, text );
+		snprintf( text, sizeof(text), "Team1alive: %d Team2alive: %d Alive: %d\n", m_iPlrAlive[1], m_iPlrAlive[2], m_iPlrAlive[0] );
+		ALERT( at_logged, "%s", text );
 		MESSAGE_BEGIN( MSG_ONE, gmsgSayText, NULL, pPlayer->pev );
 			WRITE_BYTE( ENTINDEX( pPlayer->edict( ) ) );
 			WRITE_STRING( text );
 		MESSAGE_END( );
-		sprintf( text, "Restart: %d RoundState: %d Gameover: %d\n\n", m_iRestart, m_iRoundStatus, (int)g_fGameOver );
-		ALERT( at_logged, text );
+		snprintf( text, sizeof(text), "Restart: %d RoundState: %d Gameover: %d\n\n", m_iRestart, m_iRoundStatus, (int)g_fGameOver );
+		ALERT( at_logged, "%s", text );
 		MESSAGE_BEGIN( MSG_ONE, gmsgSayText, NULL, pPlayer->pev );
 			WRITE_BYTE( ENTINDEX( pPlayer->edict( ) ) );
 			WRITE_STRING( text );
@@ -1497,15 +1497,15 @@ BOOL cPEHacking::ClientCommand( CBasePlayer *pPlayer, const char *pcmd )
 			WRITE_BYTE( ENTINDEX( pPlayer->edict( ) ) );
 			WRITE_STRING( "Player Infos:\n" );
 		MESSAGE_END( );
-		sprintf( text, "Hacker/Vip: %d Alive: %d\nTeam: %d Class: %d CurClass: %d Model: %s\nHealth: %d Armor: %d Speed: %d Points: %d\n----------------\n", pPlayer->m_bIsSpecial, pPlayer->IsAlive( ), pPlayer->m_iTeam, pPlayer->m_iPrevClass, pPlayer->m_iClass, mdl/*pPlayer->m_iModel*/, pPlayer->GetHealth( ), pPlayer->GetArmor( ), pPlayer->GetSpeed( ), pPlayer->m_iPoints );
-		ALERT( at_logged, text );
-		sprintf( text, "Hacker/Vip: %d Alive: %d Team: %d Class: %d CurClass: %d Model: %s Health: %d Armor: %d Speed: %d Points: %d", pPlayer->m_bIsSpecial, pPlayer->IsAlive( ), pPlayer->m_iTeam, pPlayer->m_iPrevClass, pPlayer->m_iClass, mdl/*pPlayer->m_iModel*/, pPlayer->GetHealth( ), pPlayer->GetArmor( ), pPlayer->GetSpeed( ), pPlayer->m_iPoints );
+		snprintf( text, sizeof(text), "Hacker/Vip: %d Alive: %d\nTeam: %d Class: %d CurClass: %d Model: %s\nHealth: %d Armor: %d Speed: %d Points: %d\n----------------\n", pPlayer->m_bIsSpecial, pPlayer->IsAlive( ), pPlayer->m_iTeam, pPlayer->m_iPrevClass, pPlayer->m_iClass, mdl/*pPlayer->m_iModel*/, pPlayer->GetHealth( ), pPlayer->GetArmor( ), pPlayer->GetSpeed( ), pPlayer->m_iPoints );
+		ALERT( at_logged, "%s", text );
+		snprintf( text, sizeof(text), "Hacker/Vip: %d Alive: %d Team: %d Class: %d CurClass: %d Model: %s Health: %d Armor: %d Speed: %d Points: %d", pPlayer->m_bIsSpecial, pPlayer->IsAlive( ), pPlayer->m_iTeam, pPlayer->m_iPrevClass, pPlayer->m_iClass, mdl/*pPlayer->m_iModel*/, pPlayer->GetHealth( ), pPlayer->GetArmor( ), pPlayer->GetSpeed( ), pPlayer->m_iPoints );
 		MESSAGE_BEGIN( MSG_ONE, gmsgSayText, NULL, pPlayer->pev );
 			WRITE_BYTE( ENTINDEX( pPlayer->edict( ) ) );
 			WRITE_STRING( text );
 		MESSAGE_END( );
 		
-		sprintf( text, "h1: %d h2: %d hf1: %d hf2: %d ht1: %f ht2: %f hges: %d", m_iHack1, m_iHack2, m_iHacked1, m_iHacked2, m_fFHack1, m_fFHack2, m_iTerminalsHacked );
+		snprintf( text, sizeof(text), "h1: %d h2: %d hf1: %d hf2: %d ht1: %f ht2: %f hges: %d", m_iHack1, m_iHack2, m_iHacked1, m_iHacked2, m_fFHack1, m_fFHack2, m_iTerminalsHacked );
 		MESSAGE_BEGIN( MSG_ONE, gmsgSayText, NULL, pPlayer->pev );
 			WRITE_BYTE( ENTINDEX( pPlayer->edict( ) ) );
 			WRITE_STRING( text );
@@ -1625,7 +1625,8 @@ BOOL cPEHacking::ClientCommand( CBasePlayer *pPlayer, const char *pcmd )
 		
 		if( CMD_ARGV( 1 ) && ( strlen( CMD_ARGV( 1 ) ) <= 32 ) )
 		{
-			strcpy( text, CMD_ARGV( 1 ) );
+			strncpy( text, CMD_ARGV( 1 ), sizeof(text) - 1 );
+			text[sizeof(text) - 1] = '\0';
 			if( !IS_MAP_VALID( text ) )
 			{
 				ClientPrint( pPlayer->pev, HUD_PRINTTALK, UTIL_VarArgs( "Map \"%s\" not found on server...\n", text ) );
@@ -1634,8 +1635,9 @@ BOOL cPEHacking::ClientCommand( CBasePlayer *pPlayer, const char *pcmd )
 			m_fNextVote = gpGlobals->time + 180;
 			m_iYesVotes = 0;
 			m_iNoVotes = 0;
-			strcpy( m_sVoteMap, CMD_ARGV( 1 ) );
-			sprintf( text, "\\t\n\\t\n\\t\n\\t\n\\t\n\\t\n\\t\n\\t\n\\t\n\\t\n\\rChange Map to %s?\n\\t\n\\t\n\\w1. Yes\n\\w2. No\n\\w3. Let the others decide", CMD_ARGV( 1 ) );
+			strncpy( m_sVoteMap, CMD_ARGV( 1 ), sizeof(m_sVoteMap) - 1 );
+			m_sVoteMap[sizeof(m_sVoteMap) - 1] = '\0';
+			snprintf( text, sizeof(text), "\\t\n\\t\n\\t\n\\t\n\\t\n\\t\n\\t\n\\t\n\\t\n\\t\n\\rChange Map to %s?\n\\t\n\\t\n\\w1. Yes\n\\w2. No\n\\w3. Let the others decide", CMD_ARGV( 1 ) );
 			ALERT( at_logged, "Vote for map %s started by %s\n", CMD_ARGV( 1 ), STRING( pPlayer->pev->netname ) );
 
 			ShowMenuAll( bit(0) | bit(1) | bit(2), 0, 0, text );
@@ -1666,7 +1668,8 @@ BOOL cPEHacking::ClientCommand( CBasePlayer *pPlayer, const char *pcmd )
 		
 		if( CMD_ARGV( 1 ) && ( strlen( CMD_ARGV( 1 ) ) <= 32 ) )
 		{
-			strcpy( text, CMD_ARGV( 1 ) );
+			strncpy( text, CMD_ARGV( 1 ), sizeof(text) - 1 );
+			text[sizeof(text) - 1] = '\0';
 			if( !CVAR_GET_POINTER( text ) )
 			{
 				ClientPrint( pPlayer->pev, HUD_PRINTTALK, UTIL_VarArgs( "Var \"%s\" does not exist...\n", text ) );
@@ -1680,9 +1683,11 @@ BOOL cPEHacking::ClientCommand( CBasePlayer *pPlayer, const char *pcmd )
 			m_fNextVarVote = gpGlobals->time + 30;
 			m_iYesVarVotes = 0;
 			m_iNoVarVotes = 0;
-			strcpy( m_sVoteVar[0], CMD_ARGV( 1 ) );
-			strcpy( m_sVoteVar[1], CMD_ARGV( 2 ) );
-			sprintf( text, "\\t\n\\t\n\\t\n\\t\n\\t\n\\t\n\\t\n\\t\n\\t\n\\t\n\\rChange value of %s to %s?\n\\t\n\\t\n\\w1. Yes\n\\w2. No\n\\w3. Let the others decide", CMD_ARGV( 1 ), CMD_ARGV( 2 ) );
+			strncpy( m_sVoteVar[0], CMD_ARGV( 1 ), sizeof(m_sVoteVar[0]) - 1 );
+			m_sVoteVar[0][sizeof(m_sVoteVar[0]) - 1] = '\0';
+			strncpy( m_sVoteVar[1], CMD_ARGV( 2 ), sizeof(m_sVoteVar[1]) - 1 );
+			m_sVoteVar[1][sizeof(m_sVoteVar[1]) - 1] = '\0';
+			snprintf( text, sizeof(text), "\\t\n\\t\n\\t\n\\t\n\\t\n\\t\n\\t\n\\t\n\\t\n\\t\n\\rChange value of %s to %s?\n\\t\n\\t\n\\w1. Yes\n\\w2. No\n\\w3. Let the others decide", CMD_ARGV( 1 ), CMD_ARGV( 2 ) );
 			ALERT( at_logged, "Vote for var %s set to %s started by %s\n", CMD_ARGV( 1 ), CMD_ARGV( 2 ), STRING( pPlayer->pev->netname ) );
 
 			ShowMenuAll( bit(0) | bit(1) | bit(2), 0, 0, text );
@@ -1746,7 +1751,8 @@ BOOL cPEHacking::ClientCommand( CBasePlayer *pPlayer, const char *pcmd )
 		
 		if( CMD_ARGV( 1 ) )
 		{
-			strcpy( text, CMD_ARGV( 1 ) );
+			strncpy( text, CMD_ARGV( 1 ), sizeof(text) - 1 );
+			text[sizeof(text) - 1] = '\0';
 			m_iOverrideModels = 1;
 			ClientUserInfoChanged( pPlayer, g_engfuncs.pfnGetInfoKeyBuffer( pPlayer->edict() ) );
 			SET_MDL( text );
