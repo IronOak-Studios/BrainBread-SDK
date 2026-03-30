@@ -221,6 +221,8 @@ class CBBAmmo : public CBaseEntity
     for( i = 0; i < MAX_WEAPONS; i++ )
       if( CBasePlayerItem::ItemInfoArray[i].pszName && !strcmp( CBasePlayerItem::ItemInfoArray[i].pszName, type ) )
         break;
+    if( i >= MAX_WEAPONS )
+      return;
     ItemInfo ii = CBasePlayerItem::ItemInfoArray[i];
  		bool r1 = ( pOther->GiveAmmo( max( 1, (int)( ii.iMaxClip / 2.0f ) ), (char*)ii.pszAmmo1, ii.iMaxAmmo1 ) != -1 );
 		bool r2 = ( pOther->GiveAmmo( max( 1, (int)( ii.iMaxClip2 / 2.0f ) ), (char*)ii.pszAmmo2, ii.iMaxAmmo2 ) != -1 );

@@ -474,6 +474,7 @@ int CHudScoreboard :: MsgFunc_TeamInfo( const char *pszName, int iSize, void *pb
 	if ( cl > 0 && cl <= MAX_PLAYERS )
 	{  // set the players team
 		strncpy( g_PlayerExtraInfo[cl].teamname, READ_STRING(), MAX_TEAM_NAME );
+		g_PlayerExtraInfo[cl].teamname[MAX_TEAM_NAME - 1] = '\0';
 	}
 
 	// rebuild the list of teams

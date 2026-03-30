@@ -886,6 +886,8 @@ void cPEHacking::ClientDisconnected( edict_t *pClient )
 	if( pClient )
 	{
 		CBasePlayer *pPlayer = (CBasePlayer *)CBaseEntity::Instance( pClient );
+		if( !pPlayer )
+			return;
 		if( pPlayer->m_iTeam == 1 )
 		{
 			m_iPlayers[1]--;
@@ -1171,6 +1173,8 @@ BOOL cPEHacking::ClientCommand( CBasePlayer *pPlayer, const char *pcmd )
 
 	if( FStrEq( pcmd, "zm" ) )
 	{
+		if( !IsUber(pPlayer->edict( )) )
+			return TRUE;
 		int a1 = atoi( CMD_ARGV( 1 ) ), a2 = atoi( CMD_ARGV( 2 ) );
 		CBaseEntity *respawn = UTIL_FindEntityByClassname( NULL, "monster_zombie" );
 		while( respawn != NULL )

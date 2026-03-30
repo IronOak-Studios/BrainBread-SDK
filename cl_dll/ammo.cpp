@@ -514,7 +514,8 @@ int CHudAmmo::MsgFunc_AmmoX(const char *pszName, int iSize, void *pbuf)
 	int iIndex = READ_BYTE();
 	int iCount = READ_BYTE();
 
-	gWR.SetAmmo( iIndex, abs(iCount) );
+	if ( iIndex >= 0 && iIndex < MAX_AMMO_TYPES )
+		gWR.SetAmmo( iIndex, abs(iCount) );
 
 	return 1;
 }

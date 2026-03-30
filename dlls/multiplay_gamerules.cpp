@@ -750,7 +750,7 @@ void CHalfLifeMultiplay::DeathNotice( CBasePlayer *pVictim, entvars_t *pKiller, 
 				// If the inflictor is the killer,  then it must be their current weapon doing the damage
 				CBasePlayer *pPlayer = (CBasePlayer*)CBaseEntity::Instance( pKiller );
 				
-				if ( pPlayer->m_pActiveItem )
+				if ( pPlayer && pPlayer->m_pActiveItem )
 				{
 					killer_weapon_name = pPlayer->m_pActiveItem->pszName();
 				}

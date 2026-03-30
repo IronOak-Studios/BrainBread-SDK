@@ -2326,6 +2326,8 @@ int TeamFortressViewport::MsgFunc_TeamNames(const char *pszName, int iSize, void
 	BEGIN_READ( pbuf, iSize );
 	
 	m_iNumberOfTeams = READ_BYTE();
+	if ( m_iNumberOfTeams > 4 )
+		m_iNumberOfTeams = 4;
 
 	for (int i = 0; i < m_iNumberOfTeams; i++)
 	{
@@ -2551,14 +2553,14 @@ int TeamFortressViewport::MsgFunc_TeamInfo( const char *pszName, int iSize, void
   else if( cl == 102 )
 	{
     int mdl = READ_BYTE( );
-    if( mdl )
+    if( mdl >= 1 && mdl <= 6 )
       g_iModels[mdl-1]++;
     return TRUE;
 	}
   else if( cl == 103 )
 	{
     int mdl = READ_BYTE( );
-    if( mdl )
+    if( mdl >= 1 && mdl <= 6 )
       g_iModels[mdl-1]--;
     return TRUE;
 	}
@@ -2590,16 +2592,20 @@ int TeamFortressViewport::MsgFunc_Spectator( const char *pszName, int iSize, voi
 	BEGIN_READ( pbuf, iSize );
 
 	short cl = READ_BYTE();
-	int prev = g_IsSpectator[cl];
 	if ( cl > 0 && cl <= MAX_PLAYERS )
 	{
+		int prev = g_IsSpectator[cl];
 		g_IsSpectator[cl] = READ_BYTE();
+		if( prev != g_IsSpectator[cl] )
+		{
+			GetAllPlayersInfo( );
+			UpdateOnPlayerInfo( );
+			m_pScoreBoard->RebuildTeams( );
+		}
 	}
-	if( prev != g_IsSpectator[cl] )
+	else
 	{
-		GetAllPlayersInfo( );
-		UpdateOnPlayerInfo( );
-		m_pScoreBoard->RebuildTeams( );
+		READ_BYTE(); // consume the byte even if cl is out of range
 	}
 	return 1;
 }

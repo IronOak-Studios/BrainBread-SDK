@@ -133,7 +133,7 @@ int CHudMOTD :: MsgFunc_MOTD( const char *pszName, int iSize, void *pbuf )
 	BEGIN_READ( pbuf, iSize );
 
 	int is_finished = READ_BYTE();
-	strcat( m_szMOTD, READ_STRING() );
+	strncat( m_szMOTD, READ_STRING(), sizeof(m_szMOTD) - strlen(m_szMOTD) - 1 );
 
 	if ( is_finished )
 	{

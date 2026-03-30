@@ -705,9 +705,9 @@ void CBasePlayerItem::DefaultTouch( CBaseEntity *pOther )
   }
 
   if( pPlayer->m_pActiveItem )
-		sprintf( pPlayer->m_sLastWeap, "%s", STRING(pPlayer->m_pActiveItem->pev->classname) );
+		snprintf( pPlayer->m_sLastWeap, sizeof(pPlayer->m_sLastWeap), "%s", STRING(pPlayer->m_pActiveItem->pev->classname) );
 	else
-		sprintf( pPlayer->m_sLastWeap, "weapon_knife" );
+		snprintf( pPlayer->m_sLastWeap, sizeof(pPlayer->m_sLastWeap), "weapon_knife" );
 	if (pOther->AddPlayerItem( this ))
 	{
 		AttachToPlayer( pPlayer );

@@ -262,7 +262,7 @@ int CHudDeathNotice :: MsgFunc_DeathMsg( const char *pszName, int iSize, void *p
 		strncpy( rgDeathNoticeList[i].szKiller, "BlackHawk\0", MAX_PLAYER_NAME_LENGTH );
 		rgDeathNoticeList[i].szKiller[MAX_PLAYER_NAME_LENGTH-1] = 0;
   }
-  else
+  else if ( killer > 0 && killer <= MAX_PLAYERS )
   {
 	  char *killer_name = g_PlayerInfoList[ killer ].name;
 	  if ( !killer_name )
@@ -305,7 +305,7 @@ int CHudDeathNotice :: MsgFunc_DeathMsg( const char *pszName, int iSize, void *p
 		strncpy( rgDeathNoticeList[i].szVictim, "Barney\0", MAX_PLAYER_NAME_LENGTH );
 		rgDeathNoticeList[i].szVictim[MAX_PLAYER_NAME_LENGTH-1] = 0;
   }
-  else
+  else if ( victim > 0 && victim <= MAX_PLAYERS )
   {
     if ( ((char)victim) != -1 )
 		  victim_name = g_PlayerInfoList[ victim ].name;

@@ -88,7 +88,7 @@ int CHudCounter::MsgFunc_SmallCnt( const char *pszName, int iSize, void *pbuf )
 	int i = 0;
 	char name[128];
 	BEGIN_READ( pbuf, iSize );
-	sprintf( name, READ_STRING( ) );
+	snprintf( name, sizeof(name), "%s", READ_STRING( ) );
 	for( i = 0; i < 10; i++ )
 		if( !strcmp( name, m_sCounters[i].sName ) && m_sCounters[i].iActive )
 		{
@@ -103,7 +103,7 @@ int CHudCounter::MsgFunc_SmallCnt( const char *pszName, int iSize, void *pbuf )
 	if( i >= 10 )
 		return 0;
 
-	sprintf( m_sCounters[i].sName, name );
+	snprintf( m_sCounters[i].sName, sizeof(m_sCounters[i].sName), "%s", name );
 	m_sCounters[i].fTotal = READ_COORD( );
 	m_sCounters[i].iActive = m_sCounters[i].fTotal > 0 ? true : false;
 	m_sCounters[i].fStart = -1;

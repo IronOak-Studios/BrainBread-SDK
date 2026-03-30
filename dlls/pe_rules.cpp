@@ -366,11 +366,13 @@ BOOL cPERules::IsVoteable( char *var )
 
 	int length;
 	char token[1500] = "\0";
-	char *varlist = (char*)LOAD_FILE_FOR_ME( "voteable_vars.txt", &length );
+	char *pFileBase = (char*)LOAD_FILE_FOR_ME( "voteable_vars.txt", &length );
+	char *varlist = pFileBase;
 
 	if( !varlist || length <= 0 )
 	{
-		FREE_FILE( varlist );
+		if( pFileBase )
+			FREE_FILE( pFileBase );
 		return FALSE;
 	}
 
@@ -379,15 +381,15 @@ BOOL cPERules::IsVoteable( char *var )
 		varlist = COM_Parse( varlist, token );
 		if( strlen( token ) <= 0 )
 		{
-			FREE_FILE( varlist );
+			FREE_FILE( pFileBase );
 			return FALSE;
 		}
 		if( !stricmp( token, var ) )
 		{
-			FREE_FILE( varlist );
+			FREE_FILE( pFileBase );
 			return TRUE;
 		}
 	}
-	FREE_FILE( varlist );
+	FREE_FILE( pFileBase );
 	return FALSE;
 }

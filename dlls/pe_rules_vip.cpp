@@ -376,6 +376,8 @@ void cPEVip::ClientDisconnected( edict_t *pClient )
 	if( pClient )
 	{
 		CBasePlayer *pPlayer = (CBasePlayer *)CBaseEntity::Instance( pClient );
+		if( !pPlayer )
+			return;
 		if( pPlayer->m_iTeam == 1 )
 		{
 			m_iPlayers[1]--;

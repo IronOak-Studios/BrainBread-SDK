@@ -736,7 +736,8 @@ void CBaseMonster :: Killed( entvars_t *pevAttacker, int iGib )
 		killer_index = ENTINDEX(ENT(pevAttacker));
 		
 		CBasePlayer *pPlayer = (CBasePlayer*)CBaseEntity::Instance( pevAttacker );
-			
+		if ( !pPlayer )
+			return;
 		if ( pPlayer->m_pActiveItem )
 		{
 			killer_weapon_name = pPlayer->m_pActiveItem->pszName();
@@ -1365,10 +1366,10 @@ void RadiusDamage( Vector vecSrc, entvars_t *pevInflictor, entvars_t *pevAttacke
 				{*/
 				pEntity->TakeDamage ( pevInflictor, pevAttacker, flAdjustedDamage, bitsDamageType );
 				//}
-				CBasePlayer *pa = (CBasePlayer*)CBaseEntity::Instance(pevAttacker);
+			CBasePlayer *pa = (CBasePlayer*)CBaseEntity::Instance(pevAttacker);
 
-				if( (CBaseEntity::Instance(pevAttacker))->IsPlayer( ) && pa )
-					pa->AddDmgDone( ENTINDEX(ENT(pEntity->pev)), flAdjustedDamage, 3 );
+			if( pa && pa->IsPlayer( ) )
+				pa->AddDmgDone( ENTINDEX(ENT(pEntity->pev)), flAdjustedDamage, 3 );
 				if( pEntity->IsPlayer( ) )
 					((CBasePlayer*)pEntity)->AddDmgReceived( ENTINDEX(ENT(pevAttacker)), flAdjustedDamage, 3 );
 		//	}

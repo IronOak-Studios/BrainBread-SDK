@@ -229,8 +229,8 @@ bool _dbOpen(sqlite3 **db)
 	char file[1024];
 	char *slash;
 	GET_GAME_DIR(file);
-	strncat(file, "\\", 1024);
-	strncat(file, playerinfofile.string, 1024);
+	strncat(file, "\\", sizeof(file) - strlen(file) - 1);
+	strncat(file, playerinfofile.string, sizeof(file) - strlen(file) - 1);
 
 #ifndef WIN32 /// LINUX
 	while (slash = strstr(file, "\\"))
