@@ -439,8 +439,10 @@ int IsUber( edict_t *player )
 	 return 0;
 }
 void SetWpnSlot( int id, int slot, CBasePlayer* pPlayer )
-{ 
-	pPlayer->m_iSlots[slot-2] = id;
+{
+	int idx = slot - 2;
+	if( idx >= 0 && idx < 3 )
+		pPlayer->m_iSlots[idx] = id;
 }
 
 void uPrintTeam( int iTeamNr, int msg_dest, const char *msg_name, const char *param1 )
@@ -477,7 +479,7 @@ void ShowTextAll( char *Text, float HoldTime, int rColor, int gColor, int bColor
 		hText.holdTime		= HoldTime; 
 		hText.fxTime		= 0;
 
-		sprintf(ShowTextAll, Text); 
+		snprintf(ShowTextAll, sizeof(ShowTextAll), "%s", Text);
 
 		UTIL_HudMessageAll( hText, ShowTextAll);
 }
@@ -504,7 +506,7 @@ void ShowText( CBasePlayer* pPlayer, char *Text, float HoldTime, int rColor, int
 		hText.holdTime		= HoldTime; 
 		hText.fxTime		= 0;
 
-		sprintf(ShowTextAll, Text); 
+		snprintf(ShowTextAll, sizeof(ShowTextAll), "%s", Text);
 
 		UTIL_HudMessage( pPlayer, hText, ShowTextAll );
 }
@@ -546,13 +548,14 @@ const char *uEqPlr( CBasePlayer* pPlayer, int wpn, int ammo, int ammo2 )
 			(int)( (float)II.iMaxAmmo1 * ( give / 100.0 ) )
 			);
 
-		if( ( pPlayer->m_iCurSlot < 5 ) )
+		if( pPlayer->m_iCurSlot >= 2 && pPlayer->m_iCurSlot < 6 )
 			pPlayer->m_sAmmoSlot[pPlayer->m_iCurSlot-2] = II.pszAmmo1;
 	}
 	if( II.pszAmmo2 )
 	{
 		pPlayer->GiveAmmo( ( (ammo2 > 0 ) ? ammo2 : II.iMaxAmmo2 ), (char *)II.pszAmmo2, II.iMaxAmmo2 );
-		pPlayer->m_sAmmo_aSlot[pPlayer->m_iCurSlot-2] = II.pszAmmo2;
+		if( pPlayer->m_iCurSlot >= 2 && pPlayer->m_iCurSlot < 6 )
+			pPlayer->m_sAmmo_aSlot[pPlayer->m_iCurSlot-2] = II.pszAmmo2;
 	}
 	if( ( pPlayer->m_iCurSlot >= 3 ) && ( pPlayer->m_iCurSlot < 5 ) )
 		SetWpnSlot( wpn, pPlayer->m_iCurSlot-1, pPlayer );

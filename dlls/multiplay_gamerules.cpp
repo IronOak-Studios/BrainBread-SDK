@@ -929,46 +929,34 @@ void CHalfLifeMultiplay::DeathNotice( CBasePlayer *pVictim, entvars_t *pKiller, 
 	// TODO: make this go direct to console
 	return; // just remove for now
 
-	char	szText[ 128 ];
+	char	szText[ 256 ];
 
 	if ( pKiller->flags & FL_MONSTER )
 	{
 		// killed by a monster
-		strcpy ( szText, STRING( pVictim->pev->netname ) );
-		strcat ( szText, " was killed by a monster.\n" );
+		snprintf ( szText, sizeof(szText), "%s was killed by a monster.\n", STRING( pVictim->pev->netname ) );
 		return;
 	}
 
 	if ( pKiller == pVictim->pev )
 	{
-		strcpy ( szText, STRING( pVictim->pev->netname ) );
-		strcat ( szText, " committed suicide.\n" );
+		snprintf ( szText, sizeof(szText), "%s committed suicide.\n", STRING( pVictim->pev->netname ) );
 	}
 	else if ( pKiller->flags & FL_CLIENT )
 	{
-		strcpy ( szText, STRING( pKiller->netname ) );
-
-		strcat( szText, " : " );
-		strcat( szText, killer_weapon_name );
-		strcat( szText, " : " );
-
-		strcat ( szText, STRING( pVictim->pev->netname ) );
-		strcat ( szText, "\n" );
+		snprintf ( szText, sizeof(szText), "%s : %s : %s\n", STRING( pKiller->netname ), killer_weapon_name, STRING( pVictim->pev->netname ) );
 	}
 	else if ( FClassnameIs ( pKiller, "worldspawn" ) )
 	{
-		strcpy ( szText, STRING( pVictim->pev->netname ) );
-		strcat ( szText, " fell or drowned or something.\n" );
+		snprintf ( szText, sizeof(szText), "%s fell or drowned or something.\n", STRING( pVictim->pev->netname ) );
 	}
 	else if ( pKiller->solid == SOLID_BSP )
 	{
-		strcpy ( szText, STRING( pVictim->pev->netname ) );
-		strcat ( szText, " was mooshed.\n" );
+		snprintf ( szText, sizeof(szText), "%s was mooshed.\n", STRING( pVictim->pev->netname ) );
 	}
 	else
 	{
-		strcpy ( szText, STRING( pVictim->pev->netname ) );
-		strcat ( szText, " died mysteriously.\n" );
+		snprintf ( szText, sizeof(szText), "%s died mysteriously.\n", STRING( pVictim->pev->netname ) );
 	}
 
 	UTIL_ClientPrintAll( HUD_PRINTNOTIFY, szText );

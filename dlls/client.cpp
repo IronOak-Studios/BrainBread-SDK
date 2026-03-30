@@ -180,7 +180,7 @@ void ClientKill( edict_t *pEntity )
 	entvars_t *pev = &pEntity->v;
 
 	CBasePlayer *pl = (CBasePlayer*) CBasePlayer::Instance( pev );
-	if( pl->observing )
+	if( !pl || pl->observing )
 		return;
 
   if( pl->m_bTransform )
@@ -506,11 +506,11 @@ void Host_Say( edict_t *pEntity, int teamonly )
 
 		//if ( teamonly && g_pGameRules->PlayerRelationship(client, CBaseEntity::Instance(pEntity)) != GR_TEAMMATE )
 		//	continue;
-		if( !pPlayer->IsAlive( ) && client->IsAlive( ) )
+		if( pPlayer && !pPlayer->IsAlive( ) && client->IsAlive( ) )
 			continue;
 		if( teamonly )
 		{
-			if( client->m_iTeam != pPlayer->m_iTeam )
+			if( pPlayer && client->m_iTeam != pPlayer->m_iTeam )
 				continue;
 			MESSAGE_BEGIN( MSG_ONE, gmsgSayText, NULL, client->pev );
 				WRITE_BYTE( ENTINDEX(pEntity) );
@@ -774,7 +774,7 @@ void ClientUserInfoChanged( edict_t *pEntity, char *infobuffer )
 		g_engfuncs.pfnSetClientKeyValue( ENTINDEX(pEntity), infobuffer, "name", sName );
 
 		char text[256];
-		sprintf( text, "* %s changed name to %s\n", STRING(pEntity->v.netname), g_engfuncs.pfnInfoKeyValue( infobuffer, "name" ) );
+		snprintf( text, sizeof(text), "* %s changed name to %s\n", STRING(pEntity->v.netname), g_engfuncs.pfnInfoKeyValue( infobuffer, "name" ) );
 		MESSAGE_BEGIN( MSG_ALL, gmsgSayText, NULL );
 			WRITE_BYTE( ENTINDEX(pEntity) );
 			WRITE_STRING( text );

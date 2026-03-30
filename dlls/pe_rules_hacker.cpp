@@ -1596,10 +1596,10 @@ BOOL cPEHacking::ClientCommand( CBasePlayer *pPlayer, const char *pcmd )
 	else if( FStrEq(pcmd, "userlist" ) )
 	{
 		ClientPrint( pPlayer->pev, HUD_PRINTCONSOLE, "Cl#   Name  <WonID>\n" );
-		for( int i = 0; i <= MAX_PLAYERS; i++ )
+		for( int i = 1; i <= MAX_PLAYERS; i++ )
 		{
 			CBasePlayer* pl = (CBasePlayer*)UTIL_PlayerByIndex( i );
-			if( pl && strlen( STRING( pPlayer->pev->netname ) ) )
+			if( pl && strlen( STRING( pl->pev->netname ) ) )
 			{
 				ClientPrint( pPlayer->pev, HUD_PRINTCONSOLE, UTIL_VarArgs( "%d: %s <%s>\n", i, STRING(pl->pev->netname), GETPLAYERAUTHID( pl->edict( ) ) ) );
 			}
@@ -1641,7 +1641,7 @@ BOOL cPEHacking::ClientCommand( CBasePlayer *pPlayer, const char *pcmd )
 			ALERT( at_logged, "Vote for map %s started by %s\n", CMD_ARGV( 1 ), STRING( pPlayer->pev->netname ) );
 
 			ShowMenuAll( bit(0) | bit(1) | bit(2), 0, 0, text );
-			for( int i = 0; i <= MAX_PLAYERS; i++ )
+			for( int i = 1; i <= MAX_PLAYERS; i++ )
 			{
 				CBasePlayer* pl = (CBasePlayer*)UTIL_PlayerByIndex( i );
 				if( pl )
@@ -1691,7 +1691,7 @@ BOOL cPEHacking::ClientCommand( CBasePlayer *pPlayer, const char *pcmd )
 			ALERT( at_logged, "Vote for var %s set to %s started by %s\n", CMD_ARGV( 1 ), CMD_ARGV( 2 ), STRING( pPlayer->pev->netname ) );
 
 			ShowMenuAll( bit(0) | bit(1) | bit(2), 0, 0, text );
-			for( int i = 0; i <= MAX_PLAYERS; i++ )
+			for( int i = 1; i <= MAX_PLAYERS; i++ )
 			{
 				CBasePlayer* pl = (CBasePlayer*)UTIL_PlayerByIndex( i );
 				if( pl )
@@ -2332,7 +2332,7 @@ BOOL cPEHacking::FPlayerCanTakeDamage( CBasePlayer *pPlayer, CBaseEntity *pAttac
 		if( !pPlayer->pev->fuser4 && ( friendlyfire.value == 0 ) && ( pAttacker != pPlayer ) )
 			return FALSE;
 	}
-	if( pPlayer->m_iTeam == 1 && FClassnameIs( pAttacker->pev, "bb_escapeair" ) )
+	if( pAttacker && pPlayer->m_iTeam == 1 && FClassnameIs( pAttacker->pev, "bb_escapeair" ) )
 		return FALSE;
 
 	//if( pPlayer->m_iTeam == 2 && FClassnameIs( pAttacker->pev, "bb_tank" ) )

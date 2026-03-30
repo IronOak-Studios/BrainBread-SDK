@@ -371,7 +371,7 @@ BOOL cPERules::IsVoteable( char *var )
 	if( !varlist || length <= 0 )
 	{
 		FREE_FILE( varlist );
-		return TRUE;
+		return FALSE;
 	}
 
 	while( varlist && strlen( varlist ) > 0 )

@@ -43,6 +43,14 @@ extern void InitGlobals( );
 
 static int tracerCount[ 32 ];
 
+static inline int *SafeTracerCount( int idx )
+{
+	static int dummy = 0;
+	if( idx < 1 || idx > 32 )
+		return &dummy;
+	return &tracerCount[idx - 1];
+}
+
 extern "C" char PM_FindTextureType( char *name );
 
 void V_PunchAxis( int axis, float punch );
@@ -121,8 +129,14 @@ vec3_t PE_GetAttachment( model_s *mdl, int att )
 vec3_t PE_MuzzlePos( int idx, int duck )
 {
 	vec3_t view_ofs;
-		
-	model_s * weaponModel = IEngineStudio.GetModelByIndex( gEngfuncs.GetEntityByIndex( idx )->curstate.weaponmodel );
+
+	cl_entity_t *pEnt = gEngfuncs.GetEntityByIndex( idx );
+	if( !pEnt )
+	{
+		VectorClear( view_ofs );
+		return view_ofs;
+	}
+	model_s * weaponModel = IEngineStudio.GetModelByIndex( pEnt->curstate.weaponmodel );
 	studiohdr_t* pStudioHeader = (studiohdr_t *)IEngineStudio.Mod_Extradata(weaponModel);
 
 	VectorClear( view_ofs );
@@ -887,11 +901,11 @@ void EV_FireMP5_10( event_args_t *args )
 
 	if ( gEngfuncs.GetMaxClients() > 1 )
 	{
-		EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_MP5, 2, &tracerCount[idx-1], args->fparam1, args->fparam2 );
+		EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_MP5, 2, SafeTracerCount(idx), args->fparam1, args->fparam2 );
 	}
 	else
 	{
-		EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_MP5, 2, &tracerCount[idx-1], args->fparam1, args->fparam2 );
+		EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_MP5, 2, SafeTracerCount(idx), args->fparam1, args->fparam2 );
 	}
 }
 
@@ -1003,7 +1017,7 @@ void EV_FireSeburo( event_args_t *args )
 	EV_GetGunPosition( args, vecSrc, origin );
 	VectorCopy( forward, vecAiming );
 
-	EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_SEBURO, 2, &tracerCount[idx-1], args->fparam1, args->fparam2 );
+	EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_SEBURO, 2, SafeTracerCount(idx), args->fparam1, args->fparam2 );
 }
 
 enum benelli_e {
@@ -1059,7 +1073,7 @@ void EV_FireBenelli( event_args_t *args )
 	EV_GetGunPosition( args, vecSrc, origin );
 	VectorCopy( forward, vecAiming );
 
-	EV_HLDM_FireBullets( idx, forward, right, up, 12, vecSrc, vecAiming, 2048, BULLET_PLAYER_BENELLI, 0, &tracerCount[idx-1], 0.08716, 0.04362 );
+	EV_HLDM_FireBullets( idx, forward, right, up, 12, vecSrc, vecAiming, 2048, BULLET_PLAYER_BENELLI, 0, SafeTracerCount(idx), 0.08716, 0.04362 );
 }
 
 enum beretta_e
@@ -1192,7 +1206,7 @@ void EV_FireM16( event_args_t *args )
 	EV_GetGunPosition( args, vecSrc, origin );
 	VectorCopy( forward, vecAiming );
 
-	EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_M16, 2, &tracerCount[idx-1], args->fparam1, args->fparam2 );
+	EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_M16, 2, SafeTracerCount(idx), args->fparam1, args->fparam2 );
 }
 
 enum glock_e
@@ -1352,7 +1366,7 @@ void EV_FireAug( event_args_t *args )
 	EV_GetGunPosition( args, vecSrc, origin );
 	VectorCopy( forward, vecAiming );
 
-	EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_AUG, 2, &tracerCount[idx-1], args->fparam1, args->fparam2 );
+	EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_AUG, 2, SafeTracerCount(idx), args->fparam1, args->fparam2 );
 }
 
 enum minigun_e
@@ -1407,7 +1421,7 @@ void EV_FireMinigun( event_args_t *args )
 
 	VectorCopy( forward, vecAiming );
 
-	EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_MINIGUN, 2, &tracerCount[idx-1], args->fparam1, args->fparam2 );
+	EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_MINIGUN, 2, SafeTracerCount(idx), args->fparam1, args->fparam2 );
 }
 
 enum microuzi_e
@@ -1462,7 +1476,7 @@ void EV_FireMicrouzi( event_args_t *args )
 	
 	VectorCopy( forward, vecAiming );
 
-	EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_MICROUZI, 2, &tracerCount[idx-1], args->fparam1, args->fparam2 );
+	EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_MICROUZI, 2, SafeTracerCount(idx), args->fparam1, args->fparam2 );
 
 
 }
@@ -1526,7 +1540,7 @@ void EV_FireMicrouzi_a( event_args_t *args )
 	EV_GetGunPosition( args, vecSrc, origin );
 	VectorCopy( forward, vecAiming );
 
-	EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_MICROUZI_A, 2, &tracerCount[idx-1], args->fparam1, args->fparam2 );
+	EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_MICROUZI_A, 2, SafeTracerCount(idx), args->fparam1, args->fparam2 );
 }
 
 enum usp_e
@@ -1647,7 +1661,7 @@ void EV_FireStoner( event_args_t *args )
 	EV_GetGunPosition( args, vecSrc, origin );
 	VectorCopy( forward, vecAiming );
 
-	EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_STONER, 2, &tracerCount[idx-1], args->fparam1, args->fparam2 );
+	EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_STONER, 2, SafeTracerCount(idx), args->fparam1, args->fparam2 );
 }
 
 enum sig550_e
@@ -1701,7 +1715,7 @@ void EV_FireSig550( event_args_t *args )
 	EV_GetGunPosition( args, vecSrc, origin );
 	VectorCopy( forward, vecAiming );
 
-	EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_SIG550, 2, &tracerCount[idx-1], args->fparam1, args->fparam2 );
+	EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_SIG550, 2, SafeTracerCount(idx), args->fparam1, args->fparam2 );
 }
 
 enum p226_e
@@ -2005,7 +2019,7 @@ void EV_FireGlock_auto_a( event_args_t *args )
 	EV_GetGunPosition( args, vecSrc, origin );
 	VectorCopy( forward, vecAiming );
 
-	EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_GLOCK_AUTO_A, 2, &tracerCount[idx-1], args->fparam1, args->fparam2 );
+	EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_GLOCK_AUTO_A, 2, SafeTracerCount(idx), args->fparam1, args->fparam2 );
 }
 
 enum glock_auto_e
@@ -2060,7 +2074,7 @@ void EV_FireGlock_auto( event_args_t *args )
 	EV_GetGunPosition( args, vecSrc, origin );
 	VectorCopy( forward, vecAiming );
 
-	EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_GLOCK_AUTO, 2, &tracerCount[idx-1], args->fparam1, args->fparam2 );
+	EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_GLOCK_AUTO, 2, SafeTracerCount(idx), args->fparam1, args->fparam2 );
 }
 
 enum mp5sd_e
@@ -2115,7 +2129,7 @@ void EV_FireMP5sd( event_args_t *args )
 	EV_GetGunPosition( args, vecSrc, origin );
 	VectorCopy( forward, vecAiming );
 
-	EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_MP5SD, 2, &tracerCount[idx-1], args->fparam1, args->fparam2 );
+	EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_MP5SD, 2, SafeTracerCount(idx), args->fparam1, args->fparam2 );
 }
 
 enum tavor_e
@@ -2172,7 +2186,7 @@ void EV_FireTavor( event_args_t *args )
 	EV_GetGunPosition( args, vecSrc, origin );
 	VectorCopy( forward, vecAiming );
 
-	EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_STONER, 2, &tracerCount[idx-1], args->fparam1, args->fparam2 );
+	EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_STONER, 2, SafeTracerCount(idx), args->fparam1, args->fparam2 );
 }
 
 enum sawed_e {
@@ -2225,7 +2239,7 @@ void EV_FireSawed( event_args_t *args )
 	EV_GetGunPosition( args, vecSrc, origin );
 	VectorCopy( forward, vecAiming );
 
-	EV_HLDM_FireBullets( idx, forward, right, up, 12, vecSrc, vecAiming, 2048, BULLET_PLAYER_SAWED, 0, &tracerCount[idx-1], 0.08716, 0.04362 );
+	EV_HLDM_FireBullets( idx, forward, right, up, 12, vecSrc, vecAiming, 2048, BULLET_PLAYER_SAWED, 0, SafeTracerCount(idx), 0.08716, 0.04362 );
 }
 
 enum ak47_e
@@ -2279,7 +2293,7 @@ void EV_FireAK47( event_args_t *args )
 	EV_GetGunPosition( args, vecSrc, origin );
 	VectorCopy( forward, vecAiming );
 
-	EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_AK47, 2, &tracerCount[idx-1], args->fparam1, args->fparam2 );
+	EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_AK47, 2, SafeTracerCount(idx), args->fparam1, args->fparam2 );
 }
 
 enum case_e {
@@ -2376,7 +2390,7 @@ void EV_FireUspMP( event_args_t *args )
 	EV_GetGunPosition( args, vecSrc, origin );
 	VectorCopy( forward, vecAiming );
 
-	EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_USPMP, 2, &tracerCount[idx-1], args->fparam1, args->fparam2 );
+	EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_USPMP, 2, SafeTracerCount(idx), args->fparam1, args->fparam2 );
 }
 
 enum hand_e

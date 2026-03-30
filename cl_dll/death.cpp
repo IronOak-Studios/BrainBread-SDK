@@ -195,13 +195,11 @@ int CHudDeathNotice :: MsgFunc_DeathMsg( const char *pszName, int iSize, void *p
 		g_IsSpectator[victim] = 1;
 	}
 
-	strcpy( killedwith, "d_" );
-	strncat( killedwith, READ_STRING(), 32 );
+	snprintf( killedwith, sizeof(killedwith), "d_%s", READ_STRING() );
 	if( !strcmp( killedwith, "d_headshot" ) )
 	{
 		head = 1;
-		strcpy( killedwith, "d_" );
-		strncat( killedwith, READ_STRING(), 32 );
+		snprintf( killedwith, sizeof(killedwith), "d_%s", READ_STRING() );
 	}
 
 	if (gViewPort)

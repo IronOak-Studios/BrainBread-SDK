@@ -78,7 +78,7 @@ int CHudNotify::MsgFunc_Plinfo( const char *pszName, int iSize, void *pbuf )
 	m_iHlth = READ_BYTE( );
 	m_iArmo = READ_BYTE( );
 	m_iTeam = READ_BYTE( );
-	strcpy( m_sName, READ_STRING( ) );
+	snprintf( m_sName, sizeof(m_sName), "%s", READ_STRING( ) );
 	return 1;
 }
 
@@ -88,7 +88,7 @@ int CHudNotify::MsgFunc_AddNotify( const char *pszName, int iSize, void *pbuf )
 	BEGIN_READ( pbuf, iSize );
 
 	add = READ_STRING( );
-	strcpy( m_sAdditional, add );
+	snprintf( m_sAdditional, sizeof(m_sAdditional), "%s", add );
 
 	return 1;
 }
@@ -248,14 +248,14 @@ int CHudNotify::MsgFunc_Notify( const char *pszName, int iSize, void *pbuf )
 		done_selection = 2;
 		break;
   case NTC_CUSTOM:
-		strcpy( m_sText1, READ_STRING( ) );
+		snprintf( m_sText1, sizeof(m_sText1), "%s", READ_STRING( ) );
     c[0] = 255;
 		c[1] = 80;
 		c[2] = 80;
 		break;
   case NTM_CUSTOM:
-		strcpy( m_sText2, READ_STRING( ) );
-		strcpy( m_sText3, READ_STRING( ) );
+		snprintf( m_sText2, sizeof(m_sText2), "%s", READ_STRING( ) );
+		snprintf( m_sText3, sizeof(m_sText3), "%s", READ_STRING( ) );
 		break;
 
 	}
@@ -276,7 +276,7 @@ int CHudNotify::MsgFunc_Notify( const char *pszName, int iSize, void *pbuf )
 
 int CHudNotify::Draw( float flTime )
 {
-	char text[128];
+	char text[256];
 	if( dur1 || dur2 )
 	{
 		if( dur1 )
@@ -366,7 +366,7 @@ int CHudNotify::Draw( float flTime )
 			ym = YRES(60);
 		}
 		
-		sprintf( text, "%s(%s): %d Health, %d Armor", m_sName, ( m_iTeam == 1 ) ? "alive" : "ZOMBIE", m_iHlth, m_iArmo );
+		snprintf( text, sizeof(text), "%s(%s): %d Health, %d Armor", m_sName, ( m_iTeam == 1 ) ? "alive" : "ZOMBIE", m_iHlth, m_iArmo );
 		g_font->DrawString( xm, ScreenHeight - ym - HudScale( 20 ), text, col[0], col[1], col[2], 128 );
 	}
 	return TRUE;

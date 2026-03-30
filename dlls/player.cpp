@@ -716,9 +716,10 @@ void CBasePlayer :: TraceAttack( entvars_t *pevAttacker, float flDamage, Vector 
 
 		//ALERT( at_console, UTIL_VarArgs( "%s(%d) hit %s in %s for %f damage.\n", STRING(pevAttacker->netname), ENTINDEX(ENT(pevAttacker)), STRING(pev->netname), hitgrp[ptr->iHitgroup], flDamage ) );
 		
-		CBasePlayer *pa = (CBasePlayer*)CBaseEntity::Instance(pevAttacker);
+		CBaseEntity *pAttackerEnt = CBaseEntity::Instance(pevAttacker);
+		CBasePlayer *pa = (CBasePlayer*)pAttackerEnt;
 
-		if( (CBaseEntity::Instance(pevAttacker))->IsPlayer( ) && pa )
+		if( pAttackerEnt && pAttackerEnt->IsPlayer( ) && pa )
 			pa->AddDmgDone( ENTINDEX(ENT(pev)), flDamage, ptr->iHitgroup );
 		AddDmgReceived( ENTINDEX(ENT(pevAttacker)), flDamage, ptr->iHitgroup );
 
@@ -2215,6 +2216,21 @@ char hitlog[8][64] =
 	{"generic bodypart"}
 };
 
+static void FormatHitGroups( char *buf, int bufsize, int hitgroup[8] )
+{
+	int len = 0;
+	buf[0] = '\0';
+	for( int i = 0; i < 4; i++ )
+	{
+		if( !hitgroup[i] )
+			continue;
+		if( len > 0 && len < bufsize )
+			len += snprintf( buf + len, bufsize - len, ", " );
+		if( len < bufsize )
+			len += snprintf( buf + len, bufsize - len, "%d hits in %s", hitgroup[i], hitlog[i] );
+	}
+}
+
 #define REHUMAN_KILLS 5
 #define REHUMAN_TIMER 120
 extern int g_teamplay;
@@ -2564,60 +2580,30 @@ void CBasePlayer::PreThink(void)
 			}
 			if( showdmg.value && ( m_fNextInfo < gpGlobals->time ) && ( ( m_iCurInfo - 32 ) < 32 ) )
 			{
-				char text[256];
-				//ALERT( at_console, "curinfo %d\n", m_iCurInfo );
+				char hits[256];
 				if( ( m_iCurInfo < 32 ) && ( m_iCurInfo >= 0 ) )
 				{
 					cinf = m_iCurInfo;
-					//ALERT( at_console, "index %d\n", dmgdone[cinf].index );
 					if( !dmgdone[cinf].index )
 					{
 						m_iCurInfo++;
 						m_fNextInfo = 0;
 						return;
 					}
-					sprintf( text, "You did %d damage to %s (", (int)dmgdone[cinf].damage, dmgdone[cinf].name );
-					//ClientPrint( pev, HUD_PRINTTALK, UTIL_VarArgs( "You did %d damage to %s:\n", (int)dmgdone[cinf].damage, dmgdone[cinf].name ) );
-					for( int i = 0; i < 4; i++ )
-					{
-						if( !dmgdone[cinf].hitgroup[i] )
-							continue;
-						//ClientPrint( pev, HUD_PRINTTALK, UTIL_VarArgs( "%d hits in %s\n", dmgdone[cinf].hitgroup[i], hitlog[i] ) );
-						if( ( i > 0 ) &&
-							( ( i == 1 ) ? dmgdone[cinf].hitgroup[0] : 1 ) &&
-							( ( i == 2 ) ? ( dmgdone[cinf].hitgroup[0] || dmgdone[cinf].hitgroup[1] ) : 1  ) )
-							strcat( text, ", " );
-						strcat( text, UTIL_VarArgs( "%d hits in %s", dmgdone[cinf].hitgroup[i], hitlog[i] ) );
-					}
-					strcat( text, ")\n" );
-					ClientPrint( pev, HUD_PRINTTALK, text );
-						
+					FormatHitGroups( hits, sizeof(hits), dmgdone[cinf].hitgroup );
+					ClientPrint( pev, HUD_PRINTTALK, UTIL_VarArgs( "You did %d damage to %s (%s)\n", (int)dmgdone[cinf].damage, dmgdone[cinf].name, hits ) );
 				}
 				else if( ( ( m_iCurInfo - 32 ) < 32 ) && ( ( m_iCurInfo - 32 ) >= 0 ) )
 				{
 					cinf = m_iCurInfo - 32;
-					//ALERT( at_console, "index %d\n", dmgdone[cinf].index );
 					if( !dmgreceived[cinf].index )
 					{
 						m_iCurInfo++;
 						m_fNextInfo = 0;
 						return;
 					}
-					sprintf( text, "You were hit for %d damage by %s (", (int)dmgreceived[cinf].damage, dmgreceived[cinf].name );
-					//ClientPrint( pev, HUD_PRINTTALK, UTIL_VarArgs( "You were hit for %d damage by %s:\n", (int)dmgreceived[cinf].damage, dmgreceived[cinf].name ) );
-					for( int i = 0; i < 4; i++ )
-					{
-						if( !dmgreceived[cinf].hitgroup[i] )
-							continue;
-						if( ( i > 0 ) &&
-							( ( i == 1 ) ? dmgreceived[cinf].hitgroup[0] : 1 ) &&
-							( ( i == 2 ) ? ( dmgreceived[cinf].hitgroup[0] || dmgreceived[cinf].hitgroup[1] ) : 1  ) )
-							strcat( text, ", " );
-						strcat( text, UTIL_VarArgs( "%d hits in %s", dmgreceived[cinf].hitgroup[i], hitlog[i] ) );
-						//ClientPrint( pev, HUD_PRINTTALK, UTIL_VarArgs( "%d hits in %s\n", dmgreceived[cinf].hitgroup[i], hitlog[i] ) );
-					}
-					strcat( text, ")\n" );
-					ClientPrint( pev, HUD_PRINTTALK, text );
+					FormatHitGroups( hits, sizeof(hits), dmgreceived[cinf].hitgroup );
+					ClientPrint( pev, HUD_PRINTTALK, UTIL_VarArgs( "You were hit for %d damage by %s (%s)\n", (int)dmgreceived[cinf].damage, dmgreceived[cinf].name, hits ) );
 				}
 				
 				m_fNextInfo = gpGlobals->time + DMG_INFO_DELAY;
