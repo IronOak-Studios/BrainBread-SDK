@@ -130,6 +130,22 @@ void cPEVip::CheckRoundEnd( )
 	}
 
 	m_iRestart = 0;
+
+	// If sv_roundtimelimit changed (e.g. settings.scr applied late), adjust the end time
+	if( ROUND_TIME != m_flRoundTimeUsed )
+	{
+		float elapsed = 0;
+		if( m_flRoundTimeUsed > 0 )
+			elapsed = m_flRoundTimeUsed - (m_flRoundEndTime - gpGlobals->time);
+
+		m_flRoundTimeUsed = ROUND_TIME;
+
+		if( ROUND_TIME )
+			m_flRoundEndTime = gpGlobals->time + (ROUND_TIME - elapsed);
+		else
+			m_flRoundEndTime = 0;
+	}
+
 	if( m_iVipEscaped )
 	{
 		AddScore( 1, 20 );
@@ -201,6 +217,7 @@ void cPEVip::StartRound( )
 	g_fSatSyn =	0;
 	g_fSatSec = 0;
 
+	m_flRoundTimeUsed = ROUND_TIME;
 	m_flRoundEndTime = gpGlobals->time + ROUND_TIME;
 	m_iRoundStatus = ROUND_DURING;
 

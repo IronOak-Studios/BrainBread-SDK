@@ -23,6 +23,7 @@ cPERules::cPERules( )
 	m_fNextThink = gpGlobals->time;
 	m_flUpdateCounter = gpGlobals->time;
 	m_flRoundEndTime = gpGlobals->time;
+	m_flRoundTimeUsed = 0;
 	m_fNextVote = gpGlobals->time + 60;
 	m_fNextVarVote = gpGlobals->time + 5;
 	m_iYesVotes = 0;

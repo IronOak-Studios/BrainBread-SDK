@@ -215,7 +215,22 @@ extern int g_teamplay;
 void cPEHacking::CheckRoundEnd( )
 {
 	m_iRestart = 0;
-  
+
+	// If sv_roundtimelimit changed (e.g. settings.scr applied late), adjust the end time
+	if( ROUND_TIME != m_flRoundTimeUsed )
+	{
+		float elapsed = 0;
+		if( m_flRoundTimeUsed > 0 )
+			elapsed = m_flRoundTimeUsed - (m_flRoundEndTime - gpGlobals->time);
+
+		m_flRoundTimeUsed = ROUND_TIME;
+
+		if( ROUND_TIME )
+			m_flRoundEndTime = gpGlobals->time + (ROUND_TIME - elapsed);
+		else
+			m_flRoundEndTime = 0;
+	}
+
   CheckAllMissions( );
   if( misComplete || ( oneEscaped && !m_iPlayers[1] ) )
   {
@@ -433,6 +448,7 @@ void cPEHacking::StartRound( )
 
   CheckAllMissions( );
 
+	m_flRoundTimeUsed = ROUND_TIME;
 	m_flRoundEndTime = gpGlobals->time + ROUND_TIME;
 	m_iRoundStatus = ROUND_DURING;
 
@@ -2257,6 +2273,7 @@ cPEHacking::cPEHacking( )
 	m_iRoundStatus = ROUND_START;
 	m_flUpdateCounter = gpGlobals->time;
 	m_flRoundEndTime = 0;
+	m_flRoundTimeUsed = 0;
 	strcpy( m_sValidMdls[0][0], "hacker" );
 	strcpy( m_sValidMdls[0][1], "vip" );
 	strcpy( m_sValidMdls[0][2], "" );

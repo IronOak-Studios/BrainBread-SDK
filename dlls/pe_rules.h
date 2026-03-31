@@ -21,6 +21,7 @@ protected:
 	float	m_fNextThink;
 	float	m_flUpdateCounter;
 	float	m_flRoundEndTime;
+	float	m_flRoundTimeUsed;
 	float	m_fNextVote;
 	float	m_fNextVarVote;
 	float	m_fResetTime;
