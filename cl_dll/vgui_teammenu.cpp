@@ -462,7 +462,7 @@ bool CTeamMenuPanel::SlotInput( int iSlot )
 	}
 
 	// Otherwise, see if a particular team is selectable
-	if ( (iSlot < 1) || (iSlot > gViewPort->GetNumberOfTeams()) )
+	if ( (iSlot < 1) || (iSlot > 3) )
 		return false;
 	if ( !m_pButtons[ iSlot ] )
 		return false;
