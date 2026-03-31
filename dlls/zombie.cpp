@@ -134,20 +134,19 @@ public:
 
 	void EXPORT SUB_FadeIn()
   {
-	  if ( pev->renderamt < 225 )
-	  {
-		  pev->renderamt += 30;
-		  pev->nextthink = gpGlobals->time + 0.1;
-	  }
-	  else 
-	  {
-		  pev->renderamt = 255;
-      pev->rendermode = kRenderNormal;
-		  pev->nextthink = gpGlobals->time + 1.5;
-      SetSequenceByName( "spawn" );
-		  SetThink( &CZombie::SpawningThink );
-	  }
-  }
+		pev->nextthink = gpGlobals->time + 0.1;
+		if ( pev->renderamt < 225 )
+			pev->renderamt += 30;
+		else
+		{
+			pev->renderamt = 255;
+			pev->rendermode = kRenderNormal;
+			SetSequenceByName("spawn");
+			if (m_flFrameRate)
+				pev->nextthink = gpGlobals->time + 1.5;
+			SetThink( &CZombie::SpawningThink );
+		}
+	}
 };
 
 BOOL CZombie::ShouldGibMonster( int iGib )
@@ -779,7 +778,7 @@ void CZombie :: Spawn()
   m_fBurning = 0;
 
 	pev->solid			= SOLID_SLIDEBOX;
-	pev->movetype		= MOVETYPE_NONE;
+	pev->movetype		= isFred ? MOVETYPE_TOSS : MOVETYPE_NONE;
 	m_bloodColor		= BLOOD_COLOR_RED;
   if( isFred )
     pev->health = FRED_HEALTH * max( ((cPEHacking*)g_pGameRules)->m_iClients, 1 );

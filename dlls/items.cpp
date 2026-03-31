@@ -161,20 +161,24 @@ class CBBAmmo : public CBaseEntity
 		pev->movetype = MOVETYPE_NONE;
 	  pev->solid = SOLID_TRIGGER;
 
-    TraceResult tr;
-		UTIL_TraceLine ( pev->origin, pev->origin - Vector ( 0, 0, 2048 ), dont_ignore_monsters, ENT(pev), &tr );
-		pev->origin.z = tr.vecEndPos.z + 1;
-
-    UTIL_SetOrigin( pev, pev->origin );
-	  UTIL_SetSize(pev, VEC_HUMAN_HULL_MIN * 3 , Vector( 16 * 3, 16 * 3, 72 ) );
-
 	  SetTouch( NULL );
     //SetUse( NULL );
     //SetThink( Recharge );
-    //pev->nextthink = gpGlobals->time + 1;
-    SetThink( NULL );
+    pev->nextthink = gpGlobals->time + 0.1;
+
     SetUse( NULL );
     nextCharge = gpGlobals->time + 1;
+	}
+
+	void Think()
+	{
+		TraceResult tr;
+		UTIL_TraceLine(pev->origin, pev->origin - Vector(0, 0, 2048), dont_ignore_monsters, ENT(pev), &tr);
+		pev->origin.z = tr.vecEndPos.z + 1;
+
+		UTIL_SetOrigin(pev, pev->origin);
+		UTIL_SetSize(pev, VEC_HUMAN_HULL_MIN * 3, Vector(16 * 3, 16 * 3, 72));
+		SetThink( NULL );
 	}
 
 	void Precache( void )
