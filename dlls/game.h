@@ -71,6 +71,7 @@ extern cvar_t	defaultteam;
 extern cvar_t	allowmonsters;
 extern cvar_t	zombie_behavior;
 extern cvar_t	zombie_yawspeed;
+extern cvar_t	zombie_lifetime;
 
 // Engine Cvars
 extern cvar_t	*g_psv_gravity;

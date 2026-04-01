@@ -43,7 +43,8 @@ cvar_t	playerinfofile	= {"sv_playerinfofile", "players.lvl", FCVAR_SERVER };
 cvar_t	gibcnt	= {"sv_gibcount", "10", FCVAR_SERVER };
 cvar_t	zombiecnt	= {"sv_zombiecount", "65", FCVAR_SERVER };
 cvar_t	zombie_behavior	= {"sv_zombie_behavior", "2", FCVAR_SERVER };
-cvar_t	zombie_yawspeed	= {"sv_zombie_yawspeed", "10", FCVAR_SERVER };
+cvar_t	zombie_yawspeed	= {"sv_zombie_yawspeed", "20", FCVAR_SERVER };
+cvar_t	zombie_lifetime	= {"sv_zombie_lifetime", "60", FCVAR_SERVER };
 
 cvar_t	teamspect	= {"mp_teamspectator", "0", FCVAR_SERVER };
 cvar_t	showdmg		= {"sv_damageinfo", "0", FCVAR_SERVER };
@@ -537,6 +538,7 @@ void GameDLLInit( void )
 	CVAR_REGISTER (&zombiecnt);
 	CVAR_REGISTER (&zombie_behavior);
 	CVAR_REGISTER (&zombie_yawspeed);
+	CVAR_REGISTER (&zombie_lifetime);
 
 //	CVAR_REGISTER (&teamspect);
 //	CVAR_REGISTER (&showdmg);

@@ -728,7 +728,10 @@ void CZombie :: Spawn()
   }
   else
   {
-    dieTime = gpGlobals->time + RANDOM_LONG( 45, 60 );
+    if( zombie_lifetime.value > 0 )
+      dieTime = gpGlobals->time + RANDOM_LONG( (int)(zombie_lifetime.value * 0.75), (int)zombie_lifetime.value );
+    else
+      dieTime = 0;
     char model[32];
     int nr = RANDOM_LONG( 1, 6 );
     /*if( nr == 7 )
