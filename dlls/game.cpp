@@ -28,7 +28,7 @@ cvar_t	allow_spectators = { "allow_spectators", "1.0", FCVAR_SERVER };
 // multiplayer server rules
 cvar_t	exppotence	= {"sv_exppotence", "2", FCVAR_SERVER };
 cvar_t	expperlevel	= {"sv_expperlevel", "150", FCVAR_SERVER };
-cvar_t	maxlevel	= {"sv_maxlevel", "23", FCVAR_SERVER };
+cvar_t	maxlevel	= {"sv_maxlevel", "-1", FCVAR_SERVER };
 
 cvar_t	savexp	= {"sv_savexp", "24", FCVAR_SERVER };
 

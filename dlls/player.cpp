@@ -6349,6 +6349,14 @@ void CBasePlayer::GiveExp( float value, bool load )
   if( !lvl )
     m_fPointsMax = 0;
 	exp += value;
+	// enforce sv_maxlevel cap (-1 = no cap)
+	int iMaxLevel = (int)maxlevel.value;
+	if( iMaxLevel >= 0 )
+	{
+		float maxexp = EXP_FOR_LEVEL( iMaxLevel + 1 );
+		if( exp >= maxexp )
+			exp = maxexp - 1;
+	}
 	int lvl2 = (int)LEVEL_FOR_EXP( exp );
   bool lvlup = false;
   if( lvl != lvl2 )
