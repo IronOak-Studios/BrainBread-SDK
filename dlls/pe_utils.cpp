@@ -240,8 +240,13 @@ bool _dbOpen(sqlite3 **db)
 		*slash = '\\';
 #endif
 
-	if (sqlite3_open(file, db) != SQLITE_OK)
-		return _dbError("open", *db);
+	ALERT(at_console, "Player EXP DB: Opening '%s'\n", file);
+
+	if (sqlite3_open(file, db) != SQLITE_OK) {
+		_dbError("open", *db);
+		*db = NULL;
+		return false;
+	}
 	return true;
 }
 
