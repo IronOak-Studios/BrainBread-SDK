@@ -1097,7 +1097,7 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 	
 	// Don't go firing anything if we have died.
 	// Or if we don't have a weapon model deployed
-	if ( ( player.pev->deadflag != ( DEAD_DISCARDBODY + 1 ) ) && !CL_IsDead() && player.pev->viewmodel )
+	if ( ( player.pev->deadflag == DEAD_NO ) && !CL_IsDead() && player.pev->viewmodel )
 	{
 		if ( player.m_flNextAttack <= 0 )
 		{
@@ -1119,7 +1119,7 @@ void HUD_WeaponsPostThink( local_state_s *from, local_state_s *to, usercmd_t *cm
 	to->client.m_iId					= from->client.m_iId;
 
 	// Now see if we issued a changeweapon command ( and we're not dead )
-	if ( cmd->weaponselect && ( player.pev->deadflag != ( DEAD_DISCARDBODY + 1 ) ) )
+	if ( cmd->weaponselect && ( player.pev->deadflag == DEAD_NO ) && !CL_IsDead() )
 	{
 		// Switched to a different weapon?
 		if ( from->weapondata[ cmd->weaponselect ].m_iId == cmd->weaponselect )

@@ -1212,6 +1212,11 @@ void CBasePlayer::Killed( entvars_t *pevAttacker, int iGib )
 	if ( m_pActiveItem )
 		m_pActiveItem->Holster( );
 
+	// Ensure viewmodel is cleared on death -- weapon Holster() overrides
+	// don't always call the base class which is the only place that clears these
+	pev->viewmodel = 0;
+	pev->weaponmodel = 0;
+
 	g_pGameRules->PlayerKilled( this, pevAttacker, pevAttacker );
   
   MESSAGE_BEGIN( MSG_ONE, gmsgSmallCnt, NULL, edict( ) );
@@ -5429,7 +5434,7 @@ void CBasePlayer::DropPlayerItem ( char *pszItemName )
     CWeaponBox *pWeaponBox = NULL;
 		if ( pWeapon )
 		{
-			if( pWeapon->m_iId != OBJECTIVE_ITEM )
+			if( pWeapon->m_iId != OBJECTIVE_ITEM && pev->deadflag == DEAD_NO )
 				g_pGameRules->GetNextBestWeapon( this, pWeapon );
 
 			UTIL_MakeVectors ( pev->angles ); 
