@@ -205,12 +205,12 @@ void CHudLens::CheckFlares( )
 	for( int i = 0; i < m_iIndex; i++ )
 	{
 		if( m_iRef[i] )
-			end = orig + ( m_vecLOrigin[i] - m_vecRefOrigin[i] ) * 4096;
+			end = orig + ( m_vecLOrigin[i] - m_vecRefOrigin[i] ).Normalize() * 4096;
 		else
-			end = orig + m_vecLOrigin[i];
+			end = m_vecLOrigin[i];
 
     tr = *(gEngfuncs.PM_TraceLine( (float *)&orig, (float *)&end, PM_TRACELINE_ANYVISIBLE, 2 /*point sized hull*/, -1 ) );
-		tex = (char *)gEngfuncs.pEventAPI->EV_TraceTexture( tr.ent, tr.endpos - Vector( 5, 5, 5 ), tr.endpos + Vector( 5, 5, 5 ) );
+		tex = (char *)gEngfuncs.pEventAPI->EV_TraceTexture( tr.ent, orig, tr.endpos );
 
 		visible = ( tex && !strcmp( tex, "sky" ) ) || ( tr.fraction == 1.0f );
 		//sprintf( cmd, "%s, %s, %f\n", visible ? "vis" : "invis", tex, tr.fraction );
