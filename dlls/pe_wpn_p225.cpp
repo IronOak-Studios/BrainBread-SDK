@@ -9,7 +9,7 @@
 #define P225_CLIP			9
 #define P225_MAX			54
 #define P225_SLOT			1
-#define P225_POS			5
+#define P225_POS			1
 
 enum p225_e
 {
