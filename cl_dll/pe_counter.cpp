@@ -94,7 +94,7 @@ int CHudCounter::MsgFunc_SmallCnt( const char *pszName, int iSize, void *pbuf )
 		{
 			m_sCounters[i].fTotal = READ_COORD( );
 			m_sCounters[i].iActive = m_sCounters[i].fTotal > 0 ? true : false;
-			m_sCounters[i].fStart = -1;
+			m_sCounters[i].fStart = gEngfuncs.GetClientTime();
 			return 1;
 		}
 	for( i = 0; i < 10; i++ )
@@ -106,7 +106,7 @@ int CHudCounter::MsgFunc_SmallCnt( const char *pszName, int iSize, void *pbuf )
 	snprintf( m_sCounters[i].sName, sizeof(m_sCounters[i].sName), "%s", name );
 	m_sCounters[i].fTotal = READ_COORD( );
 	m_sCounters[i].iActive = m_sCounters[i].fTotal > 0 ? true : false;
-	m_sCounters[i].fStart = -1;
+	m_sCounters[i].fStart = gEngfuncs.GetClientTime();
 
 	return 1;
 }
@@ -115,8 +115,12 @@ int CHudCounter::MsgFunc_CntDown( const char *pszName, int iSize, void *pbuf )
 {
 	BEGIN_READ( pbuf, iSize );
 	m_fCntTotal = READ_BYTE();
+	m_fCntDown = gEngfuncs.GetClientTime() + (float)m_fCntTotal;
 	m_iFlags |= HUD_ACTIVE;
 	m_bInitCntDown = TRUE;
+	m_bDrawCntDown = m_fCntTotal > 0 ? TRUE : FALSE;
+	if( m_bDrawCntDown )
+		progressFader->Start( "good", gEngfuncs.GetClientTime(), m_fCntDown );
 
 	return 1;
 }
@@ -126,21 +130,20 @@ int CHudCounter::MsgFunc_CntDown( const char *pszName, int iSize, void *pbuf )
 
 int CHudCounter::Draw( float flTime )
 {
+	float curTime = gEngfuncs.GetClientTime();
+
 	if( m_bInitCntDown && m_fCntTotal > 0 )
 	{
 		m_fStep = (float)PGW / ( (float)m_fCntTotal * 10.0f );
-		m_fCntDown = flTime + (float)m_fCntTotal;
 		m_fGStep = 255.0f / ( ( (float)PGW / 3.0f ) * 2.0f );
 		m_bInitCntDown = FALSE;
-		m_bDrawCntDown = TRUE;
-		progressFader->Start( "good", flTime, m_fCntDown );
 	}
 	else
 		m_bInitCntDown = FALSE;
 		
 	if( m_iProgress >= PGW )
 		m_bDrawCntDown = FALSE;
-	m_iProgress = (int)( ( ( (float)m_fCntTotal ) - ( m_fCntDown - flTime ) ) * 10 * m_fStep );
+	m_iProgress = (int)( ( ( (float)m_fCntTotal ) - ( m_fCntDown - curTime ) ) * 10 * m_fStep );
 
 
 	if( ( gHUD.m_iHideHUDDisplay & HIDEHUD_COUNTER ) )
@@ -204,9 +207,9 @@ int CHudCounter::Draw( float flTime )
 	{
 		if( !m_sCounters[i].iActive )
 			continue;
-		if( m_sCounters[i].fStart == -1 )
-			m_sCounters[i].fStart = flTime;
-		if( flTime > ( m_sCounters[i].fStart + m_sCounters[i].fTotal ) )
+		if( m_sCounters[i].fStart < 0 )
+			m_sCounters[i].fStart = curTime;
+		if( curTime > ( m_sCounters[i].fStart + m_sCounters[i].fTotal ) )
 			m_sCounters[i].iActive = 0;
 
 		int cy = HudScale( 145 ) + m_iNumCnts * SMALL_CNT_HEIGHT;
@@ -226,14 +229,14 @@ int CHudCounter::Draw( float flTime )
 		UTIL_FillRect( cx, cy + HudScale( 19 ), HudScale( 1 ), HudScale( 11 ), r, g, b, 255 );
 		UTIL_FillRect( cx + cw, cy + HudScale( 18 ), HudScale( 1 ), HudScale( 13 ), r, g, b, 255 );
 		
-		pcent = 100.0f * ( flTime - m_sCounters[i].fStart ) / m_sCounters[i].fTotal;
+		pcent = 100.0f * ( curTime - m_sCounters[i].fStart ) / m_sCounters[i].fTotal;
 		if( pcent > 100 )
 			pcent = 100;
 		if( g_iTeamNumber == 1 )
 			smallProgressFaderBad->GetColor( pcent, r, g, b );
 		else
 			smallProgressFaderGood->GetColor( pcent, r, g, b );
-		UTIL_FillRect( cx + HudScale( 2 ), cy + HudScale( 20 ), (cw - HudScale( 4 ))/m_sCounters[i].fTotal*(flTime-m_sCounters[i].fStart), HudScale( 9 ), r, g, b, 255 );
+		UTIL_FillRect( cx + HudScale( 2 ), cy + HudScale( 20 ), (cw - HudScale( 4 ))/m_sCounters[i].fTotal*(curTime-m_sCounters[i].fStart), HudScale( 9 ), r, g, b, 255 );
 
 		m_iNumCnts++;		
 	}
@@ -253,7 +256,7 @@ int CHudCounter::Draw( float flTime )
 		UTIL_FillRect( PGS + PGW + pp - HudScale( 1 ), py - pp, HudScale( 1 ), ph + pp * 2, 255, 255, 255, 255 );
 		
 		// Counter
-		progressFader->GetColor( flTime, r, g, b );
+		progressFader->GetColor( curTime, r, g, b );
 		UTIL_FillRect( PGS, py, m_iProgress, ph, r, g, b, 255 );
 
 		return 1;
