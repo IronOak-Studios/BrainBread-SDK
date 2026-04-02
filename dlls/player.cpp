@@ -2411,6 +2411,9 @@ void CBasePlayer::PreThink(void)
     MESSAGE_END( );
    	g_engfuncs.pfnSetClientMaxspeed( ENT(pev), SPEED_FORMULA );
     UTIL_EdictScreenFade( edict(), Vector( 128, 0, 0 ), 0.1, 50, 85, FFADE_MODULATE | FFADE_STAYOUT );
+    ResetRadar( );
+    InitRadar( );
+    EnableTeam( pev, m_iTeam );
   }
   if( ( m_fTransformTime - 10 ) <= gpGlobals->time && m_bTransform && !pev->fuser4 )
   {
