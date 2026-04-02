@@ -74,7 +74,7 @@ public:
 	Vector m_vecStuckCheckPos;	// Position when stuck timer started
 	float  m_flStuckStartTime;	// When the zombie first got stuck (0 = not stuck)
 	int    m_iLastAvoidDir;		// Direction of current/last avoidance: 0=none, 1=right, -1=left
-	float  m_flAvoidRemaining;	// Sideways distance left in current burst (0 = not avoiding)
+	float  m_flAvoidRemaining;	// Sideways distance left in current move (0 = not avoiding)
 	Vector m_vecAvoidEnemyPos;	// Enemy pos when m_iLastAvoidDir was set (for 80-unit reset)
 
 	// Small-obstacle clip-through
@@ -878,7 +878,8 @@ void CZombie::SpawningThink( )
 // Move - zombie override with obstacle avoidance.
 //
 // When stuck for 1s, tries clip-through first (small
-// obstacles the head can see over), then sidestep burst.
+// obstacles the head can see over), then random sideway
+// moves.
 //=========================================================
 void CZombie::Move( float flInterval )
 {
@@ -889,7 +890,10 @@ void CZombie::Move( float flInterval )
 		return;
 	}
 
-	// --- Clipping through a small obstacle ---
+	// --- Executing a clip (obstacle or ledge) ---
+	// Slides the zombie forward at walk speed, bypassing engine
+	// collision. FL_ONGROUND is cleared so gravity applies if the
+	// zombie ends up over empty air (ledge drop).
 	if ( m_flClipRemaining > 0 )
 	{
 		if ( !FRouteClear() && m_movementGoal != MOVEGOAL_NONE )
@@ -905,10 +909,12 @@ void CZombie::Move( float flInterval )
 			flDist = m_flClipRemaining;
 
 		UTIL_SetOrigin( pev, pev->origin + m_vecClipDir * flDist );
+		pev->flags &= ~FL_ONGROUND;
 		m_flClipRemaining -= flDist;
 
 		if ( m_flClipRemaining <= 0 )
 		{
+			ALERT( at_aiconsole, "zombie clip: finished at (%.0f %.0f %.0f)\n", pev->origin.x, pev->origin.y, pev->origin.z );
 			m_flClipRemaining = 0;
 			m_vecStuckCheckPos = pev->origin;
 			m_flStuckStartTime = 0;
@@ -919,18 +925,21 @@ void CZombie::Move( float flInterval )
 		return;
 	}
 
-	// --- Currently doing a sideways burst ---
+	// --- Executing a sideway move ---
+	// Slides the zombie perpendicular to its goal direction to get
+	// around an obstacle. Uses engine movement (UTIL_MoveToOrigin)
+	// so collision still applies. Aborts early if the path to the
+	// enemy becomes clear. Direction alternates each attempt.
 	if ( m_flAvoidRemaining > 0 )
 	{
 		if ( FRouteClear() || m_movementGoal == MOVEGOAL_NONE )
 		{
-			// Lost our route — abort burst
+			ALERT( at_aiconsole, "zombie sidestep: aborted (no route)\n" );
 			m_flAvoidRemaining = 0;
 			CBaseMonster::Move( flInterval );
 			return;
 		}
 
-		// Compute goal direction and perpendicular
 		Vector vecToGoal = ( m_Route[ m_iRouteIndex ].vecLocation - pev->origin );
 		vecToGoal.z = 0;
 		float flGoalDist = vecToGoal.Length();
@@ -946,14 +955,12 @@ void CZombie::Move( float flInterval )
 		Vector vecPerp = CrossProduct( vecToGoal, vecUp );
 		Vector vecSideDir = vecPerp * (float)m_iLastAvoidDir;
 
-		// Face toward the goal while sliding sideways
 		MakeIdealYaw( m_Route[ m_iRouteIndex ].vecLocation );
 		ChangeYaw( pev->yaw_speed );
 
 		if ( m_IdealActivity != m_movementActivity )
 			m_IdealActivity = m_movementActivity;
 
-		// Move sideways at normal speed this frame
 		float flDist = m_flGroundSpeed * pev->framerate * flInterval;
 		Vector vecSideTarget = pev->origin + vecSideDir * 64;
 
@@ -968,23 +975,27 @@ void CZombie::Move( float flInterval )
 
 		m_flAvoidRemaining -= flDist;
 
-		// Check if the way to the enemy is now clear
-		if ( m_hEnemy != NULL )
+		/*
+		// Abort early if path to enemy is now clear
+		if (m_hEnemy != NULL)
 		{
 			TraceResult trFwd;
 			UTIL_TraceLine( pev->origin, m_hEnemy->pev->origin, dont_ignore_monsters, ENT( pev ), &trFwd );
 			if ( trFwd.flFraction > 0.9 )
-				m_flAvoidRemaining = 0;	// path is open, stop sliding
+			{
+				ALERT( at_aiconsole, "zombie sidestep: path clear, aborting early (%.0f remaining)\n", m_flAvoidRemaining );
+				m_flAvoidRemaining = 0;
+			}
 		}
+		*/
 
-		// Burst finished — refresh route and reset stuck timer
 		if ( m_flAvoidRemaining <= 0 )
 		{
+			ALERT( at_aiconsole, "zombie sidestep: finished at (%.0f %.0f %.0f)\n", pev->origin.x, pev->origin.y, pev->origin.z );
 			m_flAvoidRemaining = 0;
 			m_vecStuckCheckPos = pev->origin;
 			m_flStuckStartTime = 0;
 
-			// Rebuild route toward enemy's current position
 			if ( m_hEnemy != NULL )
 				m_vecEnemyLKP = m_hEnemy->pev->origin;
 			FRefreshRoute();
@@ -993,22 +1004,21 @@ void CZombie::Move( float flInterval )
 		return;
 	}
 
-	// --- Normal movement ---
+	// --- Normal movement and stuck detection ---
+	// Each frame we try normal base class movement. If the zombie
+	// hasn't moved more than 16 units from its stuck checkpoint,
+	// a timer starts. After 0.5s of being stuck we stop pushing
+	// into the wall (prevents oscillation). After 1.0s we attempt
+	// a clip-through or sideway move.
 
-	// Forget avoidance direction if enemy moved significantly (>80 units,
-	// same threshold Valve uses for route refresh in CheckEnemy)
+	// Reset avoidance direction if enemy moved significantly
 	if ( m_iLastAvoidDir != 0 && m_hEnemy != NULL )
 	{
 		if ( ( m_hEnemy->pev->origin - m_vecAvoidEnemyPos ).Length2D() > 80 )
 			m_iLastAvoidDir = 0;
 	}
 
-	// If we've been stuck for >0.5s, stop pushing into the wall to prevent
-	// oscillation. The first 0.5s allows wall-sliding to work normally —
-	// the zombie has that time to accumulate 16 units of displacement from
-	// the stuck checkpoint, which resets the timer. If it hasn't moved
-	// enough by 0.5s, it's genuinely stuck and we stop until the burst
-	// starts at 1.0s.
+	// After 0.5s stuck, stop pushing into the wall
 	if ( m_flStuckStartTime > 0 && gpGlobals->time - m_flStuckStartTime > 0.5 )
 	{
 		if ( !FRouteClear() )
@@ -1025,25 +1035,22 @@ void CZombie::Move( float flInterval )
 		CBaseMonster::Move( flInterval );
 	}
 
-	// Nothing to avoid if we're not trying to go somewhere
 	if ( m_movementGoal == MOVEGOAL_NONE || FRouteClear() )
 	{
 		m_flStuckStartTime = 0;
 		return;
 	}
 
-	// Check if we've been stuck (not moving) for 1 second
+	// Check if we've moved enough to reset the stuck timer
 	float flDistFromStuckPos = ( pev->origin - m_vecStuckCheckPos ).Length2D();
 
 	if ( flDistFromStuckPos > 16.0 )
 	{
-		// We're moving fine — reset stuck timer
 		m_vecStuckCheckPos = pev->origin;
 		m_flStuckStartTime = 0;
 		return;
 	}
 
-	// Not moving much — start or continue the stuck timer
 	if ( m_flStuckStartTime == 0 )
 	{
 		m_flStuckStartTime = gpGlobals->time;
@@ -1051,11 +1058,12 @@ void CZombie::Move( float flInterval )
 		return;
 	}
 
-	// Haven't been stuck long enough yet
 	if ( gpGlobals->time - m_flStuckStartTime < 1.0 )
 		return;
 
-	// --- Stuck for 1s: try clip-through, then sidestep ---
+	// --- Stuck for 1s: try clip/ledge, then sideway move ---
+	ALERT( at_aiconsole, "zombie stuck: 1s at (%.0f %.0f %.0f)\n", pev->origin.x, pev->origin.y, pev->origin.z );
+
 	Vector vecToGoal = ( m_Route[ m_iRouteIndex ].vecLocation - pev->origin );
 	vecToGoal.z = 0;
 	float flGoalDist = vecToGoal.Length();
@@ -1063,55 +1071,103 @@ void CZombie::Move( float flInterval )
 		return;
 	vecToGoal = vecToGoal / flGoalDist;
 
-	// --- Small-obstacle clip-through (behavior >= 2) ---
-	// Head-level line trace rejects full walls.  If head is clear,
-	// a reverse human_hull trace from ahead back to the zombie finds
-	// the first position past the obstacle where the hull fits.
-	// Z offset is half the zombie's height so the BSP human_hull
-	// (centered, extends -36 to +36) doesn't clip the floor.
-	if ( zombie_behavior.value >= 2 )
+	// --- Small-obstacle clip-through / ledge drop (behavior >= 2) ---
+	// We first check if the path is clear at about head height, then
+	// we do a reverse trace to see if there is an obstacle thin enough
+	// to clip through. If no obstacle is found we assume it's a ledge.
+	// In both cases we then check for a reasonable drop after the
+	// clip (configurable height).
+	if ( zombie_behavior.value >= 2 && !isFred ) do
 	{
-		float flHalfZ = pev->size.z * 0.5f;
+		float flHalfZ = 36;	// human_hull half-height
 		Vector vecEye = pev->origin + Vector( 0, 0, pev->size.z * 0.75f );
 
 		TraceResult trHead;
 		UTIL_TraceLine( vecEye, vecEye + vecToGoal * 80, ignore_monsters, ENT( pev ), &trHead );
 
-		if ( trHead.flFraction == 1.0 && !trHead.fStartSolid && !trHead.fAllSolid )
+		// Can't see past the obstacle
+		if ( trHead.flFraction != 1.0 || trHead.fStartSolid || trHead.fAllSolid )
 		{
-			Vector vecFar  = pev->origin + vecToGoal * 45 + Vector( 0, 0, flHalfZ );
-			Vector vecNear = pev->origin + Vector( 0, 0, flHalfZ );
-
-			TraceResult trRev;
-			UTIL_TraceHull( vecFar, vecNear, dont_ignore_monsters, human_hull, ENT( pev ), &trRev );
-
-			if ( !trRev.fStartSolid && !trRev.fAllSolid && trRev.flFraction < 1.0 )
-			{
-				// Ground check at exit point
-				Vector vecExit = trRev.vecEndPos;
-				TraceResult trFloor;
-				UTIL_TraceLine( vecExit + Vector( 0, 0, flHalfZ ), vecExit - Vector( 0, 0, pev->size.z ), ignore_monsters, ENT( pev ), &trFloor );
-
-				if ( trFloor.flFraction < 1.0 )
-				{
-					m_flClipRemaining = ( vecExit - pev->origin ).Length2D() + 4;
-					m_vecClipDir = vecToGoal;
-					m_vecStuckCheckPos = pev->origin;
-					m_flStuckStartTime = 0;
-					return;
-				}
-			}
+			ALERT( at_aiconsole, "zombie clip: head blocked (frac %.2f)\n", trHead.flFraction );
+			break;
 		}
-	}
 
-	// --- Sidestep burst ---
+		Vector vecFar  = pev->origin + vecToGoal * 45 + Vector( 0, 0, flHalfZ);
+		Vector vecNear = pev->origin + Vector( 0, 0, flHalfZ);
 
-	// Perpendicular axis (right of goal direction)
+		TraceResult trRev;
+		UTIL_TraceHull( vecFar, vecNear, dont_ignore_monsters, human_hull, ENT( pev ), &trRev );
+
+		// Reverse trace is stuck in a solid
+		if ( trRev.fStartSolid || trRev.fAllSolid )
+		{
+			ALERT( at_aiconsole, "zombie clip: reverse trace stuck in solid\n" );
+			break;
+		}
+
+		Vector vecExit;
+		bool bLedge = false;
+
+		if ( trRev.flFraction < 1.0 )
+		{
+			// Found obstacle and valid exit position
+			vecExit = trRev.vecEndPos;
+		}
+		else
+		{
+			// No obstacle, move to coyote position
+			vecExit = pev->origin + vecToGoal * 45 + Vector( 0, 0, flHalfZ);
+			bLedge = true;
+		}
+
+		// Check ground at the actual end of the clip path (4 units past exit)
+		Vector vecClipEnd = vecExit + vecToGoal * 4;
+		float flDropDist = max( 36.0f, zombie_drop_height.value );
+		TraceResult trFloor;
+		UTIL_TraceHull( vecClipEnd, vecClipEnd - Vector( 0, 0, flDropDist ), dont_ignore_monsters, human_hull, ENT( pev ), &trFloor );
+
+		if ( trFloor.flFraction == 1.0 || trFloor.fAllSolid || ( bLedge && trFloor.flFraction == 0 ) )
+		{
+			ALERT( at_aiconsole, "zombie clip: no ground below (frac %.2f, allsolid %d, traced %.0f)\n", trFloor.flFraction, trFloor.fAllSolid, flDropDist );
+			break;
+		}
+
+		// Avoid hurt triggers and other zombies (prevent stacking)
+		CBaseEntity *pHit = CBaseEntity::Instance( trFloor.pHit );
+		if ( pHit && ( FClassnameIs( pHit->pev, "trigger_hurt" ) ||
+					   FClassnameIs( pHit->pev, "monster_zombie" ) ) )
+		{
+			ALERT( at_aiconsole, "zombie clip: blocked by %s below\n", STRING( pHit->pev->classname ) );
+			break;
+		}
+
+		// Don't drop down if target is not below
+		float flDrop = pev->origin.z - trFloor.vecEndPos.z + flHalfZ;
+		if ( bLedge && flDrop > 18 && m_Route[m_iRouteIndex].vecLocation.z >= pev->origin.z )
+		{
+			ALERT( at_aiconsole, "zombie clip: ledge drop %.0f but goal not below (goal z %.0f, origin z %.0f)\n", flDrop, m_Route[ m_iRouteIndex ].vecLocation.z, pev->origin.z );
+			break;
+		}
+
+		float flDist = ( vecClipEnd - pev->origin ).Length2D();
+		ALERT( at_aiconsole, "zombie %s: dist %.0f, drop %.0f/%.0f, hit %s\n", bLedge ? "ledge" : "clip", flDist, flDrop, flDropDist, pHit ? STRING( pHit->pev->classname ) : "world" );
+
+		m_flClipRemaining = flDist;
+		m_vecClipDir = vecToGoal;
+		m_vecStuckCheckPos = pev->origin;
+		m_flStuckStartTime = 0;
+		return;
+
+	} while ( 0 );
+
+	// --- Initiate sideway move ---
+	// Clip/ledge failed or not available. Slide perpendicular to
+	// the goal direction to get around the obstacle. Direction
+	// alternates each attempt; first time prefers the side closer
+	// to the enemy. Steps back 10 units first to pull off the wall.
 	Vector vecUp( 0, 0, 1 );
 	Vector vecPerp = CrossProduct( vecToGoal, vecUp );
 
-	// Pick direction: opposite of last time.
-	// First time: prefer the side closer to the enemy.
 	int iDir;
 	if ( m_iLastAvoidDir != 0 )
 	{
@@ -1131,24 +1187,22 @@ void CZombie::Move( float flInterval )
 
 	m_iLastAvoidDir = iDir;
 
-	// Record enemy position for the 80-unit direction reset check
 	if ( m_hEnemy != NULL )
 	{
 		m_vecAvoidEnemyPos = m_hEnemy->pev->origin;
 		m_vecEnemyLKP = m_hEnemy->pev->origin;
 	}
 
-	// Step back 10 units to pull off the wall
 	Vector vecBackTarget = pev->origin - vecToGoal * 10;
 	UTIL_MoveToOrigin( ENT( pev ), vecBackTarget, 10.0, MOVE_NORMAL );
 
-	// Force route refresh so burst slides relative to current enemy pos
 	FRefreshRoute();
 
-	// Start the burst — will be executed over subsequent frames
 	m_flAvoidRemaining = (float)RANDOM_LONG( 66, 196 );
 	m_vecStuckCheckPos = pev->origin;
 	m_flStuckStartTime = 0;
+
+	ALERT( at_aiconsole, "zombie sidestep: started, dir %s, dist %.0f\n", iDir > 0 ? "right" : "left", m_flAvoidRemaining );
 }
 
 //=========================================================

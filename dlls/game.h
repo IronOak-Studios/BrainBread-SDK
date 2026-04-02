@@ -72,6 +72,7 @@ extern cvar_t	allowmonsters;
 extern cvar_t	zombie_behavior;
 extern cvar_t	zombie_yawspeed;
 extern cvar_t	zombie_lifetime;
+extern cvar_t	zombie_drop_height;
 
 // Engine Cvars
 extern cvar_t	*g_psv_gravity;
