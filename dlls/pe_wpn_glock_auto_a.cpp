@@ -11,7 +11,7 @@
 #define GLOCK_AUTO_A_MAX		128
 #define GLOCK_AUTO_A_CLIP		32
 #define BERETTA_SLOT			1
-#define BERETTA_POS				7
+#define BERETTA_POS				1
 
 enum glock_auto_a_e
 {

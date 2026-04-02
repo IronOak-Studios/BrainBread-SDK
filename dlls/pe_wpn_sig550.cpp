@@ -9,7 +9,7 @@
 #include "gamerules.h"
 
 #define SIG550_SLOT		1
-#define SIG550_POSITION	8
+#define SIG550_POSITION	1
 #define SIG550_MAX		36
 #define SIG550_CLIP		6
 

@@ -9,7 +9,7 @@
 #define BERETTA_A_CLIP			30
 #define BERETTA_A_MAX			180
 #define BERETTA_A_SLOT			1
-#define BERETTA_A_POS			6
+#define BERETTA_A_POS			1
 
 
 enum beretta_a_e
