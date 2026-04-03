@@ -312,7 +312,7 @@ void CGlobalState :: DumpGlobals( void )
 	pTest = m_pList;
 	while ( pTest )
 	{
-		ALERT( at_console, "%s: %s (%s)\n", pTest->name, pTest->levelName, estates[pTest->state] );
+		ALERT( at_console, "%s: %s (%s)\n", pTest->name, pTest->levelName, (pTest->state >= 0 && pTest->state <= 2) ? estates[pTest->state] : "Unknown" );
 		pTest = pTest->pNext;
 	}
 }
@@ -515,12 +515,13 @@ void CWorld :: Precache( void )
 	///!!!LATER - do we want a sound ent in deathmatch? (sjb)
 	//pSoundEnt = CBaseEntity::Create( "soundent", g_vecZero, g_vecZero, edict() );
 	pSoundEnt = GetClassPtr( ( CSoundEnt *)NULL );
-	pSoundEnt->Spawn();
 
 	if ( !pSoundEnt )
 	{
 		ALERT ( at_console, "**COULD NOT CREATE SOUNDENT**\n" );
 	}
+	else
+		pSoundEnt->Spawn();
 
 	InitBodyQue();
 	

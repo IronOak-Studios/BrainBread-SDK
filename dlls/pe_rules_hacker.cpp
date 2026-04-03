@@ -2252,7 +2252,7 @@ extern list<CBaseEntity*> zombiepool;
 extern list<CBaseEntity*> gibpool;
 extern int zombiecount;
 extern int gibcount;
-extern char *COM_Parse (char *data, char *com_token );
+extern char *COM_Parse (char *data, char *com_token, int com_token_size );
 extern bool clearPlayerXp;
 
 cPEHacking::cPEHacking( )
@@ -2375,15 +2375,15 @@ cPEHacking::cPEHacking( )
   char *misfile; 
   char *mislist = misfile = (char*)LOAD_FILE_FOR_ME( missionsfile, &length );
   char token[1500];
-  mislist = COM_Parse( mislist, token );
+  mislist = COM_Parse( mislist, token, sizeof(token) );
   for( int i = 0; ( i < 20 ) && mislist && length; i++ )
   {
     strncpy( missionList[i][0], token, 32 ); missionList[i][0][31] = '\0';
-    mislist = COM_Parse( mislist, token );
+    mislist = COM_Parse( mislist, token, sizeof(token) );
     strncpy( missionList[i][1], token, 32 ); missionList[i][1][31] = '\0';
-    mislist = COM_Parse( mislist, token );
+    mislist = COM_Parse( mislist, token, sizeof(token) );
     strncpy( missionList[i][2], token, 32 ); missionList[i][2][31] = '\0';
-    mislist = COM_Parse( mislist, token );
+    mislist = COM_Parse( mislist, token, sizeof(token) );
   }
   misLast = false;
   curMapMission = NULL;

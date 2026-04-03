@@ -38,7 +38,7 @@ void uGiveExpToID( char *id, float amount )
 	}
 }
 
-extern char *COM_Parse (char *data, char *com_token );
+extern char *COM_Parse (char *data, char *com_token, int com_token_size );
 extern unsigned long ElfHash( const char *name );
 struct s_xphashitem
 {
@@ -92,17 +92,17 @@ void uSavePlayerData( )
   s_xphashitem cur;
   if( playerlist && length )
   {
-    playerlist = COM_Parse( playerlist, token );
+    playerlist = COM_Parse( playerlist, token, sizeof(token) );
     inittime = atol( token );
-    playerlist = COM_Parse( playerlist, token );
+    playerlist = COM_Parse( playerlist, token, sizeof(token) );
     while( playerlist && length )
     {
       cur.key = atol( token );
-      playerlist = COM_Parse( playerlist, token );
+      playerlist = COM_Parse( playerlist, token, sizeof(token) );
       cur.value = atof( token );
 
       plrlist.push_back( cur );
-      playerlist = COM_Parse( playerlist, token );
+      playerlist = COM_Parse( playerlist, token, sizeof(token) );
     }
   }
  	FREE_FILE( plfile );

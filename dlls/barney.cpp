@@ -306,6 +306,8 @@ BOOL CBarney :: CheckRangeAttack1 ( float flDot, float flDist )
 			
 			Vector shootOrigin = pev->origin + Vector( 0, 0, 55 );
 			CBaseEntity *pEnemy = m_hEnemy;
+			if ( !pEnemy )
+				return FALSE;
 			Vector shootTarget = ( (pEnemy->BodyTarget( shootOrigin ) - pEnemy->pev->origin) + m_vecEnemyLKP );
 			UTIL_TraceLine( shootOrigin, shootTarget, dont_ignore_monsters, ENT(pev), &tr );
 			m_checkAttackTime = gpGlobals->time + 1;
@@ -499,7 +501,7 @@ int CBarney :: TakeDamage( entvars_t* pevInflictor, entvars_t* pevAttacker, floa
 	if ( !IsAlive() || pev->deadflag == DEAD_DYING )
 		return ret;
 
-	if ( m_MonsterState != MONSTERSTATE_PRONE && (pevAttacker->flags & FL_CLIENT) )
+	if ( pevAttacker != NULL && m_MonsterState != MONSTERSTATE_PRONE && (pevAttacker->flags & FL_CLIENT) )
 	{
 		m_flPlayerDamage += flDamage;
 
@@ -813,6 +815,8 @@ void CDeadBarney :: Spawn( )
 	pev->sequence		= 0;
 	m_bloodColor		= BLOOD_COLOR_RED;
 
+	if ( m_iPose < 0 || m_iPose >= ARRAYSIZE(m_szPoses) )
+		m_iPose = 0;
 	pev->sequence = LookupSequence( m_szPoses[m_iPose] );
 	if (pev->sequence == -1)
 	{

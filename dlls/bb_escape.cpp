@@ -33,6 +33,18 @@ extern int gmsgSpray;
 
 LINK_ENTITY_TO_CLASS( bb_escapeair, CEscape );
 
+static void CopyMovementProps(entvars_t* dst, const entvars_t* src)
+{
+  dst->velocity = src->velocity;
+  dst->avelocity = src->avelocity;
+  dst->origin = src->origin;
+  dst->oldorigin = src->oldorigin;
+  dst->angles = src->angles;
+  dst->speed = src->speed;
+  dst->basevelocity = src->basevelocity;
+  dst->clbasevelocity = src->clbasevelocity;
+}
+
 class CMissionZone : public CBaseEntity
 {
 public:
@@ -427,23 +439,11 @@ void CEscape::HuntThink( )
 	}
   pev->angles = tmp;
 
-  glassEnt->pev->velocity = pev->velocity;
-  glassEnt->pev->avelocity = pev->avelocity;
-  glassEnt->pev->origin = pev->origin;
-  glassEnt->pev->oldorigin = pev->oldorigin;
-  glassEnt->pev->angles = pev->angles;
-  glassEnt->pev->speed = pev->speed;
-  glassEnt->pev->basevelocity = pev->basevelocity;
-  glassEnt->pev->clbasevelocity = pev->clbasevelocity;
+  if( glassEnt )
+    CopyMovementProps( glassEnt->pev, pev );
 
-  part2->pev->velocity = pev->velocity;
-  part2->pev->avelocity = pev->avelocity;
-  part2->pev->origin = pev->origin;
-  part2->pev->oldorigin = pev->oldorigin;
-  part2->pev->angles = pev->angles;
-  part2->pev->speed = pev->speed;
-  part2->pev->basevelocity = pev->basevelocity;
-  part2->pev->clbasevelocity = pev->clbasevelocity;
+  if( part2 )
+    CopyMovementProps( part2->pev, pev );
 
 
   if( noDriveTill == -1 )

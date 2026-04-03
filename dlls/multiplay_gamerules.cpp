@@ -1360,7 +1360,7 @@ COM_Parse
 Parse a token out of a string
 ==============
 */
-char *COM_Parse (char *data, char *com_token )
+char *COM_Parse (char *data, char *com_token, int com_token_size )
 {
 	int             c;
 	int             len;
@@ -1401,8 +1401,11 @@ skipwhite:
 				com_token[len] = 0;
 				return data;
 			}
-			com_token[len] = c;
-			len++;
+			if (len < com_token_size - 1)
+			{
+				com_token[len] = c;
+				len++;
+			}
 		}
 	}
 
@@ -1418,9 +1421,12 @@ skipwhite:
 // parse a regular word
 	do
 	{
-		com_token[len] = c;
+		if (len < com_token_size - 1)
+		{
+			com_token[len] = c;
+			len++;
+		}
 		data++;
-		len++;
 		c = *data;
 	if (c=='{' || c=='}'|| c==')'|| c=='(' || c=='\'' || c == ',' )
 			break;
@@ -1482,7 +1488,7 @@ int ReloadMapCycleFile( char *filename, mapcycle_t *cycle )
 			hasbuffer = 0;
 			memset( szBuffer, 0, MAX_RULE_BUFFER );
 
-			pFileList = COM_Parse( pFileList, token );
+			pFileList = COM_Parse( pFileList, token, sizeof(token) );
 			if ( strlen( token ) <= 0 )
 				break;
 
@@ -1490,9 +1496,9 @@ int ReloadMapCycleFile( char *filename, mapcycle_t *cycle )
 			szMap[ sizeof( szMap ) - 1 ] = '\0';
 
 			// Any more tokens on this line?
-			if ( COM_TokenWaiting( pFileList ) )
+			if ( pFileList && COM_TokenWaiting( pFileList ) )
 			{
-				pFileList = COM_Parse( pFileList, token );
+				pFileList = COM_Parse( pFileList, token, sizeof(token) );
 				if ( strlen( token ) > 0 )
 				{
 					hasbuffer = 1;
@@ -1619,13 +1625,14 @@ Parse commands/key value pairs to issue right after map xxx command is issued on
  level transition
 ==============
 */
-void ExtractCommandString( char *s, char *szCommand )
+void ExtractCommandString( char *s, char *szCommand, int szCommand_size )
 {
 	// Now make rules happen
 	char	pkey[512];
 	char	value[512];	// use two buffers so compares
 								// work without stomping on each other
 	char	*o;
+	char	*end;
 	
 	if ( *s == '\\' )
 		s++;
@@ -1633,32 +1640,43 @@ void ExtractCommandString( char *s, char *szCommand )
 	while (1)
 	{
 		o = pkey;
+		end = pkey + sizeof(pkey) - 1;
 		while ( *s != '\\' )
 		{
 			if ( !*s )
 				return;
-			*o++ = *s++;
+			if ( o < end )
+				*o++ = *s++;
+			else
+				s++;
 		}
 		*o = 0;
 		s++;
 
 		o = value;
+		end = value + sizeof(value) - 1;
 
 		while (*s != '\\' && *s)
 		{
 			if (!*s)
 				return;
-			*o++ = *s++;
+			if ( o < end )
+				*o++ = *s++;
+			else
+				s++;
 		}
 		*o = 0;
 
-		strcat( szCommand, pkey );
-		if ( strlen( value ) > 0 )
+		if ( (int)( strlen( szCommand ) + strlen( pkey ) + strlen( value ) + 3 ) < szCommand_size )
 		{
-			strcat( szCommand, " " );
-			strcat( szCommand, value );
+			strcat( szCommand, pkey );
+			if ( strlen( value ) > 0 )
+			{
+				strcat( szCommand, " " );
+				strcat( szCommand, value );
+			}
+			strcat( szCommand, "\n" );
 		}
-		strcat( szCommand, "\n" );
 
 		if (!*s)
 			return;

@@ -881,7 +881,7 @@ void ClientPrint( entvars_t *client, int msg_dest, const char *msg_name, const c
 
 void UTIL_SayText( const char *pText, CBaseEntity *pEntity )
 {
-	if ( !pEntity->IsNetClient() )
+	if ( !pEntity || !pEntity->IsNetClient() )
 		return;
 
 	MESSAGE_BEGIN( MSG_ONE, gmsgSayText, NULL, pEntity->edict() );
@@ -892,6 +892,9 @@ void UTIL_SayText( const char *pText, CBaseEntity *pEntity )
 
 void UTIL_SayTextAll( const char *pText, CBaseEntity *pEntity )
 {
+	if ( !pEntity )
+		return;
+
 	MESSAGE_BEGIN( MSG_ALL, gmsgSayText, NULL );
 		WRITE_BYTE( pEntity->entindex() );
 		WRITE_STRING( pText );
@@ -2119,7 +2122,10 @@ int CSave :: WriteFields( const char *pname, void *pBaseData, TYPEDESCRIPTION *p
 		case FIELD_ENTITY:
 		case FIELD_EHANDLE:
 			if ( pTest->fieldSize > MAX_ENTITYARRAY )
+			{
 				ALERT( at_error, "Can't save more than %d entities in an array!!!\n", MAX_ENTITYARRAY );
+				break;
+			}
 			for ( j = 0; j < pTest->fieldSize; j++ )
 			{
 				switch( pTest->fieldType )

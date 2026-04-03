@@ -394,16 +394,16 @@ BOOL CHGrunt :: FCanCheckAttacks ( void )
 //=========================================================
 BOOL CHGrunt :: CheckMeleeAttack1 ( float flDot, float flDist )
 {
-	CBaseMonster *pEnemy;
+	CBaseMonster *pEnemy = NULL;
 
 	if ( m_hEnemy != NULL )
 	{
 		pEnemy = m_hEnemy->MyMonsterPointer();
+	}
 
-		if ( !pEnemy )
-		{
-			return FALSE;
-		}
+	if ( !pEnemy )
+	{
+		return FALSE;
 	}
 
 	if ( flDist <= 64 && flDot >= 0.7	&& 
@@ -2315,7 +2315,7 @@ Schedule_t* CHGrunt :: GetScheduleOfType ( int Type )
 		}
 	case SCHED_GRUNT_SUPPRESS:
 		{
-			if ( m_hEnemy->IsPlayer() && m_fFirstEncounter )
+			if ( m_hEnemy != NULL && m_hEnemy->IsPlayer() && m_fFirstEncounter )
 			{
 				m_fFirstEncounter = FALSE;// after first encounter, leader won't issue handsigns anymore when he has a new enemy
 				return &slGruntSignalSuppress[ 0 ];
@@ -2399,7 +2399,17 @@ void CHGruntRepel::RepelUse ( CBaseEntity *pActivator, CBaseEntity *pCaller, USE
 	*/
 
 	CBaseEntity *pEntity = Create( "monster_hgrunt", pev->origin, pev->angles );
+	if ( !pEntity )
+	{
+		UTIL_Remove( this );
+		return;
+	}
 	CBaseMonster *pGrunt = pEntity->MyMonsterPointer( );
+	if ( !pGrunt )
+	{
+		UTIL_Remove( this );
+		return;
+	}
 	pGrunt->pev->movetype = MOVETYPE_FLY;
 	pGrunt->pev->velocity = Vector( 0, 0, RANDOM_FLOAT( -196, -128 ) );
 	pGrunt->SetActivity( ACT_GLIDE );
@@ -2460,6 +2470,9 @@ void CDeadHGrunt :: Spawn( void )
 	pev->yaw_speed		= 8;
 	pev->sequence		= 0;
 	m_bloodColor		= BLOOD_COLOR_RED;
+
+	if ( m_iPose < 0 || m_iPose > ARRAYSIZE(m_szPoses) )
+		m_iPose = 0;
 
 	pev->sequence = LookupSequence( m_szPoses[m_iPose] );
 

@@ -364,7 +364,7 @@ void cPERules::ResetMap( )
 	uPrepSpawn( );
 }
 
-extern char *COM_Parse (char *data, char *com_token );
+extern char *COM_Parse (char *data, char *com_token, int com_token_size );
 
 BOOL cPERules::IsVoteable( char *var )
 {
@@ -385,7 +385,7 @@ BOOL cPERules::IsVoteable( char *var )
 
 	while( varlist && strlen( varlist ) > 0 )
 	{
-		varlist = COM_Parse( varlist, token );
+		varlist = COM_Parse( varlist, token, sizeof(token) );
 		if( strlen( token ) <= 0 )
 		{
 			FREE_FILE( pFileBase );

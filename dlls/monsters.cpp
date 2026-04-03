@@ -247,7 +247,7 @@ void CBaseMonster :: Look ( int iDistance )
 
 							pClient = pSightEnt->MyMonsterPointer();
 							// don't link this client in the list if the monster is wait till seen and the player isn't facing the monster
-							if ( pSightEnt && !pClient->FInViewCone( this ) )
+							if ( pClient && !pClient->FInViewCone( this ) )
 							{
 								// we're not in the player's view cone. 
 								continue;
@@ -352,7 +352,10 @@ CSound* CBaseMonster :: PBestSound ( void )
 			}
 		}
 
-		iThisSound = pSound->m_iNextAudible;
+		if ( pSound )
+			iThisSound = pSound->m_iNextAudible;
+		else
+			break;
 	}
 	if ( iBestSound >= 0 )
 	{

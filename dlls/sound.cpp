@@ -1622,7 +1622,7 @@ float TEXTURETYPE_PlaySound(TraceResult *ptr,  Vector vecSrc, Vector vecEnd, int
 		if ( pTextureName )
 		{
 			// strip leading '-0' or '+0~' or '{' or '!'
-			if (*pTextureName == '-' || *pTextureName == '+')
+			if ((*pTextureName == '-' || *pTextureName == '+') && pTextureName[1])
 				pTextureName += 2;
 
 			if (*pTextureName == '{' || *pTextureName == '!' || *pTextureName == '~' || *pTextureName == ' ')

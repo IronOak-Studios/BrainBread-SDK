@@ -56,7 +56,8 @@ void CBBItem::KeyValue(KeyValueData *pkvd)
 {
 	if (FStrEq(pkvd->szKeyName, "wepname"))
 	{
-		strncpy( type, pkvd->szValue, 128 );
+		strncpy( type, pkvd->szValue, sizeof(type) - 1 );
+		type[sizeof(type) - 1] = '\0';
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "ammo"))
@@ -106,7 +107,8 @@ void CBBAmmo::KeyValue(KeyValueData *pkvd)
 {
 	if (FStrEq(pkvd->szKeyName, "wepname"))
 	{
-		strncpy( type, pkvd->szValue, 128 );
+		strncpy( type, pkvd->szValue, sizeof(type) - 1 );
+		type[sizeof(type) - 1] = '\0';
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "ammo"))
@@ -198,13 +200,13 @@ class CBBAmmo : public CBaseEntity
 
 	void Touch( CBaseEntity *pOther )
 	{ 
-    if( !FClassnameIs( pOther->edict( ), "player" ) )
+    if( !pOther || !FClassnameIs( pOther->edict( ), "player" ) )
       return;
 
     CBasePlayer *pp = (CBasePlayer*)pOther;
     if( pp->m_iTeam == 2 )
       return;
-    if( !( pp->pev->button & ( IN_USE ) ) || gpGlobals->time < nextCharge || !pp || !pp->m_pActiveItem )
+    if( !pp->m_pActiveItem || !( pp->pev->button & ( IN_USE ) ) || gpGlobals->time < nextCharge )
     {
       Help( HELP_AMMO, pp );
       return;

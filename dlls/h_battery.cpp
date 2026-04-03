@@ -96,6 +96,10 @@ void CRecharge::Precache()
 
 void CRecharge::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 { 
+	// Make sure that we have a caller
+	if (!pActivator)
+		return;
+
 	// if it's not a player, ignore
 	if (!FClassnameIs(pActivator->pev, "player"))
 		return;
@@ -124,10 +128,6 @@ void CRecharge::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE use
 	// Time to recharge yet?
 
 	if (m_flNextCharge >= gpGlobals->time)
-		return;
-
-	// Make sure that we have a caller
-	if (!pActivator)
 		return;
 
 	m_hActivator = pActivator;

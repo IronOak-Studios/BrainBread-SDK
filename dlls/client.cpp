@@ -110,8 +110,7 @@ void ClientDisconnect( edict_t *pEntity )
 
 	char text[256] = "" ;
 	if ( pEntity->v.netname )
-		_snprintf( text, sizeof(text), "- %s has left the game\n", STRING(pEntity->v.netname) );
-	text[ sizeof(text) - 1 ] = 0;
+		snprintf( text, sizeof(text), "- %s has left the game\n", STRING(pEntity->v.netname) );
 	MESSAGE_BEGIN( MSG_ALL, gmsgSayText, NULL );
 		WRITE_BYTE( ENTINDEX(pEntity) );
 		WRITE_STRING( text );
@@ -429,7 +428,9 @@ void Host_Say( edict_t *pEntity, int teamonly )
 	if (*p == '"')
 	{
 		p++;
-		p[strlen(p)-1] = 0;
+		size_t len = strlen(p);
+		if (len > 0)
+			p[len-1] = 0;
 	}
 
 // make sure the text has content
@@ -1890,8 +1891,8 @@ void UpdateClientData ( const struct edict_s *ent, int sendweapons, struct clien
 
 					cd->vuser3.z	= gun->m_iSecondaryAmmoType;
 					cd->vuser4.x	= gun->m_iPrimaryAmmoType;
-					cd->vuser4.y	= pl->m_rgAmmo[gun->m_iPrimaryAmmoType];
-					cd->vuser4.z	= pl->m_rgAmmo[gun->m_iSecondaryAmmoType];
+					cd->vuser4.y	= (gun->m_iPrimaryAmmoType >= 0 && gun->m_iPrimaryAmmoType < MAX_AMMO_SLOTS) ? pl->m_rgAmmo[gun->m_iPrimaryAmmoType] : 0;
+					cd->vuser4.z	= (gun->m_iSecondaryAmmoType >= 0 && gun->m_iSecondaryAmmoType < MAX_AMMO_SLOTS) ? pl->m_rgAmmo[gun->m_iSecondaryAmmoType] : 0;
 					
 					/*if ( pl->m_pActiveItem->m_iId == WEAPON_RPG )
 					{

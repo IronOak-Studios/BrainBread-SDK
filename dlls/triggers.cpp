@@ -1848,7 +1848,8 @@ void NextLevel( void )
 	{
 		gpGlobals->mapname = ALLOC_STRING("start");
 		pChange = GetClassPtr( (CChangeLevel *)NULL );
-		strcpy(pChange->m_szMapName, "start");
+		strncpy(pChange->m_szMapName, "start", sizeof(pChange->m_szMapName));
+		pChange->m_szMapName[sizeof(pChange->m_szMapName) - 1] = '\0';
 	}
 	else
 		pChange = GetClassPtr( (CChangeLevel *)VARS(pent));

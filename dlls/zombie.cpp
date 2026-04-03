@@ -195,7 +195,7 @@ void CZombie::Killed( entvars_t *pevAttacker, int iGib )
     }
   }
   
-  if( pev->fuser4 && !points_given )
+  if( pev->fuser4 && !points_given && ent )
   {
     pnts = 5;
     ent->GiveExp( 300 );
@@ -253,7 +253,7 @@ void CZombie::MonsterThink( )
     Killed( pev, 0 );
   }
 
-  if( m_fBurning > gpGlobals->time && m_fNextSpread <= gpGlobals->time )
+  if( flamer && m_fBurning > gpGlobals->time && m_fNextSpread <= gpGlobals->time )
   {
     CBaseEntity *ent = UTIL_FindEntityInSphere( NULL, pev->origin, 128 );
     int cnt = 0;
@@ -765,7 +765,7 @@ void CZombie :: Spawn()
     int nr = RANDOM_LONG( 1, 6 );
     /*if( nr == 7 )
       nr = RANDOM_LONG( 1, 6 );*/                         //1 2 3 4 5 6
-    sprintf( model, "models/zombie%d.mdl", nr % 3 + 1 );  //1 2 3 1 2 3
+    snprintf( model, sizeof(model), "models/zombie%d.mdl", nr % 3 + 1 );  //1 2 3 1 2 3
     pev->skin = nr % 2;                                   //1 0 1 0 1 0
     /*switch( RANDOM_LONG( 1, 4 ) )
     {

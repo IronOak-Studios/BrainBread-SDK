@@ -5391,14 +5391,14 @@ void CBasePlayer::DropPlayerItem ( char *pszItemName )
 		return;
 	}*/
 
-	if ( !strlen( pszItemName ) )
+	if ( !pszItemName || !strlen( pszItemName ) )
 	{
 		// if this string has no length, the client didn't type a name!
 		// assume player wants to drop the active item.
 		// make the string null to make future operations in this function easier
 		pszItemName = NULL;
 	} 
-  if( !strcmp( pszItemName, "weapon_knife" ) || !strcmp( pszItemName, "weapon_hand" ) )
+  if( pszItemName && ( !strcmp( pszItemName, "weapon_knife" ) || !strcmp( pszItemName, "weapon_hand" ) ) )
   {
     return;
   }
@@ -5670,6 +5670,8 @@ void CDeadHEV :: Spawn( void )
 	pev->body			= 1;
 	m_bloodColor		= BLOOD_COLOR_RED;
 
+	if ( m_iPose < 0 || m_iPose >= (int)ARRAYSIZE(m_szPoses) )
+		m_iPose = 0;
 	pev->sequence = LookupSequence( m_szPoses[m_iPose] );
 
 	if (pev->sequence == -1)

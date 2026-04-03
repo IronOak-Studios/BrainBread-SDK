@@ -587,9 +587,15 @@ int CGraph :: FindShortestPath ( int *piPath, int iStart, int iDest, int iHull, 
 		return FALSE;
 	}
 	
-	if ( iStart < 0 || iStart > m_cNodes )
+	if ( iStart < 0 || iStart >= m_cNodes )
 	{// The start node is bad?
 		ALERT ( at_aiconsole, "Can't build a path, iStart is %d!\n", iStart );
+		return FALSE;
+	}
+
+	if ( iDest < 0 || iDest >= m_cNodes )
+	{// The dest node is bad?
+		ALERT ( at_aiconsole, "Can't build a path, iDest is %d!\n", iDest );
 		return FALSE;
 	}
 
@@ -1298,7 +1304,7 @@ int CGraph :: LinkVisibleNodes ( CLink *pLinkPool, FILE *file, int *piBadNode )
 				return	FALSE;
 			}
 
-			if ( cLinksThisNode == 0 )
+			if ( cLinksThisNode == 0 && file )
 			{
 				fprintf ( file, "**NO INITIAL LINKS**\n" );
 			}
@@ -1321,8 +1327,11 @@ int CGraph :: LinkVisibleNodes ( CLink *pLinkPool, FILE *file, int *piBadNode )
 		}
 	}
 
-	fprintf ( file, "\n%4d Total Initial Connections - %4d Maximum connections for a single node.\n", cTotalLinks, cMaxInitialLinks );
-	fprintf ( file, "----------------------------------------------------------------------------\n\n\n" );
+	if ( file )
+	{
+		fprintf ( file, "\n%4d Total Initial Connections - %4d Maximum connections for a single node.\n", cTotalLinks, cMaxInitialLinks );
+		fprintf ( file, "----------------------------------------------------------------------------\n\n\n" );
+	}
 
 	return cTotalLinks;
 }
