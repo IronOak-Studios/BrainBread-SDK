@@ -989,18 +989,18 @@ void CZombie::Move( float flInterval )
 		}
 
 		Vector vecToGoal = ( m_Route[ m_iRouteIndex ].vecLocation - pev->origin );
-		vecToGoal.z = 0;
-		float flGoalDist = vecToGoal.Length();
+		Vector vecToGoal2D = Vector(vecToGoal.x, vecToGoal.y, 0);
+		float flGoalDist = vecToGoal2D.Length();
 		if ( flGoalDist < 1.0 )
 		{
 			m_flAvoidRemaining = 0;
 			CBaseMonster::Move( flInterval );
 			return;
 		}
-		vecToGoal = vecToGoal / flGoalDist;
+		vecToGoal2D = vecToGoal2D / flGoalDist;
 
 		Vector vecUp( 0, 0, 1 );
-		Vector vecPerp = CrossProduct( vecToGoal, vecUp );
+		Vector vecPerp = CrossProduct( vecToGoal2D, vecUp );
 		Vector vecSideDir = vecPerp * (float)m_iLastAvoidDir;
 
 		MakeIdealYaw( m_Route[ m_iRouteIndex ].vecLocation );
@@ -1009,7 +1009,7 @@ void CZombie::Move( float flInterval )
 		if ( m_IdealActivity != m_movementActivity )
 			m_IdealActivity = m_movementActivity;
 
-		float flDist = m_flGroundSpeed * pev->framerate * flInterval;
+		float flDist = m_flGroundSpeed * 0.5f * pev->framerate * flInterval;
 		float flSideYaw = UTIL_VecToYaw( vecSideDir );
 
 		float flTotal = flDist;
@@ -1023,16 +1023,13 @@ void CZombie::Move( float flInterval )
 
 		m_flAvoidRemaining -= flDist;
 
-		// Abort early if path to enemy is now clear
-		if (m_hEnemy != NULL)
+		// Abort early if path is now clear
+		TraceResult trFwd;
+		UTIL_TraceHull( pev->origin + vecHalfZ, pev->origin + vecToGoal.Normalize() * 32 + vecHalfZ, ignore_monsters, human_hull, ENT(pev), &trFwd);
+		if ( trFwd.flFraction > 0.9 )
 		{
-			TraceResult trFwd;
-			UTIL_TraceHull( pev->origin + vecHalfZ, m_hEnemy->pev->origin + vecHalfZ, ignore_monsters, human_hull, ENT( pev ), &trFwd );
-			if ( trFwd.flFraction > 0.9 )
-			{
-				ALERT( at_aiconsole, "zombie sidestep: path clear, aborting early (%.0f remaining)\n", m_flAvoidRemaining );
-				m_flAvoidRemaining = 0;
-			}
+			ALERT( at_aiconsole, "zombie sidestep: path clear, aborting early (%.0f remaining)\n", m_flAvoidRemaining );
+			m_flAvoidRemaining = 0;
 		}
 
 		if ( m_flAvoidRemaining <= 0 )
@@ -1238,8 +1235,8 @@ void CZombie::Move( float flInterval )
 		m_vecEnemyLKP = m_hEnemy->pev->origin;
 	}
 
-	Vector vecBackTarget = pev->origin - vecToGoal * 10;
-	UTIL_MoveToOrigin( ENT( pev ), vecBackTarget, 10.0, MOVE_NORMAL );
+	float flBackYaw = UTIL_VecToYaw( -vecToGoal );
+	WALK_MOVE( ENT( pev ), flBackYaw, 10.0, WALKMOVE_NORMAL );
 
 	FRefreshRoute();
 
@@ -1266,13 +1263,46 @@ void CZombie::MoveExecute( CBaseEntity *pTargetEnt, const Vector &vecDir, float 
 		m_IdealActivity = m_movementActivity;
 
 	float flTotal = m_flGroundSpeed * pev->framerate * flInterval;
-	float flYaw = UTIL_VecToYaw( m_Route[ m_iRouteIndex ].vecLocation - pev->origin );
+
+	Vector vecMoveDir = ( m_Route[ m_iRouteIndex ].vecLocation - pev->origin );
+	vecMoveDir.z = 0;
+	vecMoveDir = vecMoveDir.Normalize();
+
+	float flYaw = UTIL_VecToYaw( vecMoveDir );
 
 	float flStep;
 	while ( flTotal > 0.001 )
 	{
 		flStep = min( 16.0f, flTotal );
-		WALK_MOVE( ENT( pev ), flYaw, flStep, WALKMOVE_NORMAL );
+		if ( !WALK_MOVE( ENT( pev ), flYaw, flStep, WALKMOVE_NORMAL ) )
+		{
+			// Forward move blocked - try to slide along the wall at
+			// shallow angles (< 45 degrees between move dir and wall
+			// surface). This avoids oscillation from the engine's
+			// SV_NewChaseDir while still letting zombies hug walls.
+			TraceResult tr;
+			Vector vecHalfZ = Vector( 0, 0, 36 );
+			UTIL_TraceHull( pev->origin + vecHalfZ, pev->origin + vecHalfZ + vecMoveDir * flStep, dont_ignore_monsters, human_hull, ENT( pev ), &tr );
+
+			if ( tr.flFraction < 1.0 && !tr.fAllSolid && !tr.fStartSolid )
+			{
+				float flInto = DotProduct( vecMoveDir, tr.vecPlaneNormal );
+				// flInto is negative when hitting a wall head-on.
+				// Wall-surface angle = 90 + asin(flInto). We want
+				// < 45 degrees from wall surface, i.e. flInto > -0.707.
+				if ( flInto > -0.707 )
+				{
+					Vector vecSlide = vecMoveDir - tr.vecPlaneNormal * flInto;
+					vecSlide.z = 0;
+					float flSlideLen = vecSlide.Length();
+					if ( flSlideLen > 0.1 )
+					{
+						float flSlideYaw = UTIL_VecToYaw( vecSlide );
+						WALK_MOVE( ENT( pev ), flSlideYaw, flStep * flSlideLen, WALKMOVE_NORMAL );
+					}
+				}
+			}
+		}
 		flTotal -= flStep;
 	}
 }
