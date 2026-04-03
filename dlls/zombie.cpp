@@ -98,6 +98,7 @@ public:
 
 	// Obstacle avoidance overrides
 	void Move( float flInterval );
+	void MoveExecute( CBaseEntity *pTargetEnt, const Vector &vecDir, float flInterval );
 	int CheckLocalMove( const Vector &vecStart, const Vector &vecEnd, CBaseEntity *pTarget, float *pflDist );
 
 	// AI override - always retry chase on failure
@@ -971,11 +972,12 @@ void CZombie::Move( float flInterval )
 		return;
 	}
 
+	Vector vecHalfZ = Vector(0, 0, 36); // human_hull half-height
+
 	// --- Executing a sideway move ---
 	// Slides the zombie perpendicular to its goal direction to get
-	// around an obstacle. Uses engine movement (UTIL_MoveToOrigin)
-	// so collision still applies. Aborts early if the path to the
-	// enemy becomes clear. Direction alternates each attempt.
+	// around an obstacle. Uses WALK_MOVE so collision still applies.
+	// Direction alternates each attempt.
 	if ( m_flAvoidRemaining > 0 )
 	{
 		if ( FRouteClear() || m_movementGoal == MOVEGOAL_NONE )
@@ -1008,32 +1010,30 @@ void CZombie::Move( float flInterval )
 			m_IdealActivity = m_movementActivity;
 
 		float flDist = m_flGroundSpeed * pev->framerate * flInterval;
-		Vector vecSideTarget = pev->origin + vecSideDir * 64;
+		float flSideYaw = UTIL_VecToYaw( vecSideDir );
 
 		float flTotal = flDist;
 		float flStep;
 		while ( flTotal > 0.001 )
 		{
 			flStep = min( 16.0f, flTotal );
-			UTIL_MoveToOrigin( ENT( pev ), vecSideTarget, flStep, MOVE_NORMAL );
+			WALK_MOVE( ENT( pev ), flSideYaw, flStep, WALKMOVE_NORMAL );
 			flTotal -= flStep;
 		}
 
 		m_flAvoidRemaining -= flDist;
 
-		/*
 		// Abort early if path to enemy is now clear
 		if (m_hEnemy != NULL)
 		{
 			TraceResult trFwd;
-			UTIL_TraceLine( pev->origin, m_hEnemy->pev->origin, dont_ignore_monsters, ENT( pev ), &trFwd );
+			UTIL_TraceHull( pev->origin + vecHalfZ, m_hEnemy->pev->origin + vecHalfZ, ignore_monsters, human_hull, ENT( pev ), &trFwd );
 			if ( trFwd.flFraction > 0.9 )
 			{
 				ALERT( at_aiconsole, "zombie sidestep: path clear, aborting early (%.0f remaining)\n", m_flAvoidRemaining );
 				m_flAvoidRemaining = 0;
 			}
 		}
-		*/
 
 		if ( m_flAvoidRemaining <= 0 )
 		{
@@ -1125,7 +1125,6 @@ void CZombie::Move( float flInterval )
 	// clip (configurable height).
 	if ( zombie_behavior.value >= 2 && !isFred ) do
 	{
-		float flHalfZ = 36;	// human_hull half-height
 		Vector vecEye = pev->origin + Vector( 0, 0, pev->size.z * 0.75f );
 
 		TraceResult trHead;
@@ -1138,8 +1137,8 @@ void CZombie::Move( float flInterval )
 			break;
 		}
 
-		Vector vecFar  = pev->origin + vecToGoal * 45 + Vector( 0, 0, flHalfZ);
-		Vector vecNear = pev->origin + Vector( 0, 0, flHalfZ);
+		Vector vecFar  = pev->origin + vecToGoal * 45 + vecHalfZ;
+		Vector vecNear = pev->origin + vecHalfZ;
 
 		TraceResult trRev;
 		UTIL_TraceHull( vecFar, vecNear, dont_ignore_monsters, human_hull, ENT( pev ), &trRev );
@@ -1162,7 +1161,7 @@ void CZombie::Move( float flInterval )
 		else
 		{
 			// No obstacle, move to coyote position
-			vecExit = pev->origin + vecToGoal * 45 + Vector( 0, 0, flHalfZ);
+			vecExit = pev->origin + vecToGoal * 45 + vecHalfZ;
 			bLedge = true;
 		}
 
@@ -1188,7 +1187,7 @@ void CZombie::Move( float flInterval )
 		}
 
 		// Don't drop down if target is not below
-		float flDrop = pev->origin.z - trFloor.vecEndPos.z + flHalfZ;
+		float flDrop = pev->origin.z - trFloor.vecEndPos.z + vecHalfZ.z;
 		if ( bLedge && flDrop > 18 && m_Route[m_iRouteIndex].vecLocation.z >= pev->origin.z )
 		{
 			ALERT( at_aiconsole, "zombie clip: ledge drop %.0f but goal not below (goal z %.0f, origin z %.0f)\n", flDrop, m_Route[ m_iRouteIndex ].vecLocation.z, pev->origin.z );
@@ -1249,6 +1248,33 @@ void CZombie::Move( float flInterval )
 	m_flStuckStartTime = 0;
 
 	ALERT( at_aiconsole, "zombie sidestep: started, dir %s, dist %.0f\n", iDir > 0 ? "right" : "left", m_flAvoidRemaining );
+}
+
+//=========================================================
+// MoveExecute - zombie override that uses WALK_MOVE instead
+// of UTIL_MoveToOrigin.
+//=========================================================
+void CZombie::MoveExecute( CBaseEntity *pTargetEnt, const Vector &vecDir, float flInterval )
+{
+	if ( zombie_behavior.value == 0 )
+	{
+		CBaseMonster::MoveExecute( pTargetEnt, vecDir, flInterval );
+		return;
+	}
+
+	if ( m_IdealActivity != m_movementActivity )
+		m_IdealActivity = m_movementActivity;
+
+	float flTotal = m_flGroundSpeed * pev->framerate * flInterval;
+	float flYaw = UTIL_VecToYaw( m_Route[ m_iRouteIndex ].vecLocation - pev->origin );
+
+	float flStep;
+	while ( flTotal > 0.001 )
+	{
+		flStep = min( 16.0f, flTotal );
+		WALK_MOVE( ENT( pev ), flYaw, flStep, WALKMOVE_NORMAL );
+		flTotal -= flStep;
+	}
 }
 
 //=========================================================
