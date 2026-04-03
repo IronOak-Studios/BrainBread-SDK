@@ -135,9 +135,18 @@ int CHudMenu :: Draw( float flTime )
 		// Red
 		else if (g_szMenuString[i] == '\\' && g_szMenuString[i+1] == 'r')
 		{
-			r = 192;
-			g = 0;
-			b = 0;
+			if (CVAR_GET_FLOAT("cl_newfont"))
+			{
+				r = 255;
+				g = 100;
+				b = 100;
+			}
+			else
+			{
+				r = 192;
+				g = 0;
+				b = 0;
+			}
 		}
 		// green
 		else if (g_szMenuString[i] == '\\' && g_szMenuString[i+1] == 'g')
