@@ -170,6 +170,8 @@ int CHudSayText :: MsgFunc_SayText( const char *pszName, int iSize, void *pbuf )
 	BEGIN_READ( pbuf, iSize );
 
 	int client_index = READ_BYTE();		// the client who spoke the message
+	if ( client_index < 0 || client_index > MAX_PLAYERS )
+		return 1;
 	SayTextPrint( READ_STRING(), iSize - 1,  client_index );
 	
 	return 1;
@@ -302,6 +304,8 @@ void CHudSayText :: EnsureTextFitsInOneLineAndWrapIfHaveTo( int line )
 						// need to make more room to display text, scroll stuff up then fix the pointers
 						int linesmoved = ScrollTextUp();
 						line -= linesmoved;
+						if ( line < 0 )
+							return;
 						last_break = last_break - (sizeof(g_szLineBuffer[0]) * linesmoved);
 					}
 				}
@@ -313,15 +317,19 @@ void CHudSayText :: EnsureTextFitsInOneLineAndWrapIfHaveTo( int line )
 					int linelen = strlen(g_szLineBuffer[j]);
 					int remaininglen = strlen(last_break);
 
-					if ( (linelen - remaininglen) <= MAX_CHARS_PER_LINE )
-						strcat( g_szLineBuffer[j], last_break );
+					if ( (linelen + remaininglen) < MAX_CHARS_PER_LINE )
+						strncat( g_szLineBuffer[j], last_break, MAX_CHARS_PER_LINE - 1 - linelen );
 				}
 				else
 				{
-					if ( (strlen(g_szLineBuffer[j]) - strlen(last_break) - 2) < MAX_CHARS_PER_LINE )
+					int linelen = strlen(g_szLineBuffer[j]);
+					int remaininglen = strlen(last_break);
+
+					if ( (linelen + remaininglen + 2) < MAX_CHARS_PER_LINE )
 					{
-						strcat( g_szLineBuffer[j], " " );
-						strcat( g_szLineBuffer[j], last_break );
+						strncat( g_szLineBuffer[j], " ", MAX_CHARS_PER_LINE - 1 - linelen );
+						linelen = strlen(g_szLineBuffer[j]);
+						strncat( g_szLineBuffer[j], last_break, MAX_CHARS_PER_LINE - 1 - linelen );
 					}
 				}
 

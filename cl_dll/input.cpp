@@ -145,17 +145,18 @@ int KB_ConvertString( char *in, char **ppout )
 	*ppout = NULL;
 	p = in;
 	pOut = sz;
+	pEnd = sz + sizeof( sz ) - 1;
 	while ( *p )
 	{
 		if ( *p == '+' )
 		{
-			pEnd = binding;
-			while ( *p && ( isalnum( *p ) || ( pEnd == binding ) ) && ( ( pEnd - binding ) < 63 ) )
+			char *pBindEnd = binding;
+			while ( *p && ( isalnum( *p ) || ( pBindEnd == binding ) ) && ( ( pBindEnd - binding ) < 63 ) )
 			{
-				*pEnd++ = *p++;
+				*pBindEnd++ = *p++;
 			}
 
-			*pEnd =  '\0';
+			*pBindEnd =  '\0';
 
 			pBinding = NULL;
 			if ( strlen( binding + 1 ) > 0 )
@@ -166,27 +167,32 @@ int KB_ConvertString( char *in, char **ppout )
 
 			if ( pBinding )
 			{
-				*pOut++ = '[';
-				pEnd = (char *)pBinding;
+				if ( pOut < pEnd )
+					*pOut++ = '[';
+				pBindEnd = (char *)pBinding;
 			}
 			else
 			{
-				pEnd = binding;
+				pBindEnd = binding;
 			}
 
-			while ( *pEnd )
+			while ( *pBindEnd && pOut < pEnd )
 			{
-				*pOut++ = *pEnd++;
+				*pOut++ = *pBindEnd++;
 			}
 
 			if ( pBinding )
 			{
-				*pOut++ = ']';
+				if ( pOut < pEnd )
+					*pOut++ = ']';
 			}
 		}
 		else
 		{
-			*pOut++ = *p++;
+			if ( pOut < pEnd )
+				*pOut++ = *p++;
+			else
+				p++;
 		}
 	}
 
@@ -242,7 +248,8 @@ void KB_Add( const char *name, kbutton_t *pkb )
 	p = ( kblist_t * )malloc( sizeof( kblist_t ) );
 	memset( p, 0, sizeof( *p ) );
 
-	strcpy( p->name, name );
+	strncpy( p->name, name, sizeof( p->name ) - 1 );
+	p->name[ sizeof( p->name ) - 1 ] = '\0';
 	p->pkey = pkb;
 
 	p->next = g_kbkeys;

@@ -358,7 +358,7 @@ int CHudShowMenuPE::Init(void)
 
 	gHUD.AddHudElem(this);
 
-	sprintf( file, "%s/eqsave.dll", gEngfuncs.pfnGetGameDirectory( ) );
+	snprintf( file, sizeof(file), "%s/eqsave.dll", gEngfuncs.pfnGetGameDirectory( ) );
 
 	while( offset = strstr( file, "/" ) )
 		*offset = '\\';
@@ -426,7 +426,7 @@ void CHudShowMenuPE::Update( int team, int points )
 
 	LoadData( team );
 
-	sprintf( text, "eqchange %d %d %d %d %d %d\n",	m_sInfo.slot[2],
+	snprintf( text, sizeof(text), "eqchange %d %d %d %d %d %d %d\n",	m_sInfo.slot[2],
 													m_sInfo.slot[3],
 													m_sInfo.slot[4],
 													m_sInfo.slot[5],
@@ -488,9 +488,9 @@ void CHudShowMenuPE::Think( )
 
 void CHudShowMenuPE::ShowMenuNr( )
 {
-	char points[64] = "", text[64] = "";
+	char points[64] = "", text[128] = "";
 	m_iEntryCount = 0;
-	sprintf( points, "%d", m_iPoints );
+	snprintf( points, sizeof(points), "%d", m_iPoints );
 
 	category = 0;
 	if( m_sInfo.slot[1] )
@@ -598,7 +598,7 @@ void CHudShowMenuPE::ShowMenuNr( )
 		{
 		strcpy( m_sMenu, H1 );
 		strcat( m_sMenu, MED );
-		sprintf( text, "%d\n", m_iCat );
+		snprintf( text, sizeof(text), "%d\n", m_iCat );
 		strcat( m_sMenu, text );
 
 		if( m_iCat == 1 )
@@ -761,7 +761,7 @@ void CHudShowMenuPE::ShowMenuNr( )
 		if( gViewPort )
 			gViewPort->UpdateCursorState( );
 		
-		sprintf( text, "eqdata %d %d %d %d %d %d\n",	m_sInfo.slot[2],
+		snprintf( text, sizeof(text), "eqdata %d %d %d %d %d %d %d\n",	m_sInfo.slot[2],
 														m_sInfo.slot[3],
 														m_sInfo.slot[4],
 														m_sInfo.slot[5],
@@ -856,13 +856,13 @@ int CHudShowMenuPE::Draw( float flTime )
 	if( gLoaded > 0 )
 	{
 		char text[128];
-		sprintf( text, "Preset %d loaded...\n", gLoaded );
+		snprintf( text, sizeof(text), "Preset %d loaded...\n", gLoaded );
 		g_font->DrawString( CAT_X_DRAW + 384, CAT_Y_DRAW + 68, text, 140, 140, 140 );
 	}
 	if( gLoaded < 0 )
 	{
 		char text[128];
-		sprintf( text, "Preset %d saved...\n", gLoaded + 10 );
+		snprintf( text, sizeof(text), "Preset %d saved...\n", gLoaded + 10 );
 		g_font->DrawString( CAT_X_DRAW + 384, CAT_Y_DRAW + 68, text, 140, 140, 140 );
 	}
 	if( g_Mouse1 )
@@ -1186,7 +1186,7 @@ int CHudShowMenuPE::Draw( float flTime )
 	health -= ( FBitSet( m_sInfo.slot[1], (1<<7) ) ? 20 : 0 );
 	nextx = g_font->DrawString( xpos, ypos + 12, "Hitpoints:", 255, 255, 255 );
 	nextx += 15;
-	sprintf( text, "%d", ( health <= 240 ? health : 240 ) );
+	snprintf( text, sizeof(text), "%d", ( health <= 240 ? health : 240 ) );
 	//text[3] = '\0';
 	g_font->DrawString( nextx + 10, ypos + 12, text, 0, 255, 0 );
 
@@ -1204,13 +1204,13 @@ int CHudShowMenuPE::Draw( float flTime )
 	
 	g_font->DrawString( xpos, ypos + 24, "Armor:", 255, 255, 255 );
 
-	sprintf( text, "%d", armor );
+	snprintf( text, sizeof(text), "%d", armor );
 	g_font->DrawString( nextx + 10, ypos + 24, text, 0, 255, 0 );
 
 	//---
 	// Speed
 	//---
-	strcpy( text, "" );
+	text[0] = '\0';
 	float speed = 100;
 	speed += ( 1.2f * (float)m_iPoints );
 	speed += ( FBitSet( m_sInfo.slot[6], (1<<0) ) ?  5 : 0 );
@@ -1219,7 +1219,7 @@ int CHudShowMenuPE::Draw( float flTime )
 	speed -= ( FBitSet( m_sInfo.slot[1], (1<<8) ) ? 25 : 0 );
 
 	g_font->DrawString( xpos, ypos + 36, "Speed:", 255, 255, 255 );
-	sprintf( text, "%d%%", (int)speed );
+	snprintf( text, sizeof(text), "%d%%", (int)speed );
 	//text[3] = '\0';
 	g_font->DrawString( nextx + 10, ypos + 36, text, 0, 255, 0 );
 
@@ -1227,7 +1227,7 @@ int CHudShowMenuPE::Draw( float flTime )
 	// Jumpheight
 	//---
 	g_font->DrawString( xpos, ypos + 48, "Jumpheight:", 255, 255, 255 );
-	sprintf( text, ( FBitSet( m_sInfo.slot[6], (1<<2) ) ? "Improved" : "Normal" ) );
+	snprintf( text, sizeof(text), "%s", ( FBitSet( m_sInfo.slot[6], (1<<2) ) ? "Improved" : "Normal" ) );
 	//text[3] = '\0';
 	g_font->DrawString( nextx + 10, ypos + 48, text, 0, 255, 0 );
 
@@ -1241,7 +1241,7 @@ int CHudShowMenuPE::Draw( float flTime )
 	acc += ( FBitSet( m_sInfo.slot[6], (1<<3) ) ? 33 : 0 );
 	acc -= ( FBitSet( m_sInfo.slot[1], (1<<8) ) ? 15 : 0 );
 
-	sprintf( text, "%d%%", (int)acc );
+	snprintf( text, sizeof(text), "%d%%", (int)acc );
 	g_font->DrawString( nextx + 10, ypos + 60, text, 0, 255, 0 );
 
 	return 1;
@@ -1568,7 +1568,7 @@ void CHudShowMenuPE::SaveData( int nr )
 	
 	char file[256];
 	char *slash;
-	sprintf( file, "%s", gEngfuncs.pfnGetGameDirectory( ) );
+	snprintf( file, sizeof(file), "%s", gEngfuncs.pfnGetGameDirectory( ) );
 	while( slash = strstr( file, "/" ) )
 		*slash = '\\';
 
@@ -1672,7 +1672,7 @@ void CHudShowMenuPE::LoadData( int nr )
 	char filet[64];
 	int menu, slot = 0;
 
-	sprintf( filet, "SAVE\\pe_equip.t%02d", nr );
+	snprintf( filet, sizeof(filet), "SAVE\\pe_equip.t%02d", nr );
 
 	char *pstart = (char*)gEngfuncs.COM_LoadFile( filet, 5, NULL);
 	char *pfile = pstart;
@@ -1697,33 +1697,39 @@ void CHudShowMenuPE::LoadData( int nr )
 	m_iPoints = m_iPointsMax;
 	
 	pfile = gEngfuncs.COM_ParseFile( pfile, token );
+	if( !pfile ) { gEngfuncs.COM_FreeFile( pstart ); m_iMenu = menu; return; }
 	m_iMenu = 1;
 	m_sInfo.slot[2] = ( IsAvailable( atoi(token) ) ? atoi(token) : 0 );
 	CalcPoints( );
 
 	pfile = gEngfuncs.COM_ParseFile( pfile, token );
+	if( !pfile ) { gEngfuncs.COM_FreeFile( pstart ); m_iMenu = menu; return; }
 	m_iMenu = 2;
 	m_sInfo.slot[3] = ( IsAvailable( atoi(token) ) ? atoi(token) : 0 );
 	CalcPoints( );
 
 	pfile = gEngfuncs.COM_ParseFile( pfile, token );
+	if( !pfile ) { gEngfuncs.COM_FreeFile( pstart ); m_iMenu = menu; return; }
 	m_iMenu = 3;
 	m_sInfo.slot[4] = ( IsAvailable( atoi(token) ) ? atoi(token) : 0 );
 	CalcPoints( );
 
 	pfile = gEngfuncs.COM_ParseFile( pfile, token );
+	if( !pfile ) { gEngfuncs.COM_FreeFile( pstart ); m_iMenu = menu; return; }
 	m_iMenu = 4;
 	slot = atoi(token);
 	m_sInfo.slot[5] = ( IsAvailable2( 4, m_sInfo.team, &slot, m_iPoints, 0 ) ? slot : 0 );
 	CalcPoints( );
 
 	pfile = gEngfuncs.COM_ParseFile( pfile, token );
+	if( !pfile ) { gEngfuncs.COM_FreeFile( pstart ); m_iMenu = menu; return; }
 	m_iMenu = 5;
 	slot = atoi(token);
 	m_sInfo.slot[6] = ( IsAvailable2( 5, m_sInfo.team, &slot, m_iPoints, 0 ) ? slot : 0 );
 	CalcPoints( );
 
 	pfile = gEngfuncs.COM_ParseFile( pfile, token );
+	if( !pfile ) { gEngfuncs.COM_FreeFile( pstart ); m_iMenu = menu; return; }
 	slot = atoi(token);
 	m_sInfo.slot[1] = ( IsAvailable2( 6, m_sInfo.team, &slot, m_iPoints, m_sInfo.slot[6] ) ? slot : 0 );
 	CalcPoints( );

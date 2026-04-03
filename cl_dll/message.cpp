@@ -295,7 +295,8 @@ void CHudMessage::MessageDrawScan( client_textmessage_t *pMessage, float time )
 			m_parms.lineLength++;
 			pText++;
 		}
-		pText++;		// Skip LF
+		if ( *pText )
+			pText++;		// Skip LF
 		line[m_parms.lineLength] = 0;
 
 		m_parms.x = XPosition( pMessage->x, m_parms.width, m_parms.totalWidth );
@@ -320,11 +321,11 @@ int CHudMessage::Draw( float fTime )
 {
 	int i, drawn;
 	client_textmessage_t *pMessage;
-	float endTime;
+	float endTime = 0;
 
 	drawn = 0;
 
-	if ( m_gameTitleTime > 0 )
+	if ( m_gameTitleTime > 0 && m_pGameTitle != NULL )
 	{
 		float localTime = gHUD.m_flTime - m_gameTitleTime;
 		float brightness;
@@ -454,7 +455,8 @@ void CHudMessage::MessageAdd( const char *pName, float time )
 				g_pCustomMessage.fxtime = 0.25;
 				g_pCustomMessage.holdtime = 5;
 				g_pCustomMessage.pName = g_pCustomName;
-				strcpy( g_pCustomText, pName );
+				strncpy( g_pCustomText, pName, sizeof( g_pCustomText ) );
+				g_pCustomText[sizeof( g_pCustomText ) - 1] = '\0';
 				g_pCustomMessage.pMessage = g_pCustomText;
 
 				tempMessage = &g_pCustomMessage;

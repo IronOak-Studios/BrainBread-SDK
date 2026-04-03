@@ -189,6 +189,11 @@ float V_CalcBob ( struct ref_params_s *pparams )
 
 	lasttime = pparams->time;
 
+	if ( cl_bobcycle->value <= 0.0f || cl_bobup->value <= 0.0f || cl_bobup->value >= 1.0f )
+	{
+		return bob;
+	}
+
 	bobtime += pparams->frametime;
 	cycle = bobtime - (int)( bobtime / cl_bobcycle->value ) * cl_bobcycle->value;
 	cycle /= cl_bobcycle->value;
@@ -450,6 +455,9 @@ void V_CalcIntermissionRefdef ( struct ref_params_s *pparams )
 	// view is the weapon model (only visible from inside body )
 	view = gEngfuncs.GetViewModel();
 
+	if ( !ent || !view )
+		return;
+
 	VectorCopy ( pparams->simorg, pparams->vieworg );
 	VectorCopy ( pparams->cl_viewangles, pparams->viewangles );
 
@@ -528,6 +536,9 @@ void V_CalcNormalRefdef ( struct ref_params_s *pparams )
 	
 	// view is the weapon model (only visible from inside body )
 	view = gEngfuncs.GetViewModel();
+
+	if ( !ent || !view )
+		return;
 
 	// transform the view offset by the model's matrix to get the offset from
 	// model origin for the view
@@ -1388,7 +1399,7 @@ void V_GetMapChasePosition(int target, float * cl_angles, float * origin, float 
 	{
 		cl_entity_t	 *	ent = gEngfuncs.GetEntityByIndex( target );
 
-		if ( gHUD.m_Spectator.m_autoDirector->value )
+		if ( ent && gHUD.m_Spectator.m_autoDirector->value )
 		{
 			// this is done to get the angles made by director mode
 			V_GetChasePos(target, cl_angles, origin, angles);
@@ -1400,7 +1411,8 @@ void V_GetMapChasePosition(int target, float * cl_angles, float * origin, float 
 		else
 		{
 			VectorCopy(cl_angles, angles);
-			VectorCopy(ent->origin, origin);
+			if ( ent )
+				VectorCopy(ent->origin, origin);
 
 			// modify angles since we don't wanna see map's bottom
 			angles[0] = 51.25f + 38.75f*(angles[0]/90.0f);
@@ -1532,7 +1544,7 @@ void V_CalcSpectatorRefdef ( struct ref_params_s * pparams )
 
 			cl_entity_t	 * gunModel = gEngfuncs.GetViewModel();
 
-			if ( lastWeaponModelIndex != ent->curstate.weaponmodel )
+			if ( gunModel && lastWeaponModelIndex != ent->curstate.weaponmodel )
 			{
 				// weapon model changed
 
@@ -1550,7 +1562,7 @@ void V_CalcSpectatorRefdef ( struct ref_params_s * pparams )
 				}
 			}
 
-			if ( lastViewModelIndex )
+			if ( gunModel && lastViewModelIndex )
 			{
 				gunModel->model = IEngineStudio.GetModelByIndex( lastViewModelIndex );
 				gunModel->curstate.modelindex = lastViewModelIndex;
@@ -1558,7 +1570,7 @@ void V_CalcSpectatorRefdef ( struct ref_params_s * pparams )
 				gunModel->curstate.colormap = 0; 
 				gunModel->index = g_iUser2;
 			}
-			else
+			else if ( gunModel )
 			{
 				gunModel->model = NULL;	// disable weaopn model
 			}

@@ -45,22 +45,36 @@ int CHudBriefing::MsgFunc_Briefing( const char *pszName, int iSize, void *pbuf )
 		return 1;
 	}
 	char level[128];
-	strcpy( level , gEngfuncs.pfnGetLevelName( ) );
+	const char *pLevel = gEngfuncs.pfnGetLevelName( );
+	if( !pLevel || !pLevel[0] )
+		return 1;
+	strncpy( level, pLevel, sizeof(level) - 1 );
+	level[sizeof(level) - 1] = '\0';
 	char sz[256]; 
 	char szTitle[256]; 
 	char *ch;
-	if (level && level[0])
+	if (level[0])
 	{
-		strcpy( sz, level );
+		strncpy( sz, level, sizeof(sz) - 1 );
+		sz[sizeof(sz) - 1] = '\0';
 		ch = strchr( sz, '/' );
 		if (!ch)
 			ch = strchr( sz, '\\' );
-		strcpy( szTitle, ch+1 );
-		ch = strchr( szTitle, '.' );
-		*ch = '\0';
-		*ch = '.';
-		strcpy( sz, level );
+		if (!ch)
+		{
+			strcpy( m_sBriefing, "No map briefing available...");
+			return 1;
+		}
+		strncpy( szTitle, ch+1, sizeof(szTitle) - 1 );
+		szTitle[sizeof(szTitle) - 1] = '\0';
+		strncpy( sz, level, sizeof(sz) - 1 );
+		sz[sizeof(sz) - 1] = '\0';
 		ch = strchr( sz, '.' );
+		if( !ch )
+		{
+			strcpy( m_sBriefing, "No map briefing available...");
+			return 1;
+		}
 		*ch = '\0';
 		strcat( sz, ".txt" );
 		ch = (char*)gEngfuncs.COM_LoadFile( sz, 5, NULL );
@@ -104,14 +118,17 @@ int CHudBriefing::Draw( float flTime )
 		return 1;
 	}
 
-	while ( i < 1024 && m_sBriefing[i] != '\0' )
+	while ( i < 2048 && m_sBriefing[i] != '\0' )
 	{
 		for( o = i; ( m_sBriefing[o] != '\n' ) && ( o < 2048 ) && ( m_sBriefing[o] != '\0' ); o++ ){}
 
-		if( o-i > 0 )
+		int len = o - i;
+		if( len >= (int)sizeof(text) )
+			len = sizeof(text) - 1;
+		if( len > 0 )
 		{
-			strncpy( text, m_sBriefing+i, o-i );
-			text[o-i] = '\0';
+			strncpy( text, m_sBriefing+i, len );
+			text[len] = '\0';
 
 			if( i == 0 )
 				g_font->DrawString( ( ScreenWidth / 2 + XRES(140) ) - ( g_font->GetWidth( text ) / 2 ), y, text, 255, 0, 0 );
@@ -120,7 +137,7 @@ int CHudBriefing::Draw( float flTime )
 		}
 		y += 12;
 
-		while ( i < 1024 && m_sBriefing[i] != '\0' && m_sBriefing[i] != '\n' )
+		while ( i < 2048 && m_sBriefing[i] != '\0' && m_sBriefing[i] != '\n' )
 			i++;
 		if ( m_sBriefing[i] == '\n' )
 			i++;

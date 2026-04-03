@@ -531,10 +531,11 @@ void CHud :: VidInit( void )
 				if ( p->iRes == m_iRes )
 				{
 					char sz[256];
-					sprintf(sz, "sprites/%s.spr", p->szSprite);
+					snprintf(sz, sizeof(sz), "sprites/%s.spr", p->szSprite);
 					m_rghSprites[index] = SPR_Load(sz);
 					m_rgrcRects[index] = p->rc;
-					strncpy( &m_rgszSpriteNames[index * MAX_SPRITE_NAME_LENGTH], p->szName, MAX_SPRITE_NAME_LENGTH );
+					strncpy( &m_rgszSpriteNames[index * MAX_SPRITE_NAME_LENGTH], p->szName, MAX_SPRITE_NAME_LENGTH - 1 );
+					m_rgszSpriteNames[index * MAX_SPRITE_NAME_LENGTH + MAX_SPRITE_NAME_LENGTH - 1] = '\0';
 
 					index++;
 				}
@@ -554,7 +555,7 @@ void CHud :: VidInit( void )
 			if ( p->iRes == m_iRes )
 			{
 				char sz[256];
-				sprintf( sz, "sprites/%s.spr", p->szSprite );
+				snprintf( sz, sizeof(sz), "sprites/%s.spr", p->szSprite );
 				m_rghSprites[index] = SPR_Load(sz);
 				index++;
 			}
@@ -567,7 +568,10 @@ void CHud :: VidInit( void )
 	m_HUD_number_0 = GetSpriteIndex( "number_0" );
 	m_HUD_number_0large = GetSpriteIndex( "number_0large" );
 
-	m_iFontHeight = m_rgrcRects[m_HUD_number_0].bottom - m_rgrcRects[m_HUD_number_0].top;
+	if ( m_HUD_number_0 >= 0 )
+		m_iFontHeight = m_rgrcRects[m_HUD_number_0].bottom - m_rgrcRects[m_HUD_number_0].top;
+	else
+		m_iFontHeight = 0;
 
 	m_Ammo.VidInit();
 	m_Health.VidInit();

@@ -22,6 +22,8 @@ cPEHelper *g_helper = NULL;
 
 int __MsgFunc_Help( const char *pszName, int iSize, void *pbuf )
 {
+	if( !g_helper )
+		return 0;
 	return g_helper->MsgFunc_Help( pszName, iSize, pbuf );
 }
 
@@ -147,7 +149,7 @@ s_helpitem *cPEHelper::ForceShowHelp( char *cfgfile )
 	strcpy( ni->txtfadername, "stdtext" );
 
 	pfile = gEngfuncs.COM_ParseFile( pfile, token );
-	while( strlen( token ) )
+	while( pfile && strlen( token ) )
 	{
 		if( !strcmp( token, "blackbg" ) )
 		{
@@ -166,7 +168,8 @@ s_helpitem *cPEHelper::ForceShowHelp( char *cfgfile )
 		{
 			// fontname
 			pfile = gEngfuncs.COM_ParseFile( pfile, token );
-			strncpy( font, token, MAX_NAME_LEN );
+			strncpy( font, token, MAX_NAME_LEN - 1 );
+			font[MAX_NAME_LEN - 1] = '\0';
 		}
 	else if( !strcmp( token, "bordery" ) )
 		{
@@ -242,37 +245,45 @@ s_helpitem *cPEHelper::ForceShowHelp( char *cfgfile )
 		{
 			// sprite file
 			pfile = gEngfuncs.COM_ParseFile( pfile, token );
-			strncpy( ni->spritename, token, MAX_SPRITENAME_LEN );
+			strncpy( ni->spritename, token, MAX_SPRITENAME_LEN - 1 );
+			ni->spritename[MAX_SPRITENAME_LEN - 1] = '\0';
 		}
 		else if( !strcmp( token, "posfader" ) )
 		{
 			// position fader
 			pfile = gEngfuncs.COM_ParseFile( pfile, token );
-			strncpy( ni->posfadername, token, MAX_FADERNAME_LEN );
+			strncpy( ni->posfadername, token, MAX_FADERNAME_LEN - 1 );
+			ni->posfadername[MAX_FADERNAME_LEN - 1] = '\0';
 		}
 		else if( !strcmp( token, "sprfader" ) )
 		{
 			// sprite fader
 			pfile = gEngfuncs.COM_ParseFile( pfile, token );
-			strncpy( ni->sprfadername, token, MAX_FADERNAME_LEN );
+			strncpy( ni->sprfadername, token, MAX_FADERNAME_LEN - 1 );
+			ni->sprfadername[MAX_FADERNAME_LEN - 1] = '\0';
 		}
 		else if( !strcmp( token, "txtfader" ) )
 		{
 			// text fader
 			pfile = gEngfuncs.COM_ParseFile( pfile, token );
-			strncpy( ni->txtfadername, token, MAX_FADERNAME_LEN );
+			strncpy( ni->txtfadername, token, MAX_FADERNAME_LEN - 1 );
+			ni->txtfadername[MAX_FADERNAME_LEN - 1] = '\0';
 		}
 		else if( !strcmp( token, "content" ) )
 		{
 			// text
 			pfile = gEngfuncs.COM_ParseFile( pfile, token );
 			char *strt = pfile;
-			while( strlen( token ) && token[0] != '}' )
+			while( pfile && strlen( token ) && token[0] != '}' )
 				pfile = gEngfuncs.COM_ParseFile( pfile, token );
 			if( token[0] == '}' )
 			{
 				// I just hope the cfg remains DOS formatted... ^^
-				strncpy( ni->text, strt, min( MAX_HELPTEXT_LEN, (int)pfile - (int)strt - 1 ) );
+				int copylen = (int)pfile - (int)strt - 1;
+				if( copylen < 0 ) copylen = 0;
+				if( copylen > MAX_HELPTEXT_LEN - 1 ) copylen = MAX_HELPTEXT_LEN - 1;
+				strncpy( ni->text, strt, copylen );
+				ni->text[copylen] = '\0';
 			}
 		}
 		else	

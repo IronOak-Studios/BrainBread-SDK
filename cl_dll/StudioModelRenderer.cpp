@@ -116,10 +116,10 @@ void CStudioModelRenderer::StudioCalcBoneAdj( float dadt, float *adj, const byte
 	
 	pbonecontroller = (mstudiobonecontroller_t *)((byte *)m_pStudioHeader + m_pStudioHeader->bonecontrollerindex);
 
-	for (j = 0; j < m_pStudioHeader->numbonecontrollers; j++)
+	for (j = 0; j < m_pStudioHeader->numbonecontrollers && j < MAXSTUDIOCONTROLLERS; j++)
 	{
 		i = pbonecontroller[j].index;
-		if (i <= 3)
+		if (i >= 0 && i <= 3)
 		{
 			// check for 360% wrapping
 			if (pbonecontroller[j].type & STUDIO_RLOOP)
@@ -236,7 +236,7 @@ void CStudioModelRenderer::StudioCalcBoneQuaterion( int frame, float s, mstudiob
 			angle2[j] = pbone->value[j+3] + angle2[j] * pbone->scale[j+3];
 		}
 
-		if (pbone->bonecontroller[j+3] != -1)
+		if (pbone->bonecontroller[j+3] >= 0 && pbone->bonecontroller[j+3] < MAXSTUDIOCONTROLLERS)
 		{
 			angle1[j] += adj[pbone->bonecontroller[j+3]];
 			angle2[j] += adj[pbone->bonecontroller[j+3]];
@@ -316,7 +316,7 @@ void CStudioModelRenderer::StudioCalcBonePosition( int frame, float s, mstudiobo
 				}
 			}
 		}
-		if ( pbone->bonecontroller[j] != -1 && adj )
+		if ( pbone->bonecontroller[j] >= 0 && pbone->bonecontroller[j] < MAXSTUDIOCONTROLLERS && adj )
 		{
 			pos[j] += adj[pbone->bonecontroller[j]];
 		}
@@ -340,7 +340,7 @@ void CStudioModelRenderer::StudioSlerpBones( vec4_t q1[], float pos1[][3], vec4_
 
 	s1 = 1.0 - s;
 
-	for (i = 0; i < m_pStudioHeader->numbones; i++)
+	for (i = 0; i < m_pStudioHeader->numbones && i < MAXSTUDIOBONES; i++)
 	{
 		QuaternionSlerp( q1[i], q2[i], s, q3 );
 		q1[i][0] = q3[0];
@@ -378,6 +378,9 @@ mstudioanim_t *CStudioModelRenderer::StudioGetAnim( model_t *m_pSubModel, mstudi
 		paSequences = (cache_user_t *)IEngineStudio.Mem_Calloc( 16, sizeof( cache_user_t ) ); // UNDONE: leak!
 		m_pSubModel->submodels = (dmodel_t *)paSequences;
 	}
+
+	if (pseqdesc->seqgroup < 0 || pseqdesc->seqgroup >= 16)
+		return (mstudioanim_t *)((byte *)m_pStudioHeader + pseqdesc->animindex);
 
 	if (!IEngineStudio.Cache_Check( (struct cache_user_s *)&(paSequences[pseqdesc->seqgroup])))
 	{
@@ -626,7 +629,7 @@ void CStudioModelRenderer::StudioCalcRotations ( float pos[][3], vec4_t *q, mstu
 
 	StudioCalcBoneAdj( dadt, adj, m_pCurrentEntity->curstate.controller, m_pCurrentEntity->latched.prevcontroller, m_pCurrentEntity->mouth.mouthopen );
 
-	for (i = 0; i < m_pStudioHeader->numbones; i++, pbone++, panim++) 
+	for (i = 0; i < m_pStudioHeader->numbones && i < MAXSTUDIOBONES; i++, pbone++, panim++)
 	{
 		StudioCalcBoneQuaterion( frame, s, pbone, panim, adj, q[i] );
 
@@ -635,6 +638,8 @@ void CStudioModelRenderer::StudioCalcRotations ( float pos[][3], vec4_t *q, mstu
 		//	Con_DPrintf("%d %d %d %d\n", m_pCurrentEntity->curstate.sequence, frame, j, k );
 	}
 
+	if (pseqdesc->motionbone < 0 || pseqdesc->motionbone >= m_pStudioHeader->numbones || pseqdesc->motionbone >= MAXSTUDIOBONES)
+	  return;
 	if (pseqdesc->motiontype & STUDIO_X)
 	{
 		pos[pseqdesc->motionbone][0] = 0.0;
@@ -939,7 +944,7 @@ void CStudioModelRenderer::StudioSetupBones ( void )
 		panim = StudioGetAnim( m_pRenderModel, pseqdesc );
 		StudioCalcRotations( pos2, q2, pseqdesc, panim, m_pPlayerInfo->gaitframe );
 
-		for ( i = 0; i < m_pStudioHeader->numbones; i++ )
+		for ( i = 0; i < m_pStudioHeader->numbones && i < MAXSTUDIOBONES; i++ )
 		{
 			if ( !strcmp( pbones[i].name, "Bip01 Spine" ) )
 			{
@@ -959,7 +964,7 @@ void CStudioModelRenderer::StudioSetupBones ( void )
 		}
 	}
 
-	for (i = 0; i < m_pStudioHeader->numbones; i++) 
+	for (i = 0; i < m_pStudioHeader->numbones && i < MAXSTUDIOBONES; i++)
 	{
 		QuaternionMatrix( q[i], bonematrix );
 
@@ -988,7 +993,7 @@ void CStudioModelRenderer::StudioSetupBones ( void )
 			// Apply client-side effects to the transformation matrix
 			StudioFxTransform( m_pCurrentEntity, (*m_pbonetransform)[i] );
 		} 
-		else if (parent >= 0 && parent < m_pStudioHeader->numbones)
+		else if (parent >= 0 && parent < m_pStudioHeader->numbones && parent < MAXSTUDIOBONES)
 		{
 			ConcatTransforms ((*m_pbonetransform)[parent], bonematrix, (*m_pbonetransform)[i]);
 			ConcatTransforms ((*m_plighttransform)[parent], bonematrix, (*m_plighttransform)[i]);
@@ -1011,10 +1016,13 @@ void CStudioModelRenderer::StudioSaveBones( void )
 	pbones = (mstudiobone_t *)((byte *)m_pStudioHeader + m_pStudioHeader->boneindex);
 
 	m_nCachedBones = m_pStudioHeader->numbones;
+	if (m_nCachedBones > MAXSTUDIOBONES)
+		m_nCachedBones = MAXSTUDIOBONES;
 
-	for (i = 0; i < m_pStudioHeader->numbones; i++) 
+	for (i = 0; i < m_nCachedBones; i++)
 	{
-		strcpy( m_nCachedBoneNames[i], pbones[i].name );
+		strncpy( m_nCachedBoneNames[i], pbones[i].name, sizeof( m_nCachedBoneNames[i] ) - 1 );
+		m_nCachedBoneNames[i][ sizeof( m_nCachedBoneNames[i] ) - 1 ] = '\0';
 		MatrixCopy( (*m_pbonetransform)[i], m_rgCachedBoneTransform[i] );
 		MatrixCopy( (*m_plighttransform)[i], m_rgCachedLightTransform[i] );
 	}
@@ -1061,7 +1069,7 @@ void CStudioModelRenderer::StudioMergeBones ( model_t *m_pSubModel )
 	pbones = (mstudiobone_t *)((byte *)m_pStudioHeader + m_pStudioHeader->boneindex);
 
 
-	for (i = 0; i < m_pStudioHeader->numbones; i++) 
+	for (i = 0; i < m_pStudioHeader->numbones && i < MAXSTUDIOBONES; i++)
 	{
 		for (j = 0; j < m_nCachedBones; j++)
 		{
@@ -1101,7 +1109,7 @@ void CStudioModelRenderer::StudioMergeBones ( model_t *m_pSubModel )
 				// Apply client-side effects to the transformation matrix
 				StudioFxTransform( m_pCurrentEntity, (*m_pbonetransform)[i] );
 			} 
-			else if (parent >= 0 && parent < m_pStudioHeader->numbones)
+			else if (parent >= 0 && parent < m_pStudioHeader->numbones && parent < MAXSTUDIOBONES)
 			{
 				ConcatTransforms ((*m_pbonetransform)[parent], bonematrix, (*m_pbonetransform)[i]);
 				ConcatTransforms ((*m_plighttransform)[parent], bonematrix, (*m_plighttransform)[i]);
@@ -1968,7 +1976,8 @@ void CStudioModelRenderer::StudioCalcAttachments( void )
 	pattachment = (mstudioattachment_t *)((byte *)m_pStudioHeader + m_pStudioHeader->attachmentindex);
 	for (i = 0; i < m_pStudioHeader->numattachments; i++)
 	{
-		VectorTransform( pattachment[i].org, (*m_plighttransform)[pattachment[i].bone],  m_pCurrentEntity->attachment[i] );
+		if (pattachment[i].bone >= 0 && pattachment[i].bone < MAXSTUDIOBONES)
+			VectorTransform( pattachment[i].org, (*m_plighttransform)[pattachment[i].bone],  m_pCurrentEntity->attachment[i] );
 	}
 }
 

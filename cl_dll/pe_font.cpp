@@ -107,14 +107,14 @@ void cPEFontMgr::LoadFont( s_font *fnt )
 	fnt->scale = 1;
 	if (CVAR_GET_FLOAT("cl_newfont"))
 	{
-		sprintf( file, "sprites/hud/%s_solid.cfg", fnt->basename );
+		snprintf( file, sizeof(file), "sprites/hud/%s_solid.cfg", fnt->basename );
 		pstart = (char*)gEngfuncs.COM_LoadFile( file, 5, NULL );
 		if (pstart)
 			fnt->scale = 2;
 	}
 	if (!pstart)
 	{
-		sprintf( file, "sprites/hud/%s.cfg", fnt->basename );
+		snprintf( file, sizeof(file), "sprites/hud/%s.cfg", fnt->basename );
 		pstart = (char*)gEngfuncs.COM_LoadFile( file, 5, NULL );
 	}
 
@@ -148,9 +148,9 @@ void cPEFontMgr::LoadFont( s_font *fnt )
 	}
 
 	if( fnt->scale == 2 )
-		sprintf( file, "sprites/hud/%s_solid.spr", fnt->basename );
+		snprintf( file, sizeof(file), "sprites/hud/%s_solid.spr", fnt->basename );
 	else
-		sprintf( file, "sprites/hud/%s.spr", fnt->basename );
+		snprintf( file, sizeof(file), "sprites/hud/%s.spr", fnt->basename );
 
 	fnt->charSprite = LoadSprite( file );
 	fnt->ready = true;
@@ -163,7 +163,8 @@ s_font *cPEFontMgr::AddFont( char *name )
 	{
 		lfont = ffont = new s_font;
 		memset( ffont, 0, sizeof(s_font) );
-		strncpy( ffont->basename, name, MAX_NAME_LEN );
+		strncpy( ffont->basename, name, MAX_NAME_LEN - 1 );
+		ffont->basename[MAX_NAME_LEN - 1] = '\0';
 		return ffont;
 	}
 	s_font *it = ffont;
@@ -177,7 +178,8 @@ s_font *cPEFontMgr::AddFont( char *name )
 		return it;
 	it = new s_font;
 	memset( it, 0, sizeof(s_font) );
-	strncpy( it->basename, name, MAX_NAME_LEN );
+	strncpy( it->basename, name, MAX_NAME_LEN - 1 );
+	it->basename[MAX_NAME_LEN - 1] = '\0';
 	lfont->next = it;
 	lfont = it;
 	return it;
@@ -264,6 +266,8 @@ int cPEFontMgr::DrawString( int x, int y, char *string, int r, int g, int b, int
 
 int cPEFontMgr::DrawStringML( int x, int y, char *string, int r, int g, int b, int a )
 {
+	if( !curfont || !curfont->ready )
+		return x;
 	if( a < 255 )
 		ScaleColors( r, g, b, a );
 	int curx = x;
@@ -340,7 +344,9 @@ int cPEFontMgr::DrawString( int x, int y, char *string )
 	{
 		if( *string == '\\' )
 		{
-			ChrToColor( *string + 1, r, g, b );
+			if( *(string + 1) == 0 )
+				break;
+			ChrToColor( *(++string), r, g, b );
 			continue;
 		}
 		DrawChar( x, y, *string, r, g, b );
@@ -351,11 +357,15 @@ int cPEFontMgr::DrawString( int x, int y, char *string )
 
 int cPEFontMgr::DrawStringML( int x, int y, char *string )
 {
+	if( !curfont || !curfont->ready )
+		return x;
 	int curx = x, r = 0, g = 0, b = 0;
 	for ( ; *string != 0 ; string++ )
 	{
 		if( *string == '\\' )
 		{
+			if( *(string + 1) == 0 )
+				break;
 			ChrToColor( *(++string), r, g, b );
 			continue;
 		}

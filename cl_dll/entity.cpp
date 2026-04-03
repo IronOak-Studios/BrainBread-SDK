@@ -144,7 +144,7 @@ void CL_DLLEXPORT HUD_ProcessPlayerState( struct entity_state_s *dst, const stru
 
 	// Save off some data so other areas of the Client DLL can get to it
 	cl_entity_t *player = gEngfuncs.GetLocalPlayer();	// Get the local player's index
-	if ( dst->number == player->index )
+	if ( player && dst->number == player->index )
 	{
 		g_iPlayerClass = dst->playerclass;
 		//g_iTeamNumber = dst->team;
@@ -707,7 +707,8 @@ void CL_DLLEXPORT HUD_TempEntUpdate (
 
 				pClient = gEngfuncs.GetEntityByIndex( pTemp->clientIndex );
 
-				VectorAdd( pClient->origin, pTemp->tentOffset, pTemp->entity.origin );
+				if ( pClient )
+					VectorAdd( pClient->origin, pTemp->tentOffset, pTemp->entity.origin );
 			}
 			else if ( pTemp->flags & FTENT_SINEWAVE )
 			{

@@ -117,7 +117,7 @@ vec3_t PE_GetAttachment( model_s *mdl, int att )
 
 	if( !pStudioHeader )
 		return Vector( 0, 0, 0 );
-  if( pStudioHeader->numattachments <= att )
+  if( att < 0 || pStudioHeader->numattachments <= att )
     return Vector( 0, 0, 0 );
 
   pStudioHeader->name;
@@ -137,9 +137,13 @@ vec3_t PE_MuzzlePos( int idx, int duck )
 		return view_ofs;
 	}
 	model_s * weaponModel = IEngineStudio.GetModelByIndex( pEnt->curstate.weaponmodel );
-	studiohdr_t* pStudioHeader = (studiohdr_t *)IEngineStudio.Mod_Extradata(weaponModel);
 
 	VectorClear( view_ofs );
+
+	if( !weaponModel )
+		return view_ofs;
+
+	studiohdr_t* pStudioHeader = (studiohdr_t *)IEngineStudio.Mod_Extradata(weaponModel);
 
 	//view_ofs[2] = DEFAULT_VIEWHEIGHT;
 
@@ -156,7 +160,7 @@ vec3_t PE_MuzzlePos( int idx, int duck )
 	}
 	//view_ofs[2] -= DEFAULT_VIEWHEIGHT;
 
-	if( !weaponModel || !pStudioHeader )
+	if( !pStudioHeader )
 		return view_ofs;
   mstudioattachment_t *pattachment;
 	pattachment = (mstudioattachment_t *)((byte *)pStudioHeader + pStudioHeader->attachmentindex);
@@ -218,7 +222,8 @@ float EV_HLDM_PlayTextureSound( int idx, pmtrace_t *ptr, float *vecSrc, float *v
 		
 		if ( pTextureName )
 		{
-			strcpy( texname, pTextureName );
+			strncpy( texname, pTextureName, sizeof(texname) - 1 );
+			texname[ sizeof(texname) - 1 ] = 0;
 			pTextureName = texname;
 
 			// strip leading '-0' or '+0~' or '{' or '!'
@@ -233,7 +238,7 @@ float EV_HLDM_PlayTextureSound( int idx, pmtrace_t *ptr, float *vecSrc, float *v
 			}
 			
 			// '}}'
-			strcpy( szbuffer, pTextureName );
+			strncpy( szbuffer, pTextureName, sizeof(szbuffer) - 1 );
 			szbuffer[ CBTEXTURENAMEMAX - 1 ] = 0;
 				
 			// get texture type
@@ -325,16 +330,16 @@ char *EV_HLDM_DamageDecal( physent_t *pe )
 	if ( pe->classnumber == 1 )
 	{
 		idx = gEngfuncs.pfnRandomLong( 0, 2 );
-		sprintf( decalname, "{break%i", idx + 1 );
+		snprintf( decalname, sizeof(decalname), "{break%i", idx + 1 );
 	}
 	else if ( pe->rendermode != kRenderNormal )
 	{
-		sprintf( decalname, "{bproof1" );
+		snprintf( decalname, sizeof(decalname), "{bproof1" );
 	}
 	else
 	{
 		idx = gEngfuncs.pfnRandomLong( 0, 4 );
-		sprintf( decalname, "{shot%i", idx + 1 );
+		snprintf( decalname, sizeof(decalname), "{shot%i", idx + 1 );
 	}
 	return decalname;
 }
@@ -462,7 +467,8 @@ void EV_HLDM_SmokePuff( pmtrace_t *pTrace, float *vecSrc, float *vecEnd )
 		
 		if ( pTextureName )
 		{
-			strcpy( texname, pTextureName );
+			strncpy( texname, pTextureName, sizeof(texname) - 1 );
+			texname[ sizeof(texname) - 1 ] = 0;
 			pTextureName = texname;
 
 			// strip leading '-0' or '+0~' or '{' or '!'
@@ -477,7 +483,7 @@ void EV_HLDM_SmokePuff( pmtrace_t *pTrace, float *vecSrc, float *vecEnd )
 			}
 			
 			// '}}'
-			strcpy( szbuffer, pTextureName );
+			strncpy( szbuffer, pTextureName, sizeof(szbuffer) - 1 );
 			szbuffer[ CBTEXTURENAMEMAX - 1 ] = 0;
 				
 			// get texture type
@@ -817,7 +823,7 @@ void EV_TrainPitchAdjust( event_args_t *args )
 	case 6: strcpy( sz, "plats/ttrain7.wav"); break;
 	default:
 		// no sound
-		strcpy( sz, "" );
+		sz[0] = 0;
 		return;
 	}
 

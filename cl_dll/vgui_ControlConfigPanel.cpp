@@ -170,6 +170,12 @@ int ControlConfigPanel::GetCVarCount()
 
 void ControlConfigPanel::GetCVar(int index,char* cvar,int cvarLen,char* desc,int descLen)
 {
+	if(index<0||index>=_cvarDar.getCount())
+	{
+		if(cvarLen>0) cvar[0]='\0';
+		if(descLen>0) desc[0]='\0';
+		return;
+	}
 	vgui_strcpy(cvar,cvarLen,_cvarDar[index]);
 	vgui_strcpy(desc,descLen,_descDar[index]);
 }
@@ -193,7 +199,7 @@ void ControlConfigPanel::AddCVarFromInputStream(InputStream* is)
 		{
 			break;
 		}
-		if(sscanf(buf,"\"%[^\"]\" \"%[^\"]\"",cvar,desc)==2)
+		if(sscanf(buf,"\"%127[^\"]\" \"%127[^\"]\"",cvar,desc)==2)
 		{
 			AddCVar(cvar,desc);
 		}
@@ -202,8 +208,8 @@ void ControlConfigPanel::AddCVarFromInputStream(InputStream* is)
 
 void ControlConfigPanel::GetCVarBind(const char* cvar,char* bind,int bindLen,char* bindAlt,int bindAltLen)
 {
-	sprintf(bind,"%s : Bind",cvar);
-	sprintf(bindAlt,"%s : BindAlt",cvar);
+	snprintf(bind,bindLen,"%s : Bind",cvar);
+	snprintf(bindAlt,bindAltLen,"%s : BindAlt",cvar);
 }
 
 void ControlConfigPanel::SetCVarBind(const char* cvar,const char* bind,const char* bindAlt)

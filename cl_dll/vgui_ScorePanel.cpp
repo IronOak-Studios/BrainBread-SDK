@@ -275,7 +275,7 @@ void ScorePanel::Update()
 	if (gViewPort->m_szServerName)
 	{
 		char sz[128];//MAX_SERVERNAME_LENGTH + 16];
-		sprintf(sz, "%s", gViewPort->m_szServerName );
+		snprintf(sz, sizeof(sz), "%s", gViewPort->m_szServerName );
 		m_TitleLabel.setText(sz);
 	}
 
@@ -397,6 +397,8 @@ void ScorePanel::SortTeams()
 			break;
 
 		// Put this team in the sorted list
+		if ( m_iRows >= NUM_ROWS )
+			break;
 		m_iSortedRows[ m_iRows ] = best_team;
 		m_iIsATeam[ m_iRows ] = TEAM_YES;
 		g_TeamInfo[best_team].already_drawn = TRUE;  // set the already_drawn to be TRUE, so this team won't get sorted again
@@ -450,6 +452,8 @@ void ScorePanel::SortPlayers( int iTeam, int team )
 		// If we haven't created the Team yet, do it first
 		if (!bCreatedTeam && iTeam)
 		{
+			if ( m_iRows >= NUM_ROWS )
+				break;
 			m_iIsATeam[ m_iRows ] = iTeam;
 			m_iRows++;
 
@@ -457,6 +461,8 @@ void ScorePanel::SortPlayers( int iTeam, int team )
 		}
 
 		// Put this player in the sorted list
+		if ( m_iRows >= NUM_ROWS )
+			break;
 		m_iSortedRows[ m_iRows ] = best_player;
 		m_bHasBeenSorted[ best_player ] = true;
 		m_iRows++;
@@ -483,11 +489,14 @@ void ScorePanel::RebuildTeams()
 	// rebuild the team list
 	gViewPort->GetAllPlayersInfo();
 	m_iNumTeams = 2;
-	strcpy( g_TeamInfo[0].name, "Spectators" );
+	strncpy( g_TeamInfo[0].name, "Spectators", sizeof(g_TeamInfo[0].name) - 1 );
+	g_TeamInfo[0].name[sizeof(g_TeamInfo[0].name) - 1] = '\0';
 	g_TeamInfo[0].teamnumber = 0;
-	strcpy( g_TeamInfo[1].name, "Not yet undead" );
+	strncpy( g_TeamInfo[1].name, "Not yet undead", sizeof(g_TeamInfo[1].name) - 1 );
+	g_TeamInfo[1].name[sizeof(g_TeamInfo[1].name) - 1] = '\0';
 	g_TeamInfo[1].teamnumber = 1;
-	strcpy( g_TeamInfo[2].name, "Zombie mob" );
+	strncpy( g_TeamInfo[2].name, "Zombie mob", sizeof(g_TeamInfo[2].name) - 1 );
+	g_TeamInfo[2].name[sizeof(g_TeamInfo[2].name) - 1] = '\0';
 	g_TeamInfo[2].teamnumber = 2;
 	for ( i = 1; i < MAX_PLAYERS; i++ )
 	{
@@ -675,7 +684,7 @@ void ScorePanel::FillGrid()
 			}
 
 			// Fill out with the correct data
-			strcpy(sz, "");
+			sz[0] = '\0';
 			if ( m_iIsATeam[row] )
 			{
 				char sz2[128];
@@ -685,26 +694,27 @@ void ScorePanel::FillGrid()
 				case COLUMN_NAME:
 					if ( m_iIsATeam[row] == TEAM_SPECTATORS )
 					{
-						sprintf( sz2, "%s", CHudTextMessage::BufferedLocaliseTextString( "#Spectators" ) );
+						snprintf( sz, sizeof(sz), "%s", CHudTextMessage::BufferedLocaliseTextString( "#Spectators" ) );
 					}
 					else
 					{
-						//sprintf( sz2, gViewPort->GetTeamName(team_info->teamnumber) );
-						sprintf( sz2, "%s", g_TeamInfo[team_info->teamnumber].name );
+						int tn = team_info->teamnumber;
+						if ( tn >= 0 && tn <= MAX_TEAMS )
+							snprintf( sz, sizeof(sz), "%s", g_TeamInfo[tn].name );
+						else
+							sz[0] = '\0';
 					}
-
-					strcpy(sz, sz2);
 
 					// Append the number of players
 					if ( m_iIsATeam[row] == TEAM_YES )
 					{
 						if (team_info->players == 1)
 						{
-							sprintf(sz2, "(%d %s)", team_info->players, CHudTextMessage::BufferedLocaliseTextString( "#Player" ) );
+							snprintf(sz2, sizeof(sz2), "(%d %s)", team_info->players, CHudTextMessage::BufferedLocaliseTextString( "#Player" ) );
 						}
 						else
 						{
-							sprintf(sz2, "(%d %s)", team_info->players, CHudTextMessage::BufferedLocaliseTextString( "#Players" ) );
+							snprintf(sz2, sizeof(sz2), "(%d %s)", team_info->players, CHudTextMessage::BufferedLocaliseTextString( "#Players" ) );
 						}
 
 						pLabel->setText2(sz2);
@@ -715,21 +725,21 @@ void ScorePanel::FillGrid()
 					break;
 				case COLUMN_LEVEL:
 					if ( m_iIsATeam[row] == TEAM_YES )
-						sprintf(sz, "%d",  team_info->level );
+						snprintf(sz, sizeof(sz), "%d",  team_info->level );
 					break;
 				case COLUMN_CLASS:
 					break;
 				case COLUMN_KILLS:
 					if ( m_iIsATeam[row] == TEAM_YES )
-						sprintf(sz, "%d",  team_info->frags );
+						snprintf(sz, sizeof(sz), "%d",  team_info->frags );
 					break;
 				case COLUMN_DEATHS:
 					if ( m_iIsATeam[row] == TEAM_YES )
-						sprintf(sz, "%d",  team_info->deaths );
+						snprintf(sz, sizeof(sz), "%d",  team_info->deaths );
 					break;
 				case COLUMN_LATENCY:
 					if ( m_iIsATeam[row] == TEAM_YES )
-						sprintf(sz, "%d", team_info->ping );
+						snprintf(sz, sizeof(sz), "%d", team_info->ping );
 					break;
 				default:
 					break;
@@ -742,7 +752,7 @@ void ScorePanel::FillGrid()
 				switch (col)
 				{
 				case COLUMN_NAME:
-					sprintf(sz, "%s  ", pl_info->name);
+					snprintf(sz, sizeof(sz), "%s  ", pl_info->name);
 					break;
 				case COLUMN_VOICE:
 					sz[0] = 0;
@@ -783,7 +793,7 @@ void ScorePanel::FillGrid()
 					//if( g_PlayerExtraInfo[ m_iSortedRows[row] ].playerclass > 5 )
 					//	sprintf( sz, "%s %s", CHudTextMessage::BufferedLocaliseTextString( sLocalisedClasses[ g_PlayerExtraInfo[ m_iSortedRows[row] ].playerclass ] ), gsAlive[( g_IsSpectator[m_iSortedRows[row]] ? 0 : 1 )] );
 					//else
-					sprintf( sz, "%s", gsAlive[( g_IsSpectator[m_iSortedRows[row]] ? 0 : 1 )] );
+					snprintf( sz, sizeof(sz), "%s", gsAlive[( g_IsSpectator[m_iSortedRows[row]] ? 0 : 1 )] );
 					//strcat( sz, gsAlive[( ( g_IsSpecial[m_iSortedRows[row]] == 1 ) ? 2 : 1 )] );
 					//strcat( sz, gsAlive[( ( g_IsSpecial[m_iSortedRows[row]] == 2 ) ? 3 : 1 )] );
 					break;
@@ -791,16 +801,16 @@ void ScorePanel::FillGrid()
 				case COLUMN_TRACKER:
 					break;
 				case COLUMN_LEVEL:
-					sprintf(sz, "%d",  g_PlayerExtraInfo[ m_iSortedRows[row] ].level );
+					snprintf(sz, sizeof(sz), "%d",  g_PlayerExtraInfo[ m_iSortedRows[row] ].level );
 					break;
 				case COLUMN_KILLS:
-					sprintf(sz, "%d",  g_PlayerExtraInfo[ m_iSortedRows[row] ].frags );
+					snprintf(sz, sizeof(sz), "%d",  g_PlayerExtraInfo[ m_iSortedRows[row] ].frags );
 					break;
 				case COLUMN_DEATHS:
-					sprintf(sz, "%d",  g_PlayerExtraInfo[ m_iSortedRows[row] ].deaths );
+					snprintf(sz, sizeof(sz), "%d",  g_PlayerExtraInfo[ m_iSortedRows[row] ].deaths );
 					break;
 				case COLUMN_LATENCY:
-					sprintf(sz, "%d", g_PlayerInfoList[ m_iSortedRows[row] ].ping );
+					snprintf(sz, sizeof(sz), "%d", g_PlayerInfoList[ m_iSortedRows[row] ].ping );
 					break;
 				default:
 					break;

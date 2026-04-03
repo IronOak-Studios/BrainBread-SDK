@@ -146,7 +146,8 @@ void CHudStatusIcons::EnableIcon( char *pszIconName, unsigned char red, unsigned
 	if ( strstr(m_IconList[i].szSpriteName, "grenade") )
 	{
 		cl_entity_t *pthisplayer = gEngfuncs.GetLocalPlayer();
-		gEngfuncs.pEventAPI->EV_PlaySound( pthisplayer->index, pthisplayer->origin, CHAN_STATIC, "weapons/timer.wav", 1.0, ATTN_NORM, 0, PITCH_NORM );
+		if ( pthisplayer )
+			gEngfuncs.pEventAPI->EV_PlaySound( pthisplayer->index, pthisplayer->origin, CHAN_STATIC, "weapons/timer.wav", 1.0, ATTN_NORM, 0, PITCH_NORM );
 	}
 }
 

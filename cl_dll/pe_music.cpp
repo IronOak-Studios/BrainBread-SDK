@@ -241,14 +241,14 @@ int CHudMusic::MsgFunc_PlayMusic( const char *pszName, int iSize, void *pbuf )
 	int i = 0;
 	//char text[128];
 	m_bGotCommand = READ_BYTE( );
-  if( m_bGotCommand == 2 && cl_forwardspeed )
+  if( m_bGotCommand == 2 && cl_forwardspeed && cl_backspeed && cl_sidespeed )
   {
     cl_forwardspeed->value = 400;
     cl_backspeed->value = 400;
     cl_sidespeed->value = 400;
     return TRUE;
   }
-  if( m_bGotCommand == 3 && cl_forwardspeed )
+  if( m_bGotCommand == 3 && cl_forwardspeed && cl_backspeed && cl_sidespeed )
   {
 	float spd = READ_COORD( );
     cl_forwardspeed->value = spd;
@@ -320,19 +320,19 @@ int CHudMusic::MsgFunc_Spray( const char *pszName, int iSize, void *pbuf )
   switch( type )
   {
   case SPRAY_BLOOD:
-    sprintf( file, "partsys/blood%s.cfg", gre ); 
+    snprintf( file, sizeof(file), "partsys/blood%s.cfg", gre );
     break;
   case SPRAY_BLOODHEAD:
-    sprintf( file, "partsys/bloodhead%s.cfg", gre ); 
+    snprintf( file, sizeof(file), "partsys/bloodhead%s.cfg", gre );
     break;
   case SPRAY_BURN:
-    strcpy( file, "partsys/burn.cfg" ); 
+    strncpy( file, "partsys/burn.cfg", sizeof(file) - 1 );
     break;
   case SPRAY_DUST:
-    strcpy( file, "partsys/dust.cfg" ); 
+    strncpy( file, "partsys/dust.cfg", sizeof(file) - 1 );
     break;
   case SPRAY_TANK:
-    strcpy( file, "partsys/tank.cfg" ); 
+    strncpy( file, "partsys/tank.cfg", sizeof(file) - 1 );
     break;
   /*case SPRAY_PLRBLOOD:
     sprintf( file, "partsys/plrblood.cfg", gre ); 

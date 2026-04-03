@@ -229,7 +229,7 @@ int CHud :: DrawHudString(int xpos, int ypos, int iMaxX, char *szIt, int r, int 
 	// draw the string until we hit the null character or a newline character
 	for ( ; *szIt != 0 && *szIt != '\n'; szIt++ )
 	{
-		int next = xpos + gHUD.m_scrinfo.charWidths[ *szIt ]; // variable-width fonts look cool
+		int next = xpos + gHUD.m_scrinfo.charWidths[ (unsigned char)*szIt ]; // variable-width fonts look cool
 		if ( next > iMaxX )
 			return xpos;
 
@@ -243,7 +243,7 @@ int CHud :: DrawHudString(int xpos, int ypos, int iMaxX, char *szIt, int r, int 
 int CHud :: DrawHudNumberString( int xpos, int ypos, int iMinX, int iNumber, int r, int g, int b )
 {
 	char szString[32];
-	sprintf( szString, "%d", iNumber );
+	snprintf( szString, sizeof(szString), "%d", iNumber );
 	return DrawHudStringReverse( xpos, ypos, iMinX, szString, r, g, b );
 
 }
@@ -260,7 +260,7 @@ int CHud :: DrawHudStringReverse( int xpos, int ypos, int iMinX, char *szString,
 	// iterate throug the string in reverse
 	for ( szIt--;  szIt != (szString-1);  szIt-- )	
 	{
-		int next = xpos - gHUD.m_scrinfo.charWidths[ *szIt ]; // variable-width fonts look cool
+		int next = xpos - gHUD.m_scrinfo.charWidths[ (unsigned char)*szIt ]; // variable-width fonts look cool
 		if ( next < iMinX )
 			return xpos;
 		xpos = next;

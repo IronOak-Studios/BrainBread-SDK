@@ -115,7 +115,7 @@ int CHudPETeam::Draw( float flTime )
 void CHudPETeam::SelectMenuItem( int menu_item )
 {
 	char szbuf[32];
-	sprintf( szbuf, "menuselect %d\n", menu_item );
+	snprintf( szbuf, sizeof(szbuf), "menuselect %d\n", menu_item );
 	ClientCmd( szbuf );
 
 	m_iActive = 0;

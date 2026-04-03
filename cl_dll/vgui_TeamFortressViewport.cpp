@@ -194,10 +194,10 @@ char* GetVGUITGAName(const char *pszName)
 		i = 320;
 	else
 		i = 640;
-	sprintf(sz, pszName, i);
+	snprintf(sz, sizeof(sz), pszName, i);
 
 	gamedir = gEngfuncs.pfnGetGameDirectory();
-	sprintf(gd, "%s/gfx/vgui/%s.tga",gamedir,sz);
+	snprintf(gd, sizeof(gd), "%s/gfx/vgui/%s.tga",gamedir,sz);
 
 	return gd;
 }
@@ -829,7 +829,7 @@ try
 
 			// Get the button bound key
 			strncpy( cBoundKey, token, 32 );
-			cText[31] = '\0';
+			cBoundKey[31] = '\0';
 
 			// Get the button text
 			pfile = gEngfuncs.COM_ParseFile(pfile, token);
@@ -855,7 +855,8 @@ try
 
 				if ( token[0] == '{' )
 				{
-					strcpy( cCommand, token );
+					strncpy( cCommand, token, cCommandLength );
+					cCommand[cCommandLength - 1] = '\0';
 				}
 				else
 				{
@@ -976,7 +977,7 @@ CCommandMenu *TeamFortressViewport::CreateDisguiseSubmenu( CommandButton *pButto
 		CommandButton *pDisguiseButton = new CommandButton( CHudTextMessage::BufferedLocaliseTextString( sLocalisedClasses[i] ), 0, BUTTON_SIZE_Y, CMENU_SIZE_X, BUTTON_SIZE_Y );
 		
 		char sz[256]; 
-		sprintf(sz, "%s %d", commandText, i );
+		snprintf(sz, sizeof(sz), "%s %d", commandText, i );
 		pDisguiseButton->addActionSignal(new CMenuHandler_StringCommand(sz));
 		
 		pMenu->AddButton( pDisguiseButton );
@@ -1525,11 +1526,11 @@ void TeamFortressViewport::UpdateSpectatorPanel()
 			gHUD.m_TextMessage.MsgFunc_TextMsg( NULL, strlen( tempString ) + 1, tempString );
 		*/}
 		
-		sprintf(bottomText,"#Spec_Mode%d", g_iUser1 );
-		sprintf(helpString2,"#Spec_Mode%d", g_iUser1 );
+		snprintf(bottomText, sizeof(bottomText), "#Spec_Mode%d", g_iUser1 );
+		snprintf(helpString2, sizeof(helpString2), "#Spec_Mode%d", g_iUser1 );
 
 		if ( gEngfuncs.IsSpectateOnly() )
-			strcat(helpString2, " - HLTV");
+			strncat(helpString2, " - HLTV", sizeof(helpString2) - strlen(helpString2) - 1);
 
 		// check if we're locked onto a target, show the player's name
 		if ( (g_iUser2 > 0) && (g_iUser2 <= gEngfuncs.GetMaxClients()) && (g_iUser1 != OBS_ROAMING) )
@@ -1570,8 +1571,9 @@ void TeamFortressViewport::UpdateSpectatorPanel()
 		if ( gHUD.m_Spectator.m_autoDirector->value )
 		{
 			char tempString[128];
-			sprintf(tempString, "#Spec_Auto %s", helpString2);
-			strcpy( helpString2, tempString );
+			snprintf(tempString, sizeof(tempString), "#Spec_Auto %s", helpString2);
+			strncpy( helpString2, tempString, sizeof(helpString2) );
+			helpString2[sizeof(helpString2) - 1] = '\0';
 		}
 
 		m_pSpectatorPanel->m_BottomMainLabel->setText( CHudTextMessage::BufferedLocaliseTextString( bottomText ) );
@@ -1696,9 +1698,7 @@ CMenuPanel* TeamFortressViewport::CreateTextWindow( int iTextToShow )
 		// Get the current mapname, and open it's map briefing text
 		if (m_sMapName && m_sMapName[0])
 		{
-			strcpy( sz, "maps/");
-			strcat( sz, m_sMapName );
-			strcat( sz, ".txt" );
+			snprintf( sz, sizeof(sz), "maps/%s.txt", m_sMapName );
 		}
 		else
 		{
@@ -1706,13 +1706,16 @@ CMenuPanel* TeamFortressViewport::CreateTextWindow( int iTextToShow )
 			if (!level)
 				return NULL;
 
-			strcpy( sz, level );
+			strncpy( sz, level, sizeof(sz) );
+			sz[sizeof(sz) - 1] = '\0';
 			char *ch = strchr( sz, '.' );
-			*ch = '\0';
-			strcat( sz, ".txt" );
+			if (ch)
+				*ch = '\0';
+			strncat( sz, ".txt", sizeof(sz) - strlen(sz) - 1 );
 
 			// pull out the map name
-			strcpy( m_sMapName, level );
+			strncpy( m_sMapName, level, sizeof(m_sMapName) );
+			m_sMapName[sizeof(m_sMapName) - 1] = '\0';
 			ch = strchr( m_sMapName, '.' );
 			if ( ch )
 			{
@@ -1767,11 +1770,15 @@ CMenuPanel* TeamFortressViewport::CreateTextWindow( int iTextToShow )
 
 		if ( g_iPlayerClass == PC_CIVILIAN )
 		{
-			sprintf(sz, "classes/long_civilian.txt");
+			snprintf(sz, sizeof(sz), "classes/long_civilian.txt");
+		}
+		else if ( g_iPlayerClass >= 0 && g_iPlayerClass < (int)(sizeof(sTFClassSelection)/sizeof(sTFClassSelection[0])) )
+		{
+			snprintf(sz, sizeof(sz), "classes/long_%s.txt", sTFClassSelection[ g_iPlayerClass ]);
 		}
 		else
 		{
-			sprintf(sz, "classes/long_%s.txt", sTFClassSelection[ g_iPlayerClass ]);
+			return NULL;
 		}
 		char *pfile = (char*)gEngfuncs.COM_LoadFile( sz, 5, NULL );
 		if (pfile)
@@ -2649,13 +2656,17 @@ int TeamFortressViewport::MsgFunc_Special( const char *pszName, int iSize, void 
 	BEGIN_READ( pbuf, iSize );
 
 	short cl = READ_BYTE();
-	int prev = g_IsSpecial[cl];
 	if ( cl > 0 && cl <= MAX_PLAYERS )
 	{
+		int prev = g_IsSpecial[cl];
 		g_IsSpecial[cl] = READ_BYTE();
+		if( prev != g_IsSpecial[cl] )
+			m_pScoreBoard->Update( );
 	}
-	if( prev != g_IsSpecial[cl] )
-		m_pScoreBoard->Update( );
+	else
+	{
+		READ_BYTE(); // consume the byte even if cl is out of range
+	}
 
 	return 1;
 }

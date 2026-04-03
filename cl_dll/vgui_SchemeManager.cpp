@@ -127,7 +127,7 @@ static byte *LoadFileByResolution( const char *filePrefix, int xRes, const char 
 
 		// try load
 		char fname[256];
-		sprintf( fname, "%s%d%s", filePrefix, g_ResArray[resNum], filePostfix );
+		snprintf( fname, sizeof(fname), "%s%d%s", filePrefix, g_ResArray[resNum], filePostfix );
 		pFile = gEngfuncs.COM_LoadFile( fname, 5, NULL );
 
 		if ( pFile )
@@ -281,6 +281,8 @@ CSchemeManager::CSchemeManager( int xRes, int yRes )
 
 			// create the new scheme
 			currentScheme++;
+			if ( currentScheme >= numTmpSchemes )
+				break;
 			pScheme = &tmpSchemes[currentScheme];
 			hasFgColor = hasBgColor = hasArmedFgColor = hasArmedBgColor = hasMouseDownFgColor = hasMouseDownBgColor = false;
 
@@ -413,7 +415,7 @@ buildDefaultFont:
 				else if ( m_xRes >= 800 )
 					fontRes = 800;
 
-				sprintf(fontFilename, "gfx\\vgui\\fonts\\%d_%s.tga", fontRes, m_pSchemeList[i].schemeName);
+				snprintf(fontFilename, sizeof(fontFilename), "gfx\\vgui\\fonts\\%d_%s.tga", fontRes, m_pSchemeList[i].schemeName);
 				pFontData = gEngfuncs.COM_LoadFile( fontFilename, 5, &fontFileLength );
 				if(!pFontData)
 					gEngfuncs.Con_Printf("Missing bitmap font: %s\n", fontFilename);
@@ -478,7 +480,7 @@ SchemeHandle_t CSchemeManager::getSchemeHandle( const char *schemeName )
 //-----------------------------------------------------------------------------
 CSchemeManager::CScheme *CSchemeManager::getSafeScheme( SchemeHandle_t schemeHandle )
 {
-	if ( schemeHandle < m_iNumSchemes )
+	if ( schemeHandle >= 0 && schemeHandle < m_iNumSchemes )
 		return m_pSchemeList + schemeHandle;
 
 	return m_pSchemeList;

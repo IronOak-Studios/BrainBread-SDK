@@ -106,7 +106,7 @@ void SpectatorSpray(void)
 	pmtrace_t * trace = gEngfuncs.PM_TraceLine( v_origin, forward, PM_TRACELINE_PHYSENTSONLY, 2, -1 );
 	if ( trace->fraction != 1.0 )
 	{
-		sprintf(string, "drc_spray %.2f %.2f %.2f %i", 
+		snprintf(string, sizeof(string), "drc_spray %.2f %.2f %.2f %i",
 			trace->endpos[0], trace->endpos[1], trace->endpos[2], trace->ent );
 		gEngfuncs.pfnServerCmd(string);
 	}
@@ -142,7 +142,8 @@ void SpectatorMenu( void )
 		return;
 	}
 	
-	gViewPort->m_pSpectatorPanel->ShowMenu( atoi( gEngfuncs.Cmd_Argv(1))!=0  );
+	if ( gViewPort && gViewPort->m_pSpectatorPanel )
+		gViewPort->m_pSpectatorPanel->ShowMenu( atoi( gEngfuncs.Cmd_Argv(1))!=0  );
 }
 
 void ToggleScores( void )
@@ -281,7 +282,8 @@ int UTIL_FindEntityInMap(char * name, float * origin, float * angle)
 				return 0;
 			};
 			
-			strcpy (keyname, token);
+			strncpy (keyname, token, sizeof(keyname));
+			keyname[sizeof(keyname) - 1] = '\0';
 
 			// another hack to fix keynames with trailing spaces
 			n = strlen(keyname);
@@ -523,7 +525,7 @@ bool CHudSpectator::GetDirectorCamera(vec3_t &position, vec3_t &angle)
 		{
 			// we have a predecessor
 
-			if ( m_WayPoint < (m_NumWayPoints-1) )
+			if ( m_WayPoint < (m_NumWayPoints-2) )
 			{
 				// we have also a successor
 				SetWayInterpolation( &m_CamPath[m_WayPoint-1], wp1, wp2, &m_CamPath[m_WayPoint+2] );
@@ -533,7 +535,7 @@ bool CHudSpectator::GetDirectorCamera(vec3_t &position, vec3_t &angle)
 				SetWayInterpolation( &m_CamPath[m_WayPoint-1], wp1, wp2, NULL );
 			}	
 		}
-		else if ( m_WayPoint < (m_NumWayPoints-1) )
+		else if ( m_WayPoint < (m_NumWayPoints-2) )
 		{
 			// we only have a successor
 			SetWayInterpolation( NULL, wp1, wp2, &m_CamPath[m_WayPoint+2] );
@@ -666,7 +668,9 @@ int CHudSpectator::Draw(float flTime)
 		color = GetClientColor( i+1 );
 
 		// draw the players name and health underneath
-		sprintf(string, "%s", g_PlayerInfoList[i+1].name );
+		if ( !g_PlayerInfoList[i+1].name )
+			continue;
+		snprintf(string, sizeof(string), "%s", g_PlayerInfoList[i+1].name );
 		
 		lx = strlen(string)*3; // 3 is avg. character length :)
 
@@ -894,7 +898,7 @@ void CHudSpectator::FindNextPlayer(bool bReverse)
 	{
 		char cmdstring[32];
 		// forward command to server
-		sprintf(cmdstring,"follownext %i",bReverse?1:0);
+		snprintf(cmdstring, sizeof(cmdstring), "follownext %i", bReverse?1:0);
 		gEngfuncs.pfnServerCmd(cmdstring);
 		return;
 	}
@@ -966,7 +970,7 @@ void CHudSpectator::FindPlayer(const char *name)
 	{
 		char cmdstring[32];
 		// forward command to server
-		sprintf(cmdstring,"follow %s",name);
+		snprintf(cmdstring, sizeof(cmdstring), "follow %s", name);
 		gEngfuncs.pfnServerCmd(cmdstring);
 		return;
 	}
@@ -1156,7 +1160,7 @@ void CHudSpectator::SetModes(int iNewMainMode, int iNewInsetMode)
 		{
 			char cmdstring[32];
 			// forward command to server
-			sprintf(cmdstring,"specmode %i",iNewMainMode );
+			snprintf(cmdstring, sizeof(cmdstring), "specmode %i", iNewMainMode);
 			gEngfuncs.pfnServerCmd(cmdstring);
 			return;
 		}
@@ -1225,8 +1229,8 @@ void CHudSpectator::SetModes(int iNewMainMode, int iNewInsetMode)
 		gViewPort->MsgFunc_ResetFade( NULL, 0, NULL );
 
 		char string[128];
-		sprintf(string, "#Spec_Mode%d", g_iUser1 );
-		sprintf(string, "%c%s", HUD_PRINTCENTER, CHudTextMessage::BufferedLocaliseTextString( string ));
+		snprintf(string, sizeof(string), "#Spec_Mode%d", g_iUser1 );
+		snprintf(string, sizeof(string), "%c%s", HUD_PRINTCENTER, CHudTextMessage::BufferedLocaliseTextString( string ));
 		gHUD.m_TextMessage.MsgFunc_TextMsg(NULL, strlen(string)+1, string );
 	}
 
@@ -1267,15 +1271,19 @@ bool CHudSpectator::ParseOverviewFile( )
 	m_OverviewData.zoom	= 1.0f;
 	m_OverviewData.layers = 0;
 	m_OverviewData.layersHeights[0] = 0.0f;
-	strcpy( m_OverviewData.map, gEngfuncs.pfnGetLevelName() );
+	strncpy( m_OverviewData.map, gEngfuncs.pfnGetLevelName(), sizeof(m_OverviewData.map) );
+	m_OverviewData.map[sizeof(m_OverviewData.map) - 1] = '\0';
 
 	if ( strlen( m_OverviewData.map ) == 0 )
 		return false; // not active yet
 
-	strcpy(levelname, m_OverviewData.map + 5);
-	levelname[strlen(levelname)-4] = 0;
+	strncpy(levelname, m_OverviewData.map + 5, sizeof(levelname));
+	levelname[sizeof(levelname) - 1] = '\0';
+	int levelLen = strlen(levelname);
+	if (levelLen >= 4)
+		levelname[levelLen-4] = 0;
 	
-	sprintf(filename, "overviews/%s.txt", levelname );
+	snprintf(filename, sizeof(filename), "overviews/%s.txt", levelname );
 
 	pfile = (char *)gEngfuncs.COM_LoadFile( filename, 5, NULL);
 
@@ -1374,7 +1382,8 @@ bool CHudSpectator::ParseOverviewFile( )
 				if ( !stricmp( token, "image" ) )
 				{
 					pfile = gEngfuncs.COM_ParseFile(pfile,token);
-					strcpy(m_OverviewData.layersImages[ m_OverviewData.layers ], token);
+					strncpy(m_OverviewData.layersImages[ m_OverviewData.layers ], token, sizeof(m_OverviewData.layersImages[0]));
+					m_OverviewData.layersImages[ m_OverviewData.layers ][sizeof(m_OverviewData.layersImages[0]) - 1] = '\0';
 					
 					
 				} 
@@ -1675,9 +1684,12 @@ void CHudSpectator::DrawOverviewEntities()
 
 		int playerNum = ent->index - 1;
 
-		m_vPlayerPos[playerNum][0] = screen[0];	
-		m_vPlayerPos[playerNum][1] = screen[1] + Length(offset);	
-		m_vPlayerPos[playerNum][2] = 1;	// mark player as visible 
+		if ( playerNum >= 0 && playerNum < MAX_PLAYERS )
+		{
+			m_vPlayerPos[playerNum][0] = screen[0];	
+			m_vPlayerPos[playerNum][1] = screen[1] + Length(offset);	
+			m_vPlayerPos[playerNum][2] = 1;	// mark player as visible
+		}
 	}
 
 	if ( !m_pip->value || !m_drawcone->value )
@@ -1868,7 +1880,7 @@ void CHudSpectator::CheckSettings()
 		{
 			// tell proxy our new chat mode
 			char chatcmd[32];
-			sprintf(chatcmd, "ignoremsg %i", m_chatEnabled?0:1 );
+			snprintf(chatcmd, sizeof(chatcmd), "ignoremsg %i", m_chatEnabled?0:1 );
 			gEngfuncs.pfnServerCmd(chatcmd);
 		}
 	}

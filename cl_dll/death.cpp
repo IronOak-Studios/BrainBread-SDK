@@ -55,6 +55,9 @@ float g_ColorGrey[3]	= { 0.8, 0.8, 0.8 };
 
 float *GetClientColor( int clientIndex )
 {
+	if ( clientIndex < 0 || clientIndex > MAX_PLAYERS )
+		return g_ColorGrey;
+
 	switch ( g_PlayerExtraInfo[clientIndex].teamnumber )
 	{
 	case 1:	return g_ColorBlue;
@@ -328,7 +331,8 @@ int CHudDeathNotice :: MsgFunc_DeathMsg( const char *pszName, int iSize, void *p
 		rgDeathNoticeList[i].iNonPlayerKill = TRUE;
 
 		// Store the object's name in the Victim slot (skip the d_ bit)
-		strcpy( rgDeathNoticeList[i].szVictim, killedwith+2 );
+		strncpy( rgDeathNoticeList[i].szVictim, killedwith+2, sizeof(rgDeathNoticeList[i].szVictim) );
+		rgDeathNoticeList[i].szVictim[sizeof(rgDeathNoticeList[i].szVictim)-1] = 0;
 	}
 	else
 	{

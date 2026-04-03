@@ -84,7 +84,7 @@ int CHudIntro::MsgFunc_Intro( const char *pszName, int iSize, void *pbuf )
 	if( m_iActive )
 	{
 		char text[512];
-		sprintf( text, "hlp %d\0", ( CVAR_GET_FLOAT( "cl_help" ) ? 1 : 0 ) );
+		snprintf( text, sizeof(text), "hlp %d", ( CVAR_GET_FLOAT( "cl_help" ) ? 1 : 0 ) );
 		ClientCmd( text );
 		
 		g_helper->ShowHelp( HELP_INTRO, "help/intro.cfg" );
@@ -152,10 +152,14 @@ int CHudIntro::Draw( float flTime )
 			text[i] = line[actualline][i];
 		}
 		text[i] = '\0';
+		int linelen = strlen( line[actualline] );
 		for( int o = 0; o <= 5; o++ )
 		{
-			if( ( m_iCurPos - o ) >= 0 )
-				sprintf( t[o], "%c", line[actualline][m_iCurPos-5+o] );
+			int idx = m_iCurPos - 5 + o;
+			if( idx >= 0 && idx < linelen )
+				t[o][0] = line[actualline][idx];
+			else
+				t[o][0] = '\0';
 			t[o][1] = '\0';
 		}
 

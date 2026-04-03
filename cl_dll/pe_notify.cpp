@@ -163,7 +163,7 @@ int CHudNotify::MsgFunc_Notify( const char *pszName, int iSize, void *pbuf )
 		break;
 	case NTC_ZOMBIE:
     if( dr > 0 )
-  	  sprintf( m_sText1, "BRAAIINNSSS!! %d more points needed to respawn as human.", (int)dr );
+  	  snprintf( m_sText1, sizeof(m_sText1), "BRAAIINNSSS!! %d more points needed to respawn as human.", (int)dr );
     else if( !rehuman )
   	  strcpy( m_sText1, "BRAAIINNSSS!!! (respawning as human after death)" );
     else
@@ -195,7 +195,7 @@ int CHudNotify::MsgFunc_Notify( const char *pszName, int iSize, void *pbuf )
 		g_helper->ShowHelp( HELP_HUMAN_FRAG, "help/task_frag.cfg" );
 		break;
 	case NTC_MISSION_FRAGS:
-		sprintf( m_sText1, "Kill at least %d more zombies!", (int)dr );
+		snprintf( m_sText1, sizeof(m_sText1), "Kill at least %d more zombies!", (int)dr );
 		c[0] = 255;
 		c[1] = 80;
 		c[2] = 80;
@@ -223,11 +223,11 @@ int CHudNotify::MsgFunc_Notify( const char *pszName, int iSize, void *pbuf )
 		c[2] = 80;
 		break;
   case NTM_OBJECTRESTORE:
-		sprintf( m_sText2, "The case fell into an unreachable position" );
+		strcpy( m_sText2, "The case fell into an unreachable position" );
 		strcpy( m_sText3, "It will be restored at a random spot" );
 		break;
   case NTM_REHUMAN:
-		sprintf( m_sText2, "You can now choose to respawn as" );
+		strcpy( m_sText2, "You can now choose to respawn as" );
 		strcpy( m_sText3, "a human after dying." );
     rehuman = 1;
 		break;
@@ -238,12 +238,12 @@ int CHudNotify::MsgFunc_Notify( const char *pszName, int iSize, void *pbuf )
 		done_selection = 0;
 		break;
   case NTM_DONE_ZOMBIE:
-		sprintf( m_sText2, "You can now choose to spawn as" );
+		strcpy( m_sText2, "You can now choose to spawn as" );
 		strcpy( m_sText3, "a zombie for the rest of the round." );
 		done_selection = 1;
 		break;
   case NTM_DONE_SPECTATE:
-		sprintf( m_sText2, "You can now choose to spectate" );
+		strcpy( m_sText2, "You can now choose to spectate" );
 		strcpy( m_sText3, "for the rest of the round." );
 		done_selection = 2;
 		break;
@@ -311,12 +311,12 @@ int CHudNotify::Draw( float flTime )
 			SPR_DrawAdditive( 0, ScreenWidth - ( i * 32 ) - 45, 2, &gHUD.GetSpriteRect( m_sprMate ) );
 		}*/
 		//SPR_DrawHoles( 0, ScreenWidth - 70, 2, &gHUD.GetSpriteRect( m_sprMate ) );
-		sprintf( text, "TeamBonus x %d", m_iMates );
+		snprintf( text, sizeof(text), "TeamBonus x %d", m_iMates );
 		g_font->SetFont( FONT_NOTIFY );
     g_font->DrawString( ScreenWidth - ( g_font->GetWidth( text ) + HudScale( 10 ) ), HudScale( 20 ), text, 0, 255.0f, 0, (int)( 80 + 175.0f / 16.0f * m_iMates ) ); 
 
 	}
-	if( g_IsSpecial[gEngfuncs.GetLocalPlayer( )->index] == 1 )
+	if( gEngfuncs.GetLocalPlayer( ) && g_IsSpecial[gEngfuncs.GetLocalPlayer( )->index] == 1 )
 	{
 		rect_s rect;
 		rect.bottom = 181;

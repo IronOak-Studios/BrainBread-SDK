@@ -107,7 +107,7 @@ CTeamMenuPanel::CTeamMenuPanel(int iTrans, int iRemoveMe, int x,int y,int wide,i
   for( i = 0; i < 6; i ++ )
   {
     char mdl[64];
-    sprintf( mdl, "mdl%d", i + 1 );
+    snprintf( mdl, sizeof(mdl), "mdl%d", i + 1 );
     m_pModelImages[i] = new CImageLabel( mdl, TEAMMENU_TOPLEFT_BUTTON_X, 0 );
     //m_pModelImages[i-1]->setSize( TEAMMENU_BUTTON_SIZE_X, TEAMMENU_BUTTON_SIZE_Y );
     butX = m_pModelImages[i]->getImageWide( );
@@ -288,11 +288,11 @@ void CTeamMenuPanel::Update( void )
 
 				// bound key replacement
 				char sz[128]; 
-				sprintf( sz, "%d", i );
+				snprintf( sz, sizeof(sz), "%d", i );
 				m_pButtons[i]->setBoundKey( sz[0] );
 
         curmdl = RandomModel( i - 1 );
-        sprintf( sz, "setmodel %d", curmdl );
+        snprintf( sz, sizeof(sz), "setmodel %d", curmdl );
         strncpy( m_pWatch[i-1]->m_pszCommand, sz, MAX_COMMAND_SIZE);
 		    m_pWatch[i-1]->m_pszCommand[MAX_COMMAND_SIZE-1] = '\0';
 
@@ -347,7 +347,7 @@ void CTeamMenuPanel::Update( void )
 				{
 					m_pTeamInfoPanel[i]->setText( "not used" );
 				}*/
-        sprintf( sz, "/gfx/vgui/mdl%d.txt", curmdl );
+        snprintf( sz, sizeof(sz), "/gfx/vgui/mdl%d.txt", curmdl );
         char *pfile = (char*)gEngfuncs.COM_LoadFile( sz, 5, NULL );
 			  if (pfile)
 			  {
@@ -409,21 +409,27 @@ void CTeamMenuPanel::Update( void )
 			char *ch;
 
 			// Update the level name
-			strcpy( sz, level );
+			strncpy( sz, level, sizeof(sz) );
+			sz[sizeof(sz)-1] = '\0';
 			ch = strchr( sz, '/' );
 			if (!ch)
 				ch = strchr( sz, '\\' );
-			strcpy( szTitle, ch+1 );
+			if (!ch)
+				ch = sz - 1;
+			strncpy( szTitle, ch+1, sizeof(szTitle) );
+			szTitle[sizeof(szTitle)-1] = '\0';
 			ch = strchr( szTitle, '.' );
-			*ch = '\0';
+			if (ch)
+				*ch = '\0';
 			m_pMapTitle->setText( szTitle );
-			*ch = '.';
 
 			// Update the map briefing
-			strcpy( sz, level );
+			strncpy( sz, level, sizeof(sz) );
+			sz[sizeof(sz)-1] = '\0';
 			ch = strchr( sz, '.' );
-			*ch = '\0';
-			strcat( sz, ".txt" );
+			if (ch)
+				*ch = '\0';
+			strncat( sz, ".txt", sizeof(sz) - strlen(sz) - 1 );
 			char *pfile = (char*)gEngfuncs.COM_LoadFile( sz, 5, NULL );
 			if (pfile)
 			{

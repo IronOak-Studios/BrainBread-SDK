@@ -111,7 +111,7 @@ CClassMenuPanel::CClassMenuPanel(int iTrans, int iRemoveMe, int x,int y,int wide
 		ActionSignal *pASignal = new CMenuHandler_StringCommandClassSelect( sTFClassSelection[i], true );
 
 		// Class button
-		sprintf(sz, "%s", CHudTextMessage::BufferedLocaliseTextString( sLocalisedClasses[i] ) );
+		snprintf(sz, sizeof(sz), "%s", CHudTextMessage::BufferedLocaliseTextString( sLocalisedClasses[i] ) );
 		m_pButtons[i] = new ClassButton( i, sz, CLASSMENU_TOPLEFT_BUTTON_X, iYPos, CLASSMENU_BUTTON_SIZE_X, CLASSMENU_BUTTON_SIZE_Y, true);
 		// RandomPC uses '0'
 		if ( i >= 1 && i <= 9 )
@@ -143,7 +143,7 @@ CClassMenuPanel::CClassMenuPanel(int iTrans, int iRemoveMe, int x,int y,int wide
 		}
 
 		// Create the Class Name Label
-		sprintf(sz, "#Title_%s", sTFClassSelection[i]);
+		snprintf(sz, sizeof(sz), "#Title_%s", sTFClassSelection[i]);
 		char* localName=CHudTextMessage::BufferedLocaliseTextString( sz );
 		Label *pNameLabel = new Label( "", textOffs, CLASSMENU_WINDOW_NAME_Y );
 		pNameLabel->setFont( pSchemes->getFont(hTitleScheme) ); 
@@ -163,11 +163,11 @@ CClassMenuPanel::CClassMenuPanel(int iTrans, int iRemoveMe, int x,int y,int wide
 			{
 				if ( team == 1 )
 				{
-					sprintf( sz, "%sred", sTFClassSelection[i] );
+					snprintf( sz, sizeof(sz), "%sred", sTFClassSelection[i] );
 				}
 				else
 				{
-					sprintf( sz, "%sblue", sTFClassSelection[i] );
+					snprintf( sz, sizeof(sz), "%sblue", sTFClassSelection[i] );
 				}
 
 				m_pClassImages[team][i] = new CImageLabel( sz, 0, 0, CLASSMENU_WINDOW_TEXT_X, CLASSMENU_WINDOW_TEXT_Y );
@@ -197,7 +197,7 @@ CClassMenuPanel::CClassMenuPanel(int iTrans, int iRemoveMe, int x,int y,int wide
 		m_pPlayers[i]->setFont( pSchemes->getFont(hClassWindowText) );
 
 		// Open up the Class Briefing File
-		sprintf(sz, "classes/short_%s.txt", sTFClassSelection[i]);
+		snprintf(sz, sizeof(sz), "classes/short_%s.txt", sTFClassSelection[i]);
 		const char *cText = "Class Description not available.";
 		char *pfile = (char *)gEngfuncs.COM_LoadFile( sz, 5, NULL );
 		if (pfile)
@@ -319,7 +319,7 @@ void CClassMenuPanel::Update()
 		}
 
 		char sz[256]; 
-		sprintf(sz, m_sPlayersOnTeamString, iTotal);
+		snprintf(sz, sizeof(sz), m_sPlayersOnTeamString, iTotal);
 		m_pPlayers[i]->setText( "%s", sz );
 
 		// Set the text color to the teamcolor
@@ -338,7 +338,7 @@ void CClassMenuPanel::Update()
 			}
 
 			// set the current team image
-			if ( m_pClassImages[g_iTeamNumber-1][i] != NULL )
+			if ( g_iTeamNumber >= 1 && g_iTeamNumber <= MAX_TEAMS && m_pClassImages[g_iTeamNumber-1][i] != NULL )
 			{
 				m_pClassImages[g_iTeamNumber-1][i]->setVisible( true );
 			}

@@ -189,7 +189,7 @@ void CHudMenu :: SelectMenuItem( int menu_item )
 	//if ( (menu_item > 0) && (m_bitsValidSlots & (1 << (menu_item-1))) )
 	//{
 		char szbuf[32];
-		sprintf( szbuf, "menuselect %d\n", menu_item );
+		snprintf( szbuf, sizeof(szbuf), "menuselect %d\n", menu_item );
 		ClientCmd( szbuf );
 
 		// remove the menu
@@ -229,7 +229,7 @@ int CHudMenu :: MsgFunc_ShowMenu( const char *pszName, int iSize, void *pbuf )
 		}
 		else
 		{  // append to the current menu string
-			strncat( g_szPrelocalisedMenuString, READ_STRING(), MAX_MENU_STRING - strlen(g_szPrelocalisedMenuString) );
+			strncat( g_szPrelocalisedMenuString, READ_STRING(), MAX_MENU_STRING - strlen(g_szPrelocalisedMenuString) - 1 );
 		}
 		g_szPrelocalisedMenuString[MAX_MENU_STRING-1] = 0;  // ensure null termination (strncat/strncpy does not)
 

@@ -58,7 +58,7 @@ cRain::cRain( int index, t_partinfo *info )
 {
 	m_fParticleSideSpread = info->fSideSpread;
 	m_iType = info->iType;
-	m_iRainIndex = index;
+	m_iRainIndex = ( index >= 0 && index < 20 ) ? index : 0;
 	m_iNumActive = 0;
 	m_iActive = 0;
 	m_fNextParticle = 0;
@@ -162,10 +162,12 @@ void cRain::Init( )
 
 void cRain::Delete( int index, int free )
 {
-	t_particle *del = NULL;
-	del = m_pList + index;
+	if( !m_pList || index < 0 || index >= m_iMaxParticles )
+		return;
 
-	if( del && !del->iActive )
+	t_particle *del = m_pList + index;
+
+	if( !del->iActive )
 		return;
 
 	memset( del, 0, sizeof(t_particle) );

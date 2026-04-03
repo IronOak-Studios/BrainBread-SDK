@@ -1335,6 +1335,7 @@ void CL_DLLEXPORT HUD_PostRunCmd( struct local_state_s *from, struct local_state
 
 int CBasePlayerWeapon::iItemSlot( CBasePlayer *pPlayer )
 {
-	return gWR.GetWeapon( m_iId )->iSlot;
+	WEAPON *p = gWR.GetWeapon( m_iId );
+	return p ? p->iSlot : 0;
 }
 

@@ -53,7 +53,7 @@ void WeaponsResource :: LoadAllWeaponSprites( void )
 
 int WeaponsResource :: CountAmmo( int iId ) 
 { 
-	if ( iId < 0 )
+	if ( iId < 0 || iId >= MAX_AMMO_TYPES )
 		return 0;
 
 	return riAmmo[iId];
@@ -97,7 +97,7 @@ void WeaponsResource :: LoadWeaponSprites( WEAPON *pWeapon )
 	pWeapon->hAmmo = 0;
 	pWeapon->hAmmo2 = 0;
 
-	sprintf(sz, "sprites/%s.txt", pWeapon->szName);
+	snprintf(sz, sizeof(sz), "sprites/%s.txt", pWeapon->szName);
 	client_sprite_t *pList = SPR_GetList(sz, &i);
 
 	if (!pList)
@@ -108,7 +108,7 @@ void WeaponsResource :: LoadWeaponSprites( WEAPON *pWeapon )
 	/*p = GetSpriteList( pList, "crosshair", iRes, i );
 	if (p)
 	{
-		sprintf(sz, "sprites/%s.spr", p->szSprite);
+		snprintf(sz, sizeof(sz), "sprites/%s.spr", p->szSprite);
 		pWeapon->hCrosshair = SPR_Load(sz);
 		pWeapon->rcCrosshair = p->rc;
 	}
@@ -118,7 +118,7 @@ void WeaponsResource :: LoadWeaponSprites( WEAPON *pWeapon )
 	/*p = GetSpriteList(pList, "autoaim", iRes, i);
 	if (p)
 	{
-		sprintf(sz, "sprites/%s.spr", p->szSprite);
+		snprintf(sz, sizeof(sz), "sprites/%s.spr", p->szSprite);
 		pWeapon->hAutoaim = SPR_Load(sz);
 		pWeapon->rcAutoaim = p->rc;
 	}
@@ -128,7 +128,7 @@ void WeaponsResource :: LoadWeaponSprites( WEAPON *pWeapon )
 	p = GetSpriteList( pList, "zoom", iRes, i );
 	if (p)
 	{
-		sprintf(sz, "sprites/%s.spr", p->szSprite);
+		snprintf(sz, sizeof(sz), "sprites/%s.spr", p->szSprite);
 		pWeapon->hZoomedCrosshair = SPR_Load(sz);
 		pWeapon->rcZoomedCrosshair = p->rc;
 	}
@@ -141,7 +141,7 @@ void WeaponsResource :: LoadWeaponSprites( WEAPON *pWeapon )
 	p = GetSpriteList(pList, "zoom_autoaim", iRes, i);
 	if (p)
 	{
-		sprintf(sz, "sprites/%s.spr", p->szSprite);
+		snprintf(sz, sizeof(sz), "sprites/%s.spr", p->szSprite);
 		pWeapon->hZoomedAutoaim = SPR_Load(sz);
 		pWeapon->rcZoomedAutoaim = p->rc;
 	}
@@ -154,7 +154,7 @@ void WeaponsResource :: LoadWeaponSprites( WEAPON *pWeapon )
 	p = GetSpriteList(pList, "weapon", iRes, i);
 	if (p)
 	{
-		sprintf(sz, "sprites/%s.spr", p->szSprite);
+		snprintf(sz, sizeof(sz), "sprites/%s.spr", p->szSprite);
 		pWeapon->hInactive = SPR_Load(sz);
 		pWeapon->rcInactive = p->rc;
 
@@ -166,7 +166,7 @@ void WeaponsResource :: LoadWeaponSprites( WEAPON *pWeapon )
 	p = GetSpriteList(pList, "weapon_s", iRes, i);
 	if (p)
 	{
-		sprintf(sz, "sprites/%s.spr", p->szSprite);
+		snprintf(sz, sizeof(sz), "sprites/%s.spr", p->szSprite);
 		pWeapon->hActive = SPR_Load(sz);
 		pWeapon->rcActive = p->rc;
 	}
@@ -176,7 +176,7 @@ void WeaponsResource :: LoadWeaponSprites( WEAPON *pWeapon )
 	p = GetSpriteList(pList, "ammo", iRes, i);
 	if (p)
 	{
-		sprintf(sz, "sprites/%s.spr", p->szSprite);
+		snprintf(sz, sizeof(sz), "sprites/%s.spr", p->szSprite);
 		pWeapon->hAmmo = SPR_Load(sz);
 		pWeapon->rcAmmo = p->rc;
 
@@ -188,7 +188,7 @@ void WeaponsResource :: LoadWeaponSprites( WEAPON *pWeapon )
 	p = GetSpriteList(pList, "ammo2", iRes, i);
 	if (p)
 	{
-		sprintf(sz, "sprites/%s.spr", p->szSprite);
+		snprintf(sz, sizeof(sz), "sprites/%s.spr", p->szSprite);
 		pWeapon->hAmmo2 = SPR_Load(sz);
 		pWeapon->rcAmmo2 = p->rc;
 
@@ -537,6 +537,9 @@ int CHudAmmo::MsgFunc_WeapPickup( const char *pszName, int iSize, void *pbuf )
 	BEGIN_READ( pbuf, iSize );
 	int iIndex = READ_BYTE();
 
+	if ( iIndex < 0 || iIndex >= MAX_WEAPONS )
+		return 0;
+
 	// Add the weapon to the history
 	gHR.AddToHistory( HISTSLOT_WEAP, iIndex );
 
@@ -606,7 +609,7 @@ int CHudAmmo::MsgFunc_CurWeapon(const char *pszName, int iSize, void *pbuf )
 		fOnTarget = TRUE;
 	}
 
-	if ( iId < 1 )
+	if ( iId < 1 || iId >= MAX_WEAPONS )
 	{
 		SetCrosshair(0, nullrc, 0, 0, 0);
 		m_pWeapon = NULL;

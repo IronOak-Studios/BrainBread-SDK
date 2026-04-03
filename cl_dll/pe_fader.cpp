@@ -34,11 +34,11 @@ void cPEFader::Init( )
 		return;
   }
 	pfile = gEngfuncs.COM_ParseFile( pfile, token );
-	while( strlen( token ) )
+	while( pfile && strlen( token ) )
 	{
 		cPEFader::AddType( token );
 		pfile = gEngfuncs.COM_ParseFile( pfile, token );
-		if( token[0] != '{' )
+		if( !pfile || token[0] != '{' )
     {
       ConsolePrint( "FAILED, syntax error. Expecting \"{\".\n" );
 	  initialized = false;
@@ -46,16 +46,20 @@ void cPEFader::Init( )
     }
 		pfile = gEngfuncs.COM_ParseFile( pfile, token );
     lp = -1;
-		while( token[0] != '}' )
+		while( pfile && token[0] != '}' )
 		{
 			r = atoi( token );
 			pfile = gEngfuncs.COM_ParseFile( pfile, token );
+			if( !pfile ) break;
 			g = atoi( token );
 			pfile = gEngfuncs.COM_ParseFile( pfile, token );
+			if( !pfile ) break;
 			b = atoi( token );
 			pfile = gEngfuncs.COM_ParseFile( pfile, token );
+			if( !pfile ) break;
 			a = atoi( token );
 			pfile = gEngfuncs.COM_ParseFile( pfile, token );
+			if( !pfile ) break;
 			p = atof( token );
 			if( p <= lp )
 			{
@@ -68,6 +72,7 @@ void cPEFader::Init( )
 			lp = p;
 			pfile = gEngfuncs.COM_ParseFile( pfile, token );
 		}
+		if( !pfile ) break;
 		pfile = gEngfuncs.COM_ParseFile( pfile, token );
 	}
 	gEngfuncs.COM_FreeFile( pstart );
@@ -79,7 +84,8 @@ void cPEFader::AddType( char *fname )
 	if( !CVAR_GET_FLOAT( "cl_fadesys" ) )
 		return;
 	fader_type *nt = new fader_type;
-	strncpy( nt->name, fname, MAX_FADERNAME_LEN );
+	strncpy( nt->name, fname, MAX_FADERNAME_LEN - 1 );
+	nt->name[MAX_FADERNAME_LEN - 1] = '\0';
 	numtypes++;
 	nt->numsteps = 0;
 	nt->fstep = NULL;
@@ -201,6 +207,8 @@ void cPEFader::Start( char *fname, float starttime, float endtime )
 	start = starttime;
 	length = endtime - starttime;
 	step = type->fstep;
+	if( !step )
+		return;
 	nextstep = start + length * ( step->percent / 100.0f );
 }
 
@@ -272,7 +280,8 @@ void cPEFader::GetColor( float time, int &r, int &g, int &b, int &a )
   else
     step = type->lstep;
 
-	assert( step->prev );
+	if( !step->prev )
+		return;
 	float steppercent = step->percent - step->prev->percent;
 	curpercent -= step->prev->percent;
 	

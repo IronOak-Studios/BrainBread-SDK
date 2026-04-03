@@ -85,6 +85,8 @@ void* VGui_GetPanel()
 void VGui_Startup()
 {
 	Panel* root=(Panel*)VGui_GetPanel();
+	if (!root)
+		return;
 	root->setBgColor(128,128,0,0);
 	//root->setNonPainted(false);
 	//root->setBorder(new LineBorder());

@@ -228,7 +228,7 @@ void CHudLens::CheckFlares( )
 		if( ( m_vecLOrigin[i].x == 0 ) && ( m_vecLOrigin[i].y == 0 ) && ( m_vecLOrigin[i].z == 0 ) )
 		{
 			char cmd[512];
-			sprintf( cmd, "getcoords\n" );
+			snprintf( cmd, sizeof( cmd ), "getcoords\n" );
 			ClientCmd( cmd );
 		}
 	}

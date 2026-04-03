@@ -155,13 +155,13 @@ int cPEPointMgr::Draw( float time )
   //sprintf( text, "%d", lvl );  
   //g_font->DrawString( xpos +  58, ypos + 13, text, 140, 140, 140 );
   gHUD.DrawHudNumber( HudScale( 61 ), ScreenHeight - HudScale( 53 ), DHN_DRAWZERO | DHN_3DIGITS, lvl, 255, 255, 255);
-  sprintf( text, "%d", stats );  
+  snprintf( text, sizeof(text), "%d", stats );
   g_font->DrawString( xpos + HudScale( 150 ), ypos + HudScale( 27 ), text, 140, 140, 140 );
-  sprintf( text, "%d", hp );  
+  snprintf( text, sizeof(text), "%d", hp );
   g_font->DrawString( xpos + HudScale( 33 ), ypos + HudScale( 27 ), text, 140, 140, 140 );
-  sprintf( text, "%d%%", spd );
+  snprintf( text, sizeof(text), "%d%%", spd );
   g_font->DrawString( xpos + HudScale( 70 ), ypos + HudScale( 27 ), text, 140, 140, 140 );
-  sprintf( text, "%d", dmg );  
+  snprintf( text, sizeof(text), "%d", dmg );
   g_font->DrawString( xpos + HudScale( 111 ), ypos + HudScale( 27 ), text, 140, 140, 140 );
 
   if( g_Mouse1r )
@@ -180,7 +180,7 @@ int cPEPointMgr::Draw( float time )
     {
       if( between( g_MouseX, xreh, xreh + HudScale( 167 ) ) )
       {
-        strcpy( gHUD.m_Notify.m_sText1, "BRAAIINNSSS!!! (respawning as human after death)" );
+        snprintf( gHUD.m_Notify.m_sText1, sizeof(gHUD.m_Notify.m_sText1), "BRAAIINNSSS!!! (respawning as human after death)" );
     	  ClientCmd( "rehuman" );
         rehuman = 0;
       }
@@ -230,11 +230,12 @@ int cPEPointMgr::MsgFunc_UpdPoints( const char *pszName,int iSize, void *pbuf )
 	if( strstr( msg->text, "%d" ) && ( strchr( msg->text, '%' ) == strrchr( msg->text, '%' ) ) )
 	{
 		char txt[MAX_HELPTEXT_LEN];
-		strcpy( txt, msg->text );
-		sprintf( msg->text, txt, lastAdd );
+		strncpy( txt, msg->text, sizeof(txt) );
+		txt[sizeof(txt) - 1] = '\0';
+		snprintf( msg->text, MAX_HELPTEXT_LEN, txt, lastAdd );
 	}
 	else
-		_snprintf( msg->text, MAX_HELPTEXT_LEN, "You reached level %d!", lastAdd );
+		snprintf( msg->text, MAX_HELPTEXT_LEN, "You reached level %d!", lastAdd );
 	
 	char *plur;
 	if( lastAdd == 1 && ( plur = strstr( msg->text, "points!" ) ) )
@@ -252,11 +253,12 @@ int cPEPointMgr::MsgFunc_UpdPoints( const char *pszName,int iSize, void *pbuf )
 	if( strstr( msg->text, "%d" ) && ( strchr( msg->text, '%' ) == strrchr( msg->text, '%' ) ) )
 	{
 		char txt[MAX_HELPTEXT_LEN];
-		strcpy( txt, msg->text );
-		sprintf( msg->text, txt, 1 );
+		strncpy( txt, msg->text, sizeof(txt) );
+		txt[sizeof(txt) - 1] = '\0';
+		snprintf( msg->text, MAX_HELPTEXT_LEN, txt, 1 );
 	}
 	else
-		_snprintf( msg->text, MAX_HELPTEXT_LEN, "You received %d spec points!", 1 );
+		snprintf( msg->text, MAX_HELPTEXT_LEN, "You received %d spec points!", 1 );
 	
 	if( 1 == 1 && ( plur = strstr( msg->text, "points!" ) ) )
 	{

@@ -399,9 +399,12 @@ int CHudRadar::Draw( float flTime )
   if( bhdraw )
   {
     char text[128];
-    sprintf( text, "BlackHawks distance to escapezone is %d meters", (int)( ( bh - ez ).Length( ) / 10 ) );
-    g_font->SetFont( FONT_NOTIFY );
-		g_font->DrawString( HudScale( 10 ), HudScale( 160 ), text, 0, 255.0f, 0, 180 );
+    snprintf( text, sizeof( text ), "BlackHawks distance to escapezone is %d meters", (int)( ( bh - ez ).Length( ) / 10 ) );
+    if( g_font )
+    {
+      g_font->SetFont( FONT_NOTIFY );
+		  g_font->DrawString( HudScale( 10 ), HudScale( 160 ), text, 0, 255.0f, 0, 180 );
+    }
   }
 	return 1; 
 }

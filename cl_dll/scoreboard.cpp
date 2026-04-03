@@ -277,7 +277,7 @@ int CHudScoreboard :: Draw( float fTime )
 		// draw ping
 		// draw ping & packetloss
 		static char buf[64];
-		sprintf( buf, "%d", team_info->ping );
+		snprintf( buf, sizeof(buf), "%d", team_info->ping );
 		xpos = ((PING_RANGE_MAX - PING_RANGE_MIN) / 2) + PING_RANGE_MIN + xpos_rel + 25;
 		UnpackRGB( r, g, b, RGB_YELLOWISH );
 		gHUD.DrawHudStringReverse( xpos, ypos, xpos - 50, buf, r, g, b );
@@ -287,7 +287,7 @@ int CHudScoreboard :: Draw( float fTime )
 		{
 			xpos = ((PL_RANGE_MAX - PL_RANGE_MIN) / 2) + PL_RANGE_MIN + xpos_rel + 25;
 		
-			sprintf( buf, "  %d", team_info->packetloss );
+			snprintf( buf, sizeof(buf), "  %d", team_info->packetloss );
 			gHUD.DrawHudString( xpos, ypos, xpos+50, buf, r, g, b );
 		}
 
@@ -397,7 +397,7 @@ int CHudScoreboard :: DrawPlayers( int xpos_rel, float list_slot, int nameoffset
 
 		// draw ping & packetloss
 		static char buf[64];
-		sprintf( buf, "%d", g_PlayerInfoList[best_player].ping );
+		snprintf( buf, sizeof(buf), "%d", g_PlayerInfoList[best_player].ping );
 		xpos = ((PING_RANGE_MAX - PING_RANGE_MIN) / 2) + PING_RANGE_MIN + xpos_rel + 25;
 		gHUD.DrawHudStringReverse( xpos, ypos, xpos - 50, buf, r, g, b );
 
@@ -407,11 +407,11 @@ int CHudScoreboard :: DrawPlayers( int xpos_rel, float list_slot, int nameoffset
 			if ( g_PlayerInfoList[best_player].packetloss >= 63 )
 			{
 				UnpackRGB( r, g, b, RGB_REDISH );
-				sprintf( buf, " !!!!" );
+				snprintf( buf, sizeof(buf), " !!!!" );
 			}
 			else
 			{
-				sprintf( buf, "  %d", g_PlayerInfoList[best_player].packetloss );
+				snprintf( buf, sizeof(buf), "  %d", g_PlayerInfoList[best_player].packetloss );
 			}
 
 			xpos = ((PL_RANGE_MAX - PL_RANGE_MIN) / 2) + PL_RANGE_MIN + xpos_rel + 25;
@@ -456,7 +456,8 @@ int CHudScoreboard :: MsgFunc_ScoreInfo( const char *pszName, int iSize, void *p
 		g_PlayerExtraInfo[cl].playerclass = playerclass;
 		g_PlayerExtraInfo[cl].teamnumber = teamnumber;
 
-		gViewPort->UpdateOnPlayerInfo();
+		if ( gViewPort )
+			gViewPort->UpdateOnPlayerInfo();
 	}
 
 	return 1;
@@ -514,9 +515,13 @@ int CHudScoreboard :: MsgFunc_TeamInfo( const char *pszName, int iSize, void *pb
 				if ( g_TeamInfo[j].name[0] == '\0' )
 					break;
 			}
+			if ( j > MAX_TEAMS )
+				continue; // no room for more teams
+
 			m_iNumTeams = max( j, m_iNumTeams );
 
 			strncpy( g_TeamInfo[j].name, g_PlayerExtraInfo[i].teamname, MAX_TEAM_NAME );
+			g_TeamInfo[j].name[MAX_TEAM_NAME - 1] = '\0';
 			g_TeamInfo[j].players = 0;
 		}
 

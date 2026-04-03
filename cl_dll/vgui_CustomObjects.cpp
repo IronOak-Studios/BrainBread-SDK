@@ -65,8 +65,8 @@ char *GetTGANameForRes(const char *pszName)
 		i = 320;
 	else
 		i = 640;
-	sprintf(sz, pszName, i);
-	sprintf(gd, "gfx/vgui/%s.tga", sz);
+	snprintf(sz, sizeof(sz), pszName, i);
+	snprintf(gd, sizeof(gd), "gfx/vgui/%s.tga", sz);
 	return gd;
 }
 
@@ -78,7 +78,7 @@ BitmapTGA *LoadTGAForRes( const char* pImageName )
 	BitmapTGA	*pTGA;
 
 	char sz[256];
-	sprintf(sz, "%%d_%s", pImageName);
+	snprintf(sz, sizeof(sz), "%%d_%s", pImageName);
 	pTGA = vgui_LoadTGA(GetTGANameForRes(sz));
 
 	return pTGA;
@@ -145,19 +145,18 @@ void CommandButton::RecalculateText( void )
 	{
 		if ( m_cBoundKey == (char)255 )
 		{
-			strcpy( szBuf, m_sMainText );
+			strncpy( szBuf, m_sMainText, sizeof(szBuf) );
+			szBuf[sizeof(szBuf)-1] = 0;
 		}
 		else
 		{
-			sprintf( szBuf, "  %c  %s", m_cBoundKey, m_sMainText );
+			snprintf( szBuf, sizeof(szBuf), "  %c  %s", m_cBoundKey, m_sMainText );
 		}
-		szBuf[MAX_BUTTON_SIZE-1] = 0;
 	}
 	else
 	{
 		// just draw a space if no key bound
-		sprintf( szBuf, "     %s", m_sMainText );
-		szBuf[MAX_BUTTON_SIZE-1] = 0;
+		snprintf( szBuf, sizeof(szBuf), "     %s", m_sMainText );
 	}
 
 	Button::setText( szBuf );
@@ -263,7 +262,8 @@ void CommandButton::cursorEntered( void )
 		{
 			CommandButton *pParentButton = pCParent->FindButtonWithSubmenu( containingMenu );
 
-			pParentButton->cursorEntered();
+			if ( pParentButton )
+				pParentButton->cursorEntered();
 		}
 	}
 
@@ -402,7 +402,7 @@ void CImageLabel::LoadImage(const char * pImageName)
 		// try to load file resolution independent
 
 		char sz[256];
-		sprintf(sz, "%s/%s",gEngfuncs.pfnGetGameDirectory(), pImageName );
+		snprintf(sz, sizeof(sz), "%s/%s",gEngfuncs.pfnGetGameDirectory(), pImageName );
 		FileInputStream fis( sz, false );
 		m_pTGA = new BitmapTGA(&fis,true);
 		fis.close();
@@ -502,6 +502,8 @@ CTFScrollButton::CTFScrollButton(int iArrow, const char* text,int x,int y,int wi
 	setFgColor(Scheme::sc_primary1);
 
 	// Load in the arrow
+	if ( iArrow < 0 || iArrow >= (int)(sizeof(sArrowFilenames)/sizeof(sArrowFilenames[0])) )
+		iArrow = 0;
 	m_pTGA = LoadTGAForRes( sArrowFilenames[iArrow] );
 	setImage( m_pTGA );
 

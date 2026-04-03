@@ -604,7 +604,7 @@ cBlood *cBlood::NewSpray( char *cfgfile, vec3_t origin, vec3_t dir, int entidx, 
     return NULL;
 	int i = 0;
   char file[128];
-  strncpy( file, cfgfile, 128 ); 
+  snprintf( file, sizeof(file), "%s", cfgfile );
   t_bloodpartinfo info; 
 
   list<t_bloodpartinfo>::iterator it;
@@ -670,7 +670,7 @@ cBlood *cBlood::NewSpray( char *cfgfile, vec3_t origin, vec3_t dir, int entidx, 
 	if( !pfile )
 		return NULL;
 
-  strcpy( info.file, file );
+  snprintf( info.file, sizeof(info.file), "%s", file );
   pfile = gEngfuncs.COM_ParseFile( pfile, token );
 	while( strlen( token ) )
 	{
@@ -698,17 +698,17 @@ cBlood *cBlood::NewSpray( char *cfgfile, vec3_t origin, vec3_t dir, int entidx, 
 		else if( !strcmp( token, "spr" ) )
 		{
 			pfile = gEngfuncs.COM_ParseFile( pfile, token );
-      strncpy( info.sprite, token, 128 );
+      snprintf( info.sprite, sizeof(info.sprite), "%s", token );
 		}
 		else if( !strcmp( token, "maskspr" ) )
 		{
 			pfile = gEngfuncs.COM_ParseFile( pfile, token );
-      strncpy( info.masksprite, token, 128 );
+      snprintf( info.masksprite, sizeof(info.masksprite), "%s", token );
 		}
 		else if( !strcmp( token, "detailspr" ) )
 		{
 			pfile = gEngfuncs.COM_ParseFile( pfile, token );
-      strncpy( info.detailsprite, token, 128 );
+      snprintf( info.detailsprite, sizeof(info.detailsprite), "%s", token );
 		}
 		else if( !strcmp( token, "size" ) )
 		{
@@ -745,12 +745,12 @@ cBlood *cBlood::NewSpray( char *cfgfile, vec3_t origin, vec3_t dir, int entidx, 
 		else if( !strcmp( token, "colfader" ) )
 		{
 			pfile = gEngfuncs.COM_ParseFile( pfile, token );
-		  strncpy( info.colfader, token, MAX_FADERNAME_LEN );
+		  snprintf( info.colfader, sizeof(info.colfader), "%s", token );
 		}
 		else if( !strcmp( token, "sizefader" ) )
 		{
 			pfile = gEngfuncs.COM_ParseFile( pfile, token );
-      strncpy( info.sizefader, token, MAX_FADERNAME_LEN );
+      snprintf( info.sizefader, sizeof(info.sizefader), "%s", token );
 		}
 		else if( !strcmp( token, "mode" ) )
 		{

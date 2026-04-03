@@ -106,6 +106,9 @@ void CHudStatusBar :: ParseStatusString( int line_num )
 			// copy the text, char by char, until we hit a % or a \n
 			while ( *src != '\n' && *src != 0 )
 			{
+				if ( (dst - dst_start) >= MAX_STATUSTEXT_LENGTH - 1 )
+					break;
+
 				if ( *src != '%' )
 				{  // just copy the character
 					*dst = *src;
@@ -138,11 +141,19 @@ void CHudStatusBar :: ParseStatusString( int line_num )
 						switch ( valtype )
 						{
 						case 'p':  // player name
+							if ( indexval >= 1 && indexval <= MAX_PLAYERS )
+							{
 							GetPlayerInfo( indexval, &g_PlayerInfoList[indexval] );
 							if ( g_PlayerInfoList[indexval].name != NULL )
 							{
 								strncpy( szRepString, g_PlayerInfoList[indexval].name, MAX_PLAYER_NAME_LENGTH );
+								szRepString[MAX_PLAYER_NAME_LENGTH - 1] = 0;
 								m_pflNameColors[line_num] = GetClientColor( indexval );
+							}
+							else
+							{
+								strcpy( szRepString, "******" );
+							}
 							}
 							else
 							{
@@ -151,7 +162,7 @@ void CHudStatusBar :: ParseStatusString( int line_num )
 
 							break;
 						case 'i':  // number
-							sprintf( szRepString, "%d", indexval );
+							snprintf( szRepString, sizeof(szRepString), "%d", indexval );
 							break;
 						default:
 							szRepString[0] = 0;
