@@ -496,6 +496,18 @@ void CMultiManager :: ManagerReport ( void )
 }
 #endif
 
+// Returns the delay (in seconds) for a target name in a multi_manager, or -1 if not found.
+float UTIL_MultiManagerTargetDelay( CBaseEntity *pEntity, const char *szTarget )
+{
+	CMultiManager *pManager = static_cast<CMultiManager*>( pEntity );
+	for( int i = 0; i < pManager->m_cTargets; i++ )
+	{
+		if( FStrEq( STRING( pManager->m_iTargetName[i] ), szTarget ) )
+			return pManager->m_flTargetDelay[i];
+	}
+	return -1;
+}
+
 //***********************************************************
 
 

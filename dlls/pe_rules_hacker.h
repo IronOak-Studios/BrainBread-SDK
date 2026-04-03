@@ -102,6 +102,7 @@ public:
   int misType;
   int misNr;
   float misStart;
+  float misHoldoutDuration;
   bool misComplete;
   bool misLast;
 

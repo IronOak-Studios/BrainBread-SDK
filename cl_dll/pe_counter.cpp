@@ -232,7 +232,7 @@ int CHudCounter::Draw( float flTime )
 		pcent = 100.0f * ( curTime - m_sCounters[i].fStart ) / m_sCounters[i].fTotal;
 		if( pcent > 100 )
 			pcent = 100;
-		if( g_iTeamNumber == 1 )
+		if( g_iTeamNumber == 1 && strstr( m_sCounters[i].sName, "ombie" ) )
 			smallProgressFaderBad->GetColor( pcent, r, g, b );
 		else
 			smallProgressFaderGood->GetColor( pcent, r, g, b );

@@ -47,6 +47,8 @@ cvar_t	zombie_yawspeed	= {"sv_zombie_yawspeed", "20", FCVAR_SERVER };
 cvar_t	zombie_lifetime	= {"sv_zombie_lifetime", "60", FCVAR_SERVER };
 cvar_t	zombie_drop_height	= {"sv_zombie_drop_height", "100", FCVAR_SERVER };
 
+cvar_t	mission_timer_detect	= {"sv_mission_timer_detect", "1", FCVAR_SERVER };
+
 cvar_t	teamspect	= {"mp_teamspectator", "0", FCVAR_SERVER };
 cvar_t	showdmg		= {"sv_damageinfo", "0", FCVAR_SERVER };
 cvar_t	autoteam	= {"sv_autoteambalance", "0", FCVAR_SERVER };
@@ -536,6 +538,7 @@ void GameDLLInit( void )
 	CVAR_REGISTER (&playerinfofile);
 
 	CVAR_REGISTER (&gibcnt);
+	CVAR_REGISTER (&mission_timer_detect);
 	CVAR_REGISTER (&zombiecnt);
 	CVAR_REGISTER (&zombie_behavior);
 	CVAR_REGISTER (&zombie_yawspeed);

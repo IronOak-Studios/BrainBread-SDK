@@ -2397,6 +2397,11 @@ void CBasePlayer::PreThink(void)
     pev->max_health = PLR_HP(this);
     ((cPEHacking*)g_pGameRules)->SetTeam( 2, this, 0 );
     m_sInfo.team = 2;
+    // Cancel holdout progress bar -- no longer a human survivor
+    MESSAGE_BEGIN( MSG_ONE, gmsgSmallCnt, NULL, edict( ) );
+      WRITE_STRING( "Survive!" );
+      WRITE_COORD( 0 );
+    MESSAGE_END( );
     DropPlayerItem( "bb_objective_item" );
 	  RemoveAllItems( FALSE );
 	  m_iCurSlot = 1;

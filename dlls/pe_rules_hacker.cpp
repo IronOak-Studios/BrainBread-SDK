@@ -70,6 +70,8 @@ extern int gmsgUpdPoints;
 extern int gmsgSmallCnt;
 extern int gmsgNotify;
 extern int gmsgVGUIMenu;
+extern cvar_t mission_timer_detect;
+extern float UTIL_MultiManagerTargetDelay( CBaseEntity *pEntity, const char *szTarget );
 
 
 #define NO_TEAM 0
@@ -444,7 +446,45 @@ void cPEHacking::StartRound( )
   misNr = 0;
   misNr = 0;
   misType = 0;
+  misHoldoutDuration = 0;
   oneEscaped = false;
+
+  // Pre-neutralize unnamed trigger_once entities that target custom missions,
+  // so players can't accidentally fire them before the mission starts.
+  if( mission_timer_detect.value )
+  {
+    for( int m = 0; m < 20 && strlen( missionList[m][0] ); m++ )
+    {
+      // Skip built-in mission keywords
+      if( !strcmp( missionList[m][0], "random" ) ||
+          !strcmp( missionList[m][0], "rescue" ) ||
+          !strcmp( missionList[m][0], "fred" ) ||
+          !strcmp( missionList[m][0], "frags" ) ||
+          !strcmp( missionList[m][0], "object" ) )
+        continue;
+
+      // Find trigger_once entities targeting this custom mission
+      CBaseEntity *pTrigger = NULL;
+      while( ( pTrigger = UTIL_FindEntityByClassname( pTrigger, "trigger_once" ) ) != NULL )
+      {
+        // Only intercept unnamed triggers (no targetname = not triggered externally)
+        if( !FStringNull( pTrigger->pev->targetname ) )
+          continue;
+        if( FStringNull( pTrigger->pev->target ) )
+          continue;
+        if( !FStrEq( STRING( pTrigger->pev->target ), missionList[m][0] ) )
+          continue;
+
+        CBaseDelay *pDelay = static_cast<CBaseDelay*>( pTrigger );
+        if( pDelay->m_flDelay > 0 )
+        {
+          // Disable touch so players can't fire it early
+          pTrigger->SetTouch( NULL );
+          pTrigger->pev->solid = SOLID_NOT;
+        }
+      }
+    }
+  }
 
   CheckAllMissions( );
 
@@ -2559,6 +2599,15 @@ void cPEHacking::AbortMission( )
       curMapMission->Deactivate( );
       curMapMission = NULL;
     }
+
+    // Cancel holdout progress bar if active
+    if( misHoldoutDuration > 0 )
+    {
+      MESSAGE_BEGIN( MSG_ALL, gmsgSmallCnt, NULL );
+        WRITE_STRING( "Survive!" );
+        WRITE_COORD( 0 );
+      MESSAGE_END( );
+    }
     break;
   }
   }
@@ -2616,6 +2665,19 @@ void cPEHacking::PlayerInitMission( CBasePlayer *plr )
     EnableAll( "bb_mapmission", (char*)STRING( curMapMission->pev->targetname ) );
     Notify( plr, NTC_CUSTOM, -1, curMapMission->notify[0] );
     NotifyMid( plr, NTM_CUSTOM, 5, curMapMission->notify[1], curMapMission->notify[2] );
+
+    // Send holdout progress bar with remaining time for late joiners
+    if( misHoldoutDuration > 0 )
+    {
+      float remaining = misHoldoutDuration - ( gpGlobals->time - misStart );
+      if( remaining > 0 )
+      {
+        MESSAGE_BEGIN( MSG_ONE, gmsgSmallCnt, NULL, plr->edict( ) );
+          WRITE_STRING( "Survive!" );
+          WRITE_COORD( remaining );
+        MESSAGE_END( );
+      }
+    }
     return;
   }
   Notify( plr, NTC_MISSION_START + misType, misReq[misType] );
@@ -2740,6 +2802,68 @@ void cPEHacking::StartMission( )
     curMapMission->Activate( );
     NotifyTeam( 1, NTC_CUSTOM, -1, curMapMission->notify[0] );
 	  NotifyMidTeam( 1, NTM_CUSTOM, 5, curMapMission->notify[1], curMapMission->notify[2] );
+
+    // Auto-detect holdout duration from trigger_once entities targeting this mission
+    if( mission_timer_detect.value )
+    {
+      const char *missionName = STRING( curMapMission->pev->targetname );
+      CBaseEntity *pTrigger = NULL;
+      while( ( pTrigger = UTIL_FindEntityByClassname( pTrigger, "trigger_once" ) ) != NULL )
+      {
+        // Only intercept unnamed triggers (no targetname = not triggered externally)
+        if( !FStringNull( pTrigger->pev->targetname ) )
+          continue;
+        if( FStringNull( pTrigger->pev->target ) )
+          continue;
+        if( !FStrEq( STRING( pTrigger->pev->target ), missionName ) )
+          continue;
+
+        CBaseDelay *pDelay = static_cast<CBaseDelay*>( pTrigger );
+        if( pDelay->m_flDelay > 0 )
+        {
+          misHoldoutDuration = pDelay->m_flDelay;
+          // Fire the trigger chain now so timing is synced with the bar
+          pDelay->SUB_UseTargets( NULL, USE_TOGGLE, 0 );
+          // Remove the trigger_once (mirrors ActivateMultiTrigger self-removal)
+          pTrigger->SetTouch( NULL );
+          pTrigger->SetThink( &CBaseEntity::SUB_Remove );
+          pTrigger->pev->nextthink = gpGlobals->time + 0.1;
+          break;
+        }
+      }
+
+      // If no trigger_once found, check if there is a multi_manager
+      // with a delayed entry targeting the mission entity
+      if( misHoldoutDuration <= 0 )
+      {
+        CBaseEntity *pMgr = NULL;
+        while ( ( pMgr = UTIL_FindEntityByClassname( pMgr, "multi_manager" ) ) != NULL )
+        {
+          float delay = UTIL_MultiManagerTargetDelay( pMgr, missionName );
+          if( delay > 0 )
+          {
+            misHoldoutDuration = delay;
+            break;
+          }
+        }
+      }
+
+      // Send progress bar if we found a holdout duration
+      if( misHoldoutDuration > 0 )
+      {
+        for( int i = 1; i <= MAX_PLAYERS; i++ )
+        {
+          CBasePlayer *plr = (CBasePlayer*)UTIL_PlayerByIndex( i );
+          if( plr && plr->m_iTeam == 1 )
+          {
+            MESSAGE_BEGIN( MSG_ONE, gmsgSmallCnt, NULL, plr->edict( ) );
+              WRITE_STRING( "Survive!" );
+              WRITE_COORD( misHoldoutDuration );
+            MESSAGE_END( );
+          }
+        }
+      }
+    }
     return;
   }
   }
@@ -2867,6 +2991,15 @@ void cPEHacking::CheckAllMissions( )
 {
   misComplete = CheckMission( );
 
+  // Cancel holdout progress bar on mission completion
+  if( misComplete && misHoldoutDuration > 0 )
+  {
+    MESSAGE_BEGIN( MSG_ALL, gmsgSmallCnt, NULL );
+      WRITE_STRING( "Survive!" );
+      WRITE_COORD( 0 );
+    MESSAGE_END( );
+  }
+
   if( ( misComplete && !misLast ) || !misNr )
   {
     misNr++;
@@ -2880,6 +3013,8 @@ void cPEHacking::CheckAllMissions( )
     // On completion
     if( misNr >= 2 && missionList[misNr-2][2][0] != '-' )
       FireTargets( missionList[misNr-2][2], NULL, NULL, USE_TOGGLE, 0 );
+
+    misHoldoutDuration = 0;
 
     if( !strcmp( missionList[misNr-1][0], "random" ) )
     {
