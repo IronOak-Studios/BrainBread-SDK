@@ -2318,6 +2318,7 @@ void CBasePlayer::PreThink(void)
 
   if( m_fNextSuicideTime && m_fNextSuicideTime <= gpGlobals->time )
   {
+    NotifyMid( this, NTM_CUSTOM, 0 );
     pev->health = 0;
     Killed( pev, GIB_NEVER );
     m_fNextSuicideTime = 0;

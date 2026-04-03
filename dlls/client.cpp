@@ -43,6 +43,8 @@
 #include "pe_rules_hacker.h"
 #include "pe_rules_vip.h"
 #include "pe_utils.h"
+#include "pe_menus.h"
+#include "pe_notify.h"
 #include "build.h"
 
 edict_t *EntSelectSpawnPoint( CBasePlayer *pPlayer );
@@ -184,12 +186,15 @@ void ClientKill( edict_t *pEntity )
 		return;
 
   if( pl->m_bTransform )
+  {
+    NotifyMid( pl, NTM_CUSTOM, 2, "Not allowed right now." );
 		return;
-	//if ( pl->m_fNextSuicideTime > gpGlobals->time )
-	//	return;  // prevent suiciding too often
+  }
+	if ( pl->m_fNextSuicideTime > gpGlobals->time )
+		return;  // prevent suiciding too often
 
 	pl->m_fNextSuicideTime = gpGlobals->time + 4;  // don't let them suicide for 5 seconds after suiciding
-  ClientPrint( pl->pev, HUD_PRINTCENTER, "Killing self in 4 seconds."  );
+  NotifyMid( pl, NTM_CUSTOM, 3, "Killing self in 4 seconds." );
 
 	// have the player kill themself
 	//pev->health = 0;
