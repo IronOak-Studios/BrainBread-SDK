@@ -1793,7 +1793,7 @@ Vector CBaseEntity::FireBulletsPlayer ( ULONG cShots, Vector vecSrc, Vector vecD
 	TraceResult tr;
 	Vector vecRight = gpGlobals->v_right;
 	Vector vecUp = gpGlobals->v_up;
-	float x, y, z;
+	float x = .0f, y = .0f, z = .0f;
 	int pwall = 0;
 
 	if( recoilratio.value > 0 )

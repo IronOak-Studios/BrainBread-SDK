@@ -203,7 +203,7 @@ void CBeretta_a::WeaponIdle( void )
 	if (m_flTimeWeaponIdle > UTIL_WeaponTimeBase() )
 		return;
 
-	int iAnim;
+	int iAnim = BERETTA_A_IDLE1;
 	float flRand = UTIL_SharedRandomFloat( m_pPlayer->random_seed, 10, 15 );
 	int x;
 

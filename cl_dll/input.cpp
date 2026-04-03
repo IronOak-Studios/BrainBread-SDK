@@ -246,6 +246,8 @@ void KB_Add( const char *name, kbutton_t *pkb )
 		return;
 
 	p = ( kblist_t * )malloc( sizeof( kblist_t ) );
+	if (!p)
+		return;
 	memset( p, 0, sizeof( *p ) );
 
 	strncpy( p->name, name, sizeof( p->name ) - 1 );

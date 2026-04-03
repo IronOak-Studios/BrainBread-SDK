@@ -767,7 +767,7 @@ int CHudServers::LoadMasterAddresses( int maxservers, int *count, netadr_t *padr
 	int			nPort;
 	int			nCount = 0;
 	bool		bIgnore;
-	int			nDefaultPort;
+	int			nDefaultPort = PORT_SERVER;
 
 	// Assume default master and master file
 	strncpy( szMaster, VALVE_MASTER_ADDRESS, sizeof(szMaster) - 1 );    // IP:PORT string

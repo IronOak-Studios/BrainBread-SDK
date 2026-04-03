@@ -64,6 +64,9 @@ cBlood::~cBlood( )
     if( cur->item == this )
       break;
 
+  if( !cur )
+    return;
+
   if( gFBlood == cur )
 	{
 		if( gLBlood == cur )

@@ -198,7 +198,7 @@ int RealRandomModel( int slot )
   }
   else if( slot == 1 )
   {
-    int mdls[5];
+    int mdls[5] = { 0 };
     int o = 0;
     for( int i = 0; i < 6; i++ )
     {
@@ -211,7 +211,7 @@ int RealRandomModel( int slot )
   }
   else
   {
-    int mdls[4];
+    int mdls[4] = { 0 };
     int o = 0;
     for( int i = 0; i < 6; i++ )
     {

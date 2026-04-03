@@ -275,7 +275,7 @@ public:
 	int				m_iRows;
 	int				m_iSortedRows[NUM_ROWS];
 	int				m_iIsATeam[NUM_ROWS];
-	bool			m_bHasBeenSorted[MAX_PLAYERS];
+	bool			m_bHasBeenSorted[NUM_ROWS];
 	int				m_iLastKilledBy;
 	int				m_fLastKillTime;
 

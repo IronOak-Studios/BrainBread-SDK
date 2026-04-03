@@ -685,7 +685,7 @@ void ScorePanel::FillGrid()
 
 			// Fill out with the correct data
 			sz[0] = '\0';
-			if ( m_iIsATeam[row] )
+			if ( m_iIsATeam[row] && team_info)
 			{
 				char sz2[128];
 
@@ -745,7 +745,7 @@ void ScorePanel::FillGrid()
 					break;
 				}
 			}
-			else
+			else if (pl_info)
 			{
 				bool bShowClass = false;
 

@@ -131,6 +131,9 @@ void CBaseMonster :: Listen ( void )
 	{
 		pCurrentSound = CSoundEnt::SoundPointerForIndex( iSound );
 
+		if (!pCurrentSound)
+			break;
+
 		if ( pCurrentSound	&& 
 			 ( pCurrentSound->m_iType & iMySounds )	&& 
 			 ( pCurrentSound->m_vecOrigin - EarPosition() ).Length() <= pCurrentSound->m_iVolume * hearingSensitivity )

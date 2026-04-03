@@ -1679,7 +1679,7 @@ void TeamFortressViewport::SetCurrentMenu( CMenuPanel *pMenu )
 CMenuPanel* TeamFortressViewport::CreateTextWindow( int iTextToShow )
 {
 	char sz[256];
-	char *cText;
+	char *cText = NULL;
 	char *pfile = NULL;
 	static const int MAX_TITLE_LENGTH = 64;
 	char cTitle[MAX_TITLE_LENGTH];
@@ -1799,7 +1799,7 @@ CMenuPanel* TeamFortressViewport::CreateTextWindow( int iTextToShow )
 	}
 
 	// if we're in the game (ie. have selected a class), flag the menu to be only grayed in the dialog box, instead of full screen
-	CMenuPanel *pMOTDPanel = CMessageWindowPanel_Create( cText, cTitle, g_iPlayerClass == PC_UNDEFINED, false, 0, 0, ScreenWidth, ScreenHeight );
+	CMenuPanel *pMOTDPanel = CMessageWindowPanel_Create( cText ? cText : "", cTitle, g_iPlayerClass == PC_UNDEFINED, false, 0, 0, ScreenWidth, ScreenHeight);
 	pMOTDPanel->setParent( this );
 
 	if ( pfile )

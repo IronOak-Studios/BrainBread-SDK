@@ -210,6 +210,11 @@ public:
 		if ( !m_pNodes || i < 0 || i > m_cNodes )
 			ALERT( at_error, "Bad Node!\n" );
 #endif
+		if ( !m_pNodes || i < 0 || i >= m_cNodes)
+		{
+			static CNode dummy;
+			return dummy;
+		}
 		return m_pNodes[i];
 	}
 
@@ -219,6 +224,11 @@ public:
 		if ( !m_pLinkPool || i < 0 || i > m_cLinks )
 			ALERT( at_error, "Bad link!\n" );
 #endif
+		if ( !m_pLinkPool || i < 0 || i >= m_cLinks)
+		{
+			static CLink dummy;
+			return dummy;
+		}
 		return m_pLinkPool[i];
 	}
 	

@@ -1020,7 +1020,7 @@ void CBaseTrigger :: HurtTouch ( CBaseEntity *pOther )
 		return;
 	}*/
 
-	if ( !pOther->pev->takedamage )
+	if ( !pOther || !pOther->pev->takedamage )
 		return;
 
 	if ( (pev->spawnflags & SF_TRIGGER_HURT_CLIENTONLYTOUCH) && !pOther->IsPlayer() )

@@ -513,6 +513,11 @@ void CTalkMonster :: RunTask( Task_t *pTask )
 			{
 				IdleHeadTurn( pPlayer->v.origin );
 			}
+			else
+			{
+				TaskFail();
+				return;
+			}
 		}
 		else
 		{
