@@ -391,11 +391,12 @@ void CZombie :: TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecD
  			  WRITE_BYTE( 0 );
 			  WRITE_COORD( -1 );
      MESSAGE_END();*/
-      MESSAGE_BEGIN( MSG_PVS, gmsgSpray, pev->origin );
+			vec3_t org = pev->origin + Vector( 0, 0, 28 + 37 );
+      MESSAGE_BEGIN( MSG_PVS, gmsgSpray, org );
 			  WRITE_BYTE( SPRAY_BLOODHEAD );
-        WRITE_COORD( pev->origin.x ); // origin
-			  WRITE_COORD( pev->origin.y );
-			  WRITE_COORD( pev->origin.z + 28 + 37 );
+        WRITE_COORD( org.x ); // origin
+			  WRITE_COORD( org.y );
+			  WRITE_COORD( org.z );
         WRITE_COORD( 0 ); // origin
 			  WRITE_COORD( 0 );
 			  WRITE_COORD( 1 );
@@ -408,7 +409,7 @@ void CZombie :: TraceAttack( entvars_t *pevAttacker, float flDamage, Vector vecD
     else if( m_fNextBlood <= gpGlobals->time )
     {
       vec3_t org = ptr->vecEndPos + 5 * vecDir.Normalize( );
-		  MESSAGE_BEGIN( MSG_PVS, gmsgSpray, pev->origin );
+		  MESSAGE_BEGIN( MSG_PVS, gmsgSpray, org);
 			  WRITE_BYTE( SPRAY_BLOOD );
         WRITE_COORD( org.x ); // origin
 			  WRITE_COORD( org.y );

@@ -686,7 +686,7 @@ void CBasePlayer :: TraceAttack( entvars_t *pevAttacker, float flDamage, Vector 
 		{
 			//SpawnBlood(ptr->vecEndPos, BLOOD_COLOR_RED, flDamage);// a little surface blood.
       vec3_t org = ptr->vecEndPos + 5 * vecDir.Normalize( );
-      MESSAGE_BEGIN( MSG_PVS, gmsgSpray, pev->origin );
+      MESSAGE_BEGIN( MSG_PVS, gmsgSpray, org);
       if( flDamage >= 50 )
       {
         WRITE_BYTE( SPRAY_PLRBLOODBIG );
@@ -737,7 +737,7 @@ void CBasePlayer :: TraceAttack( entvars_t *pevAttacker, float flDamage, Vector 
 				WRITE_BYTE( 180 );
 			MESSAGE_END();*/
       vec3_t org = ptr->vecEndPos + 2 * vecDir.Normalize( );
-      MESSAGE_BEGIN( MSG_PVS, gmsgSpray, pev->origin );
+      MESSAGE_BEGIN( MSG_PVS, gmsgSpray, org);
         WRITE_BYTE( SPRAY_PLRBLOODSTREAM );
         WRITE_COORD( org.x ); // origin
         WRITE_COORD( org.y );
