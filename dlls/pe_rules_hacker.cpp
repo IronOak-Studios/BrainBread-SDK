@@ -2693,8 +2693,25 @@ void cPEHacking::PlayerInitMission( CBasePlayer *plr )
     break;
   }
   case MISSION_OBJECT:
-    EnableAll( "bb_objective_item" );
+  {
+    // Enable bb_objective_item only if it's not packed inside a weaponbox (EF_NODRAW)
+    CBaseEntity *pObj = UTIL_FindEntityByClassname( NULL, "bb_objective_item" );
+    while ( pObj != NULL )
+    {
+      if ( !( pObj->pev->effects & EF_NODRAW ) )
+        plr->Enable( pObj->pev );
+      pObj = UTIL_FindEntityByClassname( pObj, "bb_objective_item" );
+    }
+    // Also enable dropped objective weaponboxes (fuser4 marks objective items)
+    CBaseEntity *pBox = UTIL_FindEntityByClassname( NULL, "weaponbox" );
+    while ( pBox != NULL )
+    {
+      if ( pBox->pev->fuser4 )
+        plr->Enable( pBox->pev );
+      pBox = UTIL_FindEntityByClassname( pBox, "weaponbox" );
+    }
     break;
+  }
   default: // Map mission: Enable bb_mapmission ents
     if( !curMapMission )
       return;
