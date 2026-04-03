@@ -99,6 +99,7 @@ public:
 	// Obstacle avoidance overrides
 	void Move( float flInterval );
 	void MoveExecute( CBaseEntity *pTargetEnt, const Vector &vecDir, float flInterval );
+	BOOL SlideWalkMove( float flYaw, float flDist, const Vector &vecMoveDir );
 	int CheckLocalMove( const Vector &vecStart, const Vector &vecEnd, CBaseEntity *pTarget, float *pflDist );
 
 	// AI override - always retry chase on failure
@@ -1017,7 +1018,7 @@ void CZombie::Move( float flInterval )
 		while ( flTotal > 0.001 )
 		{
 			flStep = min( 16.0f, flTotal );
-			WALK_MOVE( ENT( pev ), flSideYaw, flStep, WALKMOVE_NORMAL );
+			SlideWalkMove( flSideYaw, flStep, vecSideDir );
 			flTotal -= flStep;
 		}
 
@@ -1248,6 +1249,42 @@ void CZombie::Move( float flInterval )
 }
 
 //=========================================================
+// SlideWalkMove - WALK_MOVE with wall sliding. If blocked,
+// slides along the wall at angles < sv_zombie_slide_angle.
+//=========================================================
+BOOL CZombie::SlideWalkMove( float flYaw, float flDist, const Vector &vecMoveDir )
+{
+	if ( WALK_MOVE( ENT( pev ), flYaw, flDist, WALKMOVE_NORMAL ) )
+		return TRUE;
+
+	float flSlideThreshold = -sin( zombie_slide_angle.value * M_PI / 180.0 );
+
+	TraceResult tr;
+	Vector vecHalfZ = Vector( 0, 0, 36 );
+	UTIL_TraceHull( pev->origin + vecHalfZ, pev->origin + vecHalfZ + vecMoveDir * flDist, dont_ignore_monsters, human_hull, ENT( pev ), &tr );
+
+	if ( tr.flFraction < 1.0 && !tr.fAllSolid && !tr.fStartSolid )
+	{
+		float flInto = DotProduct( vecMoveDir, tr.vecPlaneNormal );
+		// flInto is negative when hitting a wall head-on.
+		// flInto = -sin(surface_angle), so we slide when
+		// surface_angle < flMaxSurfaceAngle.
+		if ( flInto > flSlideThreshold )
+		{
+			Vector vecSlide = vecMoveDir - tr.vecPlaneNormal * flInto;
+			vecSlide.z = 0;
+			float flSlideLen = vecSlide.Length();
+			if ( flSlideLen > 0.1 )
+			{
+				float flSlideYaw = UTIL_VecToYaw( vecSlide );
+				return WALK_MOVE( ENT( pev ), flSlideYaw, flDist * flSlideLen, WALKMOVE_NORMAL );
+			}
+		}
+	}
+	return FALSE;
+}
+
+//=========================================================
 // MoveExecute - zombie override that uses WALK_MOVE instead
 // of UTIL_MoveToOrigin.
 //=========================================================
@@ -1274,35 +1311,7 @@ void CZombie::MoveExecute( CBaseEntity *pTargetEnt, const Vector &vecDir, float 
 	while ( flTotal > 0.001 )
 	{
 		flStep = min( 16.0f, flTotal );
-		if ( !WALK_MOVE( ENT( pev ), flYaw, flStep, WALKMOVE_NORMAL ) )
-		{
-			// Forward move blocked - try to slide along the wall at
-			// shallow angles (< 45 degrees between move dir and wall
-			// surface). This avoids oscillation from the engine's
-			// SV_NewChaseDir while still letting zombies hug walls.
-			TraceResult tr;
-			Vector vecHalfZ = Vector( 0, 0, 36 );
-			UTIL_TraceHull( pev->origin + vecHalfZ, pev->origin + vecHalfZ + vecMoveDir * flStep, dont_ignore_monsters, human_hull, ENT( pev ), &tr );
-
-			if ( tr.flFraction < 1.0 && !tr.fAllSolid && !tr.fStartSolid )
-			{
-				float flInto = DotProduct( vecMoveDir, tr.vecPlaneNormal );
-				// flInto is negative when hitting a wall head-on.
-				// Wall-surface angle = 90 + asin(flInto). We want
-				// < 45 degrees from wall surface, i.e. flInto > -0.707.
-				if ( flInto > -0.707 )
-				{
-					Vector vecSlide = vecMoveDir - tr.vecPlaneNormal * flInto;
-					vecSlide.z = 0;
-					float flSlideLen = vecSlide.Length();
-					if ( flSlideLen > 0.1 )
-					{
-						float flSlideYaw = UTIL_VecToYaw( vecSlide );
-						WALK_MOVE( ENT( pev ), flSlideYaw, flStep * flSlideLen, WALKMOVE_NORMAL );
-					}
-				}
-			}
-		}
+		SlideWalkMove( flYaw, flStep, vecMoveDir );
 		flTotal -= flStep;
 	}
 }
