@@ -108,6 +108,9 @@ public:
   float misHoldoutDuration;
   bool misComplete;
   bool misLast;
+#ifdef _DEBUG
+  bool misForceComplete;
+#endif
 
   bool heliactivated;
   cBBMapMission* curMapMission;

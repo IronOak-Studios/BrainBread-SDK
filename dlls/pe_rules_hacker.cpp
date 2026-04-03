@@ -448,6 +448,9 @@ void cPEHacking::StartRound( )
   misType = 0;
   misHoldoutDuration = 0;
   oneEscaped = false;
+#ifdef _DEBUG
+  misForceComplete = false;
+#endif
 
   // Pre-neutralize unnamed trigger_once entities that target custom missions,
   // so players can't accidentally fire them before the mission starts.
@@ -1995,6 +1998,14 @@ BOOL cPEHacking::ClientCommand( CBasePlayer *pPlayer, const char *pcmd )
 		ClientPrint( pPlayer->pev, HUD_PRINTCONSOLE, "y" );
 		return TRUE;
 	}
+	else if( FStrEq( pcmd, "bb_skipmission" ) )
+	{
+#ifdef _DEBUG
+		misForceComplete = true;
+		ClientPrint( pPlayer->pev, HUD_PRINTCONSOLE, "Mission skipped.\n" );
+#endif
+		return TRUE;
+	}
 	return FALSE;
 }
 
@@ -2928,6 +2939,13 @@ int mis[3];
 
 bool cPEHacking::CheckMission( )
 {
+#ifdef _DEBUG
+  if( misForceComplete )
+  {
+    misForceComplete = false;
+    return true;
+  }
+#endif
   switch( misType )
   {
   case MISSION_RESCUE:
