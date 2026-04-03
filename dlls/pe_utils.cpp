@@ -210,20 +210,50 @@ void uSavePlayerData( )
   //  ((cPEHacking*)g_pGameRules)->GoToIntermission( );
 }
 
-bool _dbError(const char *action, sqlite3 *db = NULL, sqlite3_stmt *stmt = NULL, bool close = true)
+// Persistent database connection - reopened automatically on fatal errors
+static sqlite3 *g_expDb = NULL;
+
+// Returns true if the error is fatal and the connection should be reset
+static bool _dbIsFatalError(int rc)
 {
-	ALERT(at_error, "Player EXP DB: Failed to %s (%s)\n", action, sqlite3_errmsg(db));
-	sqlite3_finalize(stmt);
-	if (db && close)
-		sqlite3_close(db);	
+	switch (rc)
+	{
+	case SQLITE_CORRUPT:
+	case SQLITE_CANTOPEN:
+	case SQLITE_IOERR:
+	case SQLITE_FULL:
+	case SQLITE_NOTADB:
+		return true;
+	default:
+		return false;
+	}
+}
+
+// Logs a SQLite error. Finalizes stmt if provided.
+// On fatal DB errors, closes and NULLs the persistent connection so it reopens next time.
+static bool _dbError(const char *action, sqlite3_stmt *stmt = NULL)
+{
+	int rc = g_expDb ? sqlite3_errcode(g_expDb) : SQLITE_ERROR;
+	ALERT(at_error, "Player EXP DB: Failed to %s (%s)\n", action, g_expDb ? sqlite3_errmsg(g_expDb) : "no connection");
+	if (stmt)
+		sqlite3_finalize(stmt);
+	if (_dbIsFatalError(rc))
+	{
+		ALERT(at_error, "Player EXP DB: Fatal error, closing connection for reopen\n");
+		if (g_expDb)
+		{
+			sqlite3_close(g_expDb);
+			g_expDb = NULL;
+		}
+	}
 	return false;
 }
 
-bool _dbOpen(sqlite3 **db)
+// Opens the persistent connection if not already open.
+// Creates the schema on first open.
+static bool _dbOpen( void )
 {
-	if (!db)
-		return false;
-	if (*db)
+	if (g_expDb)
 		return true;
 
 	char file[1024];
@@ -233,54 +263,70 @@ bool _dbOpen(sqlite3 **db)
 	strncat(file, playerinfofile.string, sizeof(file) - strlen(file) - 1);
 
 #ifndef WIN32 /// LINUX
-	while (slash = strstr(file, "\\"))
+	while ((slash = strstr(file, "\\")))
 		*slash = '/';
 #else /// WINDOWS
-	while (slash = strstr(file, "/"))
+	while ((slash = strstr(file, "/")))
 		*slash = '\\';
 #endif
 
 	ALERT(at_console, "Player EXP DB: Opening '%s'\n", file);
 
-	if (sqlite3_open(file, db) != SQLITE_OK) {
-		_dbError("open", *db);
-		*db = NULL;
+	if (sqlite3_open(file, &g_expDb) != SQLITE_OK)
+	{
+		ALERT(at_error, "Player EXP DB: Failed to open (%s)\n", sqlite3_errmsg(g_expDb));
+		sqlite3_close(g_expDb);
+		g_expDb = NULL;
 		return false;
 	}
-	return true;
-}
 
-bool _uCreateExpSchema(sqlite3 *extDb)
-{
-	sqlite3 *db = extDb;
-	if (!db && !_dbOpen(&db))
+	// Ensure schema exists on every open
+	if (sqlite3_exec(g_expDb, "CREATE TABLE IF NOT EXISTS player (steamid TEXT PRIMARY KEY, exp DOUBLE NOT NULL, time INT NOT NULL)", NULL, NULL, NULL) != SQLITE_OK)
+	{
+		ALERT(at_error, "Player EXP DB: Failed to create schema (%s)\n", sqlite3_errmsg(g_expDb));
+		sqlite3_close(g_expDb);
+		g_expDb = NULL;
 		return false;
+	}
 
-	if (sqlite3_exec(db, "create table player (steamid text primary key, exp double not null, time int not null)", NULL, NULL, NULL) != SQLITE_OK)
-		return _dbError("create player table", db);
-	if (!extDb)
-		sqlite3_close(db);
 	return true;
 }
 
-bool _uLoadPlayerExp(CBasePlayer *plr, sqlite3 *extDb)
+void uCloseExpDb( void )
+{
+	if (g_expDb)
+	{
+		sqlite3_close(g_expDb);
+		g_expDb = NULL;
+		ALERT(at_console, "Player EXP DB: Connection closed\n");
+	}
+}
+
+// Safely copies a Steam ID into a fixed buffer with guaranteed null termination
+static void _getSteamId(CBasePlayer *plr, char *id, int idSize)
+{
+	const char *authId = GETPLAYERAUTHID(plr->edict());
+	strncpy(id, authId, idSize - 1);
+	id[idSize - 1] = '\0';
+}
+
+static bool _uLoadPlayerExp(CBasePlayer *plr)
 {
 	if (savexp.value == 0.0f)
 		return true;
 
-	sqlite3 *db = extDb;
-	if (!db && !_dbOpen(&db))
+	if (!_dbOpen())
 		return false;
 
 	char id[128];
-	strncpy(id, GETPLAYERAUTHID(plr->edict()), 128);
+	_getSteamId(plr, id, sizeof(id));
 
 	sqlite3_stmt *stmt = NULL;
-	if (sqlite3_prepare_v2(db, "select exp, time from player where steamid=?", -1, &stmt, NULL) != SQLITE_OK)
-		return _dbError("prepare load query", db, stmt);
+	if (sqlite3_prepare_v2(g_expDb, "SELECT exp, time FROM player WHERE steamid=?", -1, &stmt, NULL) != SQLITE_OK)
+		return _dbError("prepare load query", stmt);
 
-	if (sqlite3_bind_text(stmt, 1, id, strlen(id), NULL) != SQLITE_OK)
-		return _dbError("bind load id", db, stmt);
+	if (sqlite3_bind_text(stmt, 1, id, strlen(id), SQLITE_TRANSIENT) != SQLITE_OK)
+		return _dbError("bind load id", stmt);
 
 	int step = sqlite3_step(stmt);
 	double exp = 0;
@@ -292,7 +338,7 @@ bool _uLoadPlayerExp(CBasePlayer *plr, sqlite3 *extDb)
 		saveTime = sqlite3_column_int(stmt, 1);
 	}
 	else if (step != SQLITE_DONE)
-		return _dbError("run load query", db, stmt);
+		return _dbError("run load query", stmt);
 
 	plr->expLoaded = true;
 	float age = (time(NULL) - saveTime) / 3600.0f;
@@ -305,8 +351,6 @@ bool _uLoadPlayerExp(CBasePlayer *plr, sqlite3 *extDb)
 		ALERT(at_console, "Exp for %s has expired (age %f)\n", id, age);
 
 	sqlite3_finalize(stmt);
-	if (!extDb)
-		sqlite3_close(db);
 	return true;
 }
 
@@ -315,7 +359,45 @@ bool uLoadPlayerExp(CBasePlayer *plr)
 	if (!uUseSqlite())
 		return false;
 
-	return _uLoadPlayerExp(plr, NULL);
+	return _uLoadPlayerExp(plr);
+}
+
+bool uSavePlayerExp(CBasePlayer *plr)
+{
+	if (savexp.value == 0.0f)
+		return true;
+
+	if (!uUseSqlite())
+		return false;
+
+	if (!plr || !plr->expLoaded)
+		return false;
+
+	if (!_dbOpen())
+		return false;
+
+	char id[128];
+	_getSteamId(plr, id, sizeof(id));
+	if (!strlen(id))
+		return false;
+
+	sqlite3_stmt *stmt = NULL;
+	if (sqlite3_prepare_v2(g_expDb, "INSERT OR REPLACE INTO player (steamid, exp, time) VALUES(?,?,?)", -1, &stmt, NULL) != SQLITE_OK)
+		return _dbError("prepare single insert", stmt);
+
+	if (sqlite3_bind_text(stmt, 1, id, strlen(id), SQLITE_TRANSIENT) != SQLITE_OK)
+		return _dbError("bind single insert id", stmt);
+	if (sqlite3_bind_double(stmt, 2, (double)plr->exp) != SQLITE_OK)
+		return _dbError("bind single insert exp", stmt);
+	if (sqlite3_bind_int(stmt, 3, time(NULL)) != SQLITE_OK)
+		return _dbError("bind single insert time", stmt);
+
+	if (sqlite3_step(stmt) != SQLITE_DONE)
+		return _dbError("run single insert", stmt);
+
+	sqlite3_finalize(stmt);
+	ALERT(at_console, "Saved exp for player %s: %f\n", id, plr->exp);
+	return true;
 }
 
 bool uSaveAllExp()
@@ -326,23 +408,20 @@ bool uSaveAllExp()
 	if (!uUseSqlite())
 		return false;
 
-	sqlite3 *db = NULL;
-	if (!_dbOpen(&db))
+	if (!_dbOpen())
 		return false;
 
 	sqlite3_stmt *stmt = NULL;
-	if (sqlite3_prepare_v2(db, "insert or replace into player (steamid, exp, time) values(?,?,?)", -1, &stmt, NULL) != SQLITE_OK)
+	if (sqlite3_prepare_v2(g_expDb, "INSERT OR REPLACE INTO player (steamid, exp, time) VALUES(?,?,?)", -1, &stmt, NULL) != SQLITE_OK)
+		return _dbError("prepare insert statement", stmt);
+
+	if (sqlite3_exec(g_expDb, "BEGIN TRANSACTION", NULL, NULL, NULL) != SQLITE_OK)
 	{
-		_dbError("prepare insert statement", db, stmt, false);
-		_uCreateExpSchema(db);
 		sqlite3_finalize(stmt);
-		sqlite3_close(db);
-		return false;
+		return _dbError("start transaction");
 	}
 
-	if (sqlite3_exec(db, "begin transaction", NULL, NULL, NULL) != SQLITE_OK)
-		return _dbError("start transaction", db);
-
+	bool ok = true;
 	char id[128];
 	int i = 0;
 	for (i = 1; i <= MAX_PLAYERS; i++)
@@ -353,32 +432,51 @@ bool uSaveAllExp()
 
 		if (!plr->expLoaded)
 		{
-			_uLoadPlayerExp(plr, db);
+			_uLoadPlayerExp(plr);
 			continue;
 		}
 
-		strncpy(id, GETPLAYERAUTHID(plr->edict()), 128);
+		_getSteamId(plr, id, sizeof(id));
 		if (!strlen(id))
 			continue;
 
-		if (sqlite3_bind_text(stmt, 1, id, strlen(id), NULL) != SQLITE_OK)
-			return _dbError("bind insert id", db, stmt);
+		if (sqlite3_bind_text(stmt, 1, id, strlen(id), SQLITE_TRANSIENT) != SQLITE_OK)
+		{
+			ok = _dbError("bind insert id", stmt);
+			break;
+		}
 		if (sqlite3_bind_double(stmt, 2, (double)plr->exp) != SQLITE_OK)
-			return _dbError("bind insert exp", db, stmt);
+		{
+			ok = _dbError("bind insert exp", stmt);
+			break;
+		}
 		if (sqlite3_bind_int(stmt, 3, time(NULL)) != SQLITE_OK)
-			return _dbError("bind insert time", db, stmt);
+		{
+			ok = _dbError("bind insert time", stmt);
+			break;
+		}
 
 		if (sqlite3_step(stmt) != SQLITE_DONE)
-			return _dbError("run insert statement", db, stmt);
-		//ALERT(at_console, "Saved exp for player %s: %f\n", id, plr->exp);
+		{
+			ok = _dbError("run insert statement", stmt);
+			break;
+		}
 		sqlite3_reset(stmt);
 	}
+
+	if (!ok)
+	{
+		// Implicit rollback: stmt already finalized by _dbError, just rollback the transaction
+		if (g_expDb)
+			sqlite3_exec(g_expDb, "ROLLBACK TRANSACTION", NULL, NULL, NULL);
+		return false;
+	}
+
 	sqlite3_finalize(stmt);
 
-	if (sqlite3_exec(db, "commit transaction", NULL, NULL, NULL) != SQLITE_OK)
-		return _dbError("commit transaction", db);
+	if (sqlite3_exec(g_expDb, "COMMIT TRANSACTION", NULL, NULL, NULL) != SQLITE_OK)
+		return _dbError("commit transaction");
 
-	sqlite3_close(db);
 	ALERT(at_console, "Saved exp for all players\n");
 	return true;
 }

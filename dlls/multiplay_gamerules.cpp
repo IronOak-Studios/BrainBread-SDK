@@ -31,6 +31,7 @@
 #include	"items.h"
 #include	"voice_gamemgr.h"
 #include	"hltv.h"
+#include	"pe_utils.h"
 
 extern DLL_GLOBAL CGameRules	*g_pGameRules;
 extern DLL_GLOBAL BOOL	g_fGameOver;
@@ -1252,6 +1253,8 @@ void CHalfLifeMultiplay :: GoToIntermission( void )
 
 	g_fGameOver = TRUE;
 	m_iEndIntermissionButtonHit = FALSE;
+
+	uSaveAllExp();
 
   //list<CBaseEntity*>::iterator i;
 

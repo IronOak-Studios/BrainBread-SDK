@@ -19,4 +19,6 @@ void uPrepSpawn( );
 float uNearestPlayerDist( vec3_t origin );
 void uSavePlayerData( );
 bool uLoadPlayerExp(CBasePlayer *plr);
+bool uSavePlayerExp(CBasePlayer *plr);
 bool uSaveAllExp();
+void uCloseExpDb( void );

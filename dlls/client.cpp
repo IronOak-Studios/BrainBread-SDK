@@ -42,6 +42,7 @@
 #include "pe_rules.h"
 #include "pe_rules_hacker.h"
 #include "pe_rules_vip.h"
+#include "pe_utils.h"
 #include "build.h"
 
 edict_t *EntSelectSpawnPoint( CBasePlayer *pPlayer );
@@ -805,8 +806,9 @@ void ServerDeactivate( void )
 
 	g_serveractive = 0;
 
-	// Peform any shutdown operations here...
-	//
+	// Save all player exp and close the database before shutdown
+	uSaveAllExp();
+	uCloseExpDb();
 }
 
 void ServerActivate( edict_t *pEdictList, int edictCount, int clientMax )

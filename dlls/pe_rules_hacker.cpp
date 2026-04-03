@@ -993,6 +993,7 @@ void cPEHacking::ClientDisconnected( edict_t *pClient )
     pPlayer->clientFrags = 0;
     pPlayer->clientDeaths = 0;
    	pPlayer->m_fPointsMax = 0;
+		uSavePlayerExp( pPlayer );
     pPlayer->exp = 0;
 		pPlayer->expLoaded = false;
     SetBits( pPlayer->pev->flags, FL_NOTARGET );
