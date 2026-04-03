@@ -1223,6 +1223,10 @@ void CBasePlayer::Killed( entvars_t *pevAttacker, int iGib )
 		WRITE_STRING( "Zombie transformation" );
 		WRITE_COORD( 0 );
 	MESSAGE_END( );
+	MESSAGE_BEGIN( MSG_ONE, gmsgSmallCnt, NULL, edict( ) );
+		WRITE_STRING( "Survive!" );
+		WRITE_COORD( 0 );
+	MESSAGE_END( );
 
 	if ( m_pTank != NULL )
 	{
@@ -2392,42 +2396,46 @@ void CBasePlayer::PreThink(void)
   if( m_fTransformTime <= gpGlobals->time && m_bTransform )
   {
     pev->frags -= 10;
-	  if( m_pActiveItem )
-		  DropPlayerItem( (char*)STRING( m_pActiveItem->pev->classname ) );
     m_bTransform = FALSE;
-    pev->health = PLR_HP(this);
-    pev->max_health = PLR_HP(this);
-    ((cPEHacking*)g_pGameRules)->SetTeam( 2, this, 0 );
     m_sInfo.team = 2;
-    // Cancel holdout progress bar -- no longer a human survivor
-    MESSAGE_BEGIN( MSG_ONE, gmsgSmallCnt, NULL, edict( ) );
-      WRITE_STRING( "Survive!" );
-      WRITE_COORD( 0 );
-    MESSAGE_END( );
-    DropPlayerItem( "bb_objective_item" );
-	  RemoveAllItems( FALSE );
-	  m_iCurSlot = 1;
-	  uEqPlr( this, WEAPON_HAND );
-	  m_iPrimaryWeap = WEAPON_HAND;
-    rehbutton = false;
     if( g_teamplay == 1 )
       m_fTransformTime = gpGlobals->time + REHUMAN_TIMER;
     else
       m_fTransformTime = 0;
     zombieKills = REHUMAN_KILLS;
-    Notify( this, NTC_ZOMBIE, max( 0.0f, zombieKills ) );
-		NotifyMid( this, NTM_ZOMBIE );
-    MESSAGE_BEGIN( MSG_ONE, gmsgPlayMusic, NULL, edict( ) );
-      WRITE_BYTE( 3 );
-      WRITE_COORD( SPEED_FORMULA );
-    MESSAGE_END( );
-   	g_engfuncs.pfnSetClientMaxspeed( ENT(pev), SPEED_FORMULA );
-    UTIL_EdictScreenFade( edict(), Vector( 128, 0, 0 ), 0.1, 50, 85, FFADE_MODULATE | FFADE_STAYOUT );
-    ResetRadar( );
-    InitRadar( );
-    EnableTeam( pev, m_iTeam );
+
+    if( IsAlive() )
+    {
+      ((cPEHacking*)g_pGameRules)->SetTeam(2, this, 0);
+      if( m_pActiveItem )
+        DropPlayerItem( (char*)STRING( m_pActiveItem->pev->classname ) );
+      pev->health = PLR_HP(this);
+      pev->max_health = PLR_HP(this);
+      // Cancel holdout progress bar -- no longer a human survivor
+      MESSAGE_BEGIN( MSG_ONE, gmsgSmallCnt, NULL, edict( ) );
+        WRITE_STRING( "Survive!" );
+        WRITE_COORD( 0 );
+      MESSAGE_END( );
+      DropPlayerItem( "bb_objective_item" );
+	    RemoveAllItems( FALSE );
+	    m_iCurSlot = 1;
+	    uEqPlr( this, WEAPON_HAND );
+	    m_iPrimaryWeap = WEAPON_HAND;
+      rehbutton = false;
+      Notify( this, NTC_ZOMBIE, max( 0.0f, zombieKills ) );
+		  NotifyMid( this, NTM_ZOMBIE );
+      MESSAGE_BEGIN( MSG_ONE, gmsgPlayMusic, NULL, edict( ) );
+        WRITE_BYTE( 3 );
+        WRITE_COORD( SPEED_FORMULA );
+      MESSAGE_END( );
+			g_engfuncs.pfnSetClientMaxspeed( ENT(pev), SPEED_FORMULA );
+      UTIL_EdictScreenFade( edict(), Vector( 128, 0, 0 ), 0.1, 50, 85, FFADE_MODULATE | FFADE_STAYOUT );
+      ResetRadar( );
+      InitRadar( );
+      EnableTeam( pev, m_iTeam );
+    }
   }
-  if( ( m_fTransformTime - 10 ) <= gpGlobals->time && m_bTransform && !pev->fuser4 )
+  if( ( m_fTransformTime - 10 ) <= gpGlobals->time && m_bTransform && !pev->fuser4 && IsAlive() )
   {
     pev->health = 200;
     pev->fuser4 = 1;
