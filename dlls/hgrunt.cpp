@@ -936,7 +936,7 @@ void CHGrunt :: HandleAnimEvent( MonsterEvent_t *pEvent )
 				UTIL_MakeVectors( pev->angles );
 				pHurt->pev->punchangle.x = 15;
 				pHurt->pev->velocity = pHurt->pev->velocity + gpGlobals->v_forward * 100 + gpGlobals->v_up * 50;
-				pHurt->TakeDamage( pev, pev, gSkillData.hgruntDmgKick, DMG_CLUB );
+				pHurt->TakeDamage( pev, pev, gSkillData.hgruntDmgKick / 0.65, DMG_CLUB ); // compensate for dmgratio now applying to NPC melee
 			}
 		}
 		break;

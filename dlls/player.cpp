@@ -668,8 +668,6 @@ void CBasePlayer :: TraceAttack( entvars_t *pevAttacker, float flDamage, Vector 
     if( m_iTeam == 2 )
       flDamage *= 0.20;
 
-		if( dmgratio.value > 0 )
-			flDamage *= dmgratio.value;
 		/*if( strlen( gameplay.string ) > 0 )
 		{
 			float svdmg = 1.0f;
@@ -828,9 +826,14 @@ int CBasePlayer :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, 
 			MESSAGE_END();
 		}
 	}	
+	// apply damage ratio to combat damage from living entities (players and NPCs)
+	if( dmgratio.value > 0 && pAttacker && pAttacker != this &&
+		(pAttacker->IsPlayer() || FBitSet(pAttacker->pev->flags, FL_MONSTER)) )
+		flDamage *= dmgratio.value;
+
 	// this cast to INT is critical!!! If a player ends up with 0.5 health, the engine will get that
 	// as an int (zero) and think the player is dead! (this will incite a clientside screentilt, etc)
-	fTookDamage = CBaseMonster::TakeDamage(pevInflictor, pevAttacker, (int)flDamage, bitsDamageType);
+	fTookDamage = CBaseMonster::TakeDamage(pevInflictor, pevAttacker, (int)(flDamage + 0.5), bitsDamageType);
 
 	// reset damage time countdown for each type of time based damage player just sustained
 

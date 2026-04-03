@@ -652,6 +652,7 @@ void CZombie :: HandleAnimEvent( MonsterEvent_t *pEvent )
 	if( !diff.value )
 		diff.value = 0.01;
   dmg *= diff.value;
+  dmg /= 0.65; // compensate for dmgratio now applying to NPC melee in CBasePlayer::TakeDamage
 	switch( pEvent->event )
 	{
 		case ZOMBIE_AE_ATTACK_RIGHT:
