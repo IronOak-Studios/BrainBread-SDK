@@ -198,9 +198,7 @@ void CHudLens::CheckFlares( )
 	vec3_t orig = v_origin + Vector( 0, 0, 21 );
 	vec3_t end;
 	pmtrace_t tr;
-	char *tex = NULL;
 	bool visible = false;
-	//char cmd[512];
 
 	for( int i = 0; i < m_iIndex; i++ )
 	{
@@ -210,11 +208,11 @@ void CHudLens::CheckFlares( )
 			end = m_vecLOrigin[i];
 
     tr = *(gEngfuncs.PM_TraceLine( (float *)&orig, (float *)&end, PM_TRACELINE_ANYVISIBLE, 2 /*point sized hull*/, -1 ) );
-		tex = (char *)gEngfuncs.pEventAPI->EV_TraceTexture( tr.ent, orig, tr.endpos );
 
-		visible = ( tex && !strcmp( tex, "sky" ) ) || ( tr.fraction == 1.0f );
-		//sprintf( cmd, "%s, %s, %f\n", visible ? "vis" : "invis", tex, tr.fraction );
-		//ConsolePrint( cmd );
+		// Use PM_PointContents at the hit point to distinguish sky from walls.
+		// Sky brush endpos returns CONTENTS_SKY; walls return CONTENTS_EMPTY.
+		visible = ( tr.fraction == 1.0f )
+			|| ( gEngfuncs.PM_PointContents( tr.endpos, NULL ) == CONTENTS_SKY );
 
 		if( m_iActive[i] && !visible )
 		{
