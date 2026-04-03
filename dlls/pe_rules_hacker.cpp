@@ -1252,34 +1252,60 @@ BOOL cPEHacking::ClientCommand( CBasePlayer *pPlayer, const char *pcmd )
   {
     if( CMD_ARGC( ) < 2 )
 			return TRUE;
-    int num;
-    if( strlen( pPlayer->m_sModel ) == 10 )
-      num = pPlayer->m_sModel[9] - 48 ;
-    else if( strlen( pPlayer->m_sModel ) == 9 )
-      num = pPlayer->m_sModel[8] - 48 ;
+    if( pPlayer->m_fNextSpecCmd > gpGlobals->time )
+      return TRUE;
+
+    int model = atoi( CMD_ARGV( 1 ) );
+    if( model < 1 || model > 6 )
+      return TRUE;
+
+    // Determine what team the player should be on
+    int newTeam;
+    if( g_teamplay == 2 && ( !ROUND_TIME || ( ( m_flRoundEndTime - gpGlobals->time ) <= ( ROUND_TIME - ( ROUND_TIME * 0.15 ) ) ) ) )
+      newTeam = 2;
+    else if( pPlayer->zombieKills || pPlayer->m_iTeam == 2 || pPlayer->escaped )
+      newTeam = 2;
     else
-      num = -1;
-    if( num > 0 )
+      newTeam = 1;
+
+    // Extract current model number
+    int oldNum = -1;
+    if( strlen( pPlayer->m_sModel ) == 10 )
+      oldNum = pPlayer->m_sModel[9] - '0';
+    else if( strlen( pPlayer->m_sModel ) == 9 )
+      oldNum = pPlayer->m_sModel[8] - '0';
+
+    // Nothing changed, skip entirely
+    if( newTeam == pPlayer->m_iTeam && model == oldNum )
+      return TRUE;
+
+    pPlayer->m_fNextSpecCmd = gpGlobals->time + 3;
+
+    // Notify old model slot freed
+    if( oldNum > 0 )
     {
       MESSAGE_BEGIN( MSG_ALL, gmsgTeamInfo, NULL );
-		    WRITE_BYTE( 102 );
-		    WRITE_BYTE( num );
+        WRITE_BYTE( 102 );
+        WRITE_BYTE( oldNum );
       MESSAGE_END( );
     }
+    // Notify new model slot taken
     MESSAGE_BEGIN( MSG_ALL, gmsgTeamInfo, NULL );
-		  WRITE_BYTE( 103 );
-		  WRITE_BYTE( atoi( CMD_ARGV( 1 ) ) );
+      WRITE_BYTE( 103 );
+      WRITE_BYTE( model );
     MESSAGE_END( );
 
-    if( g_teamplay == 2 && ( !ROUND_TIME ||( ( m_flRoundEndTime - gpGlobals->time )  <= ( ROUND_TIME - ( ROUND_TIME * 0.15 ) ) ) ) )
-      pPlayer->m_sInfo.team = 2;
-    else if( /*pPlayer->zombieKills ||*/ pPlayer->m_iTeam == 2 || pPlayer->escaped )
-	    pPlayer->m_sInfo.team = 2;
-    else //if( pPlayer->m_iTeam == 1 )
-      pPlayer->m_sInfo.team = 1;
-    //else
-    //  pPlayer->m_sInfo.team = 0;
-    SetTeam( pPlayer->m_sInfo.team, pPlayer, 0, atoi( CMD_ARGV( 1 ) ) );
+    if( newTeam == pPlayer->m_iTeam )
+    {
+      const char *prefix = ( pPlayer->m_iTeam == 1 ) ? "security" : "syndicate";
+      snprintf( pPlayer->m_sModel, sizeof(pPlayer->m_sModel), "%s%d", prefix, model );
+      SET_MDL( pPlayer->m_sModel );
+      ClientUserInfoChanged( pPlayer, g_engfuncs.pfnGetInfoKeyBuffer( pPlayer->edict() ) );
+      return TRUE;
+    }
+
+    pPlayer->m_sInfo.team = newTeam;
+    SetTeam( pPlayer->m_sInfo.team, pPlayer, 0, model );
     return TRUE;
   }
   else if( FStrEq( pcmd, "modelmenu" ) )
@@ -1658,13 +1684,13 @@ BOOL cPEHacking::ClientCommand( CBasePlayer *pPlayer, const char *pcmd )
 	}
 	else if( FStrEq(pcmd, "userlist" ) )
 	{
-		ClientPrint( pPlayer->pev, HUD_PRINTCONSOLE, "Cl#   Name  <WonID>\n" );
+		ClientPrint( pPlayer->pev, HUD_PRINTCONSOLE, "Cl#   Name\n" );
 		for( int i = 1; i <= MAX_PLAYERS; i++ )
 		{
 			CBasePlayer* pl = (CBasePlayer*)UTIL_PlayerByIndex( i );
 			if( pl && strlen( STRING( pl->pev->netname ) ) )
 			{
-				ClientPrint( pPlayer->pev, HUD_PRINTCONSOLE, UTIL_VarArgs( "%d: %s <%s>\n", i, STRING(pl->pev->netname), GETPLAYERAUTHID( pl->edict( ) ) ) );
+				ClientPrint( pPlayer->pev, HUD_PRINTCONSOLE, UTIL_VarArgs( "%d: %s\n", i, STRING(pl->pev->netname) ) );
 			}
 		}
 		return TRUE;
@@ -1680,9 +1706,14 @@ BOOL cPEHacking::ClientCommand( CBasePlayer *pPlayer, const char *pcmd )
 			return TRUE;
 		}
 
+		if( gpGlobals->time <= pPlayer->m_fNextVotemap )
+		{
+			ClientPrint( pPlayer->pev, HUD_PRINTTALK, UTIL_VarArgs( "You have to wait %d seconds until you can start a map vote again\n", (int)( pPlayer->m_fNextVotemap - gpGlobals->time ) ) );
+			return TRUE;
+		}
 		if( gpGlobals->time <= m_fNextVote )
 		{
-			ClientPrint( pPlayer->pev, HUD_PRINTTALK, UTIL_VarArgs( "You have to wait %d seconds until you can start a map vote again\n", (int)( m_fNextVote - gpGlobals->time ) ) );
+			ClientPrint( pPlayer->pev, HUD_PRINTTALK, UTIL_VarArgs( "A map vote can be started in %d seconds\n", (int)( m_fNextVote - gpGlobals->time ) ) );
 			return TRUE;
 		}
 		
@@ -1696,6 +1727,7 @@ BOOL cPEHacking::ClientCommand( CBasePlayer *pPlayer, const char *pcmd )
 				return TRUE;
 			}
 			m_fNextVote = gpGlobals->time + 180;
+			pPlayer->m_fNextVotemap = gpGlobals->time + 300;
 			m_iYesVotes = 0;
 			m_iNoVotes = 0;
 			strncpy( m_sVoteMap, CMD_ARGV( 1 ), sizeof(m_sVoteMap) - 1 );

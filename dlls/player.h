@@ -589,6 +589,9 @@ public:
   int clientFrags;
   int clientDeaths;
   float statsRatio;
+
+  float m_fNextSpecCmd;		// shared cooldown for spectate/unspectate/fullupdate
+  float m_fNextVotemap;		// per-player votemap cooldown
 };
 
 #define AUTOAIM_2DEGREES  0.0348994967025

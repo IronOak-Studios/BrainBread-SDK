@@ -611,13 +611,20 @@ void ClientCommand( edict_t *pEntity )
 	}
 	else if ( FStrEq(pcmd, "fullupdate" ) )
 	{
-		GetClassPtr((CBasePlayer *)pev)->ForceClientDllUpdate(); 
+		CBasePlayer *pPlayer = GetClassPtr((CBasePlayer *)pev);
+		if( pPlayer->m_fNextSpecCmd > gpGlobals->time )
+			return;
+		pPlayer->m_fNextSpecCmd = gpGlobals->time + 3;
+		pPlayer->ForceClientDllUpdate();
 	}
     else if ( FStrEq(pcmd, "spectate" ) )
     {
 		  CBasePlayer *pPlayer = GetClassPtr((CBasePlayer *)pev);
+		  if( pPlayer->m_fNextSpecCmd > gpGlobals->time )
+			  return;
       if( pPlayer->m_iTeam == 2 )
       {
+		    pPlayer->m_fNextSpecCmd = gpGlobals->time + 3;
 		    pPlayer->m_sInfo.team = 0;
 		    ((cPEHacking*)g_pGameRules)->SetTeam( pPlayer->m_sInfo.team, pPlayer, 1 );
         pPlayer->pev->frags -= 10;
@@ -628,6 +635,12 @@ void ClientCommand( edict_t *pEntity )
     else if ( FStrEq(pcmd, "unspectate" ) )
     {
 		  CBasePlayer *pPlayer = GetClassPtr((CBasePlayer *)pev);
+		  if( !pPlayer->IsObserver() )
+			  return;
+		  if( pPlayer->m_fNextSpecCmd > gpGlobals->time )
+			  return;
+		  pPlayer->m_fNextSpecCmd = gpGlobals->time + 3;
+
       if( pPlayer->zombieKills || pPlayer->escaped )
  		    pPlayer->m_sInfo.team = 2;
       else
