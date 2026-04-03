@@ -339,7 +339,7 @@ void cPEHacking::CheckRoundEnd( )
           pPlayer->clientlevel = pPlayer->level;
         }
 
-				EMIT_SOUND(ENT(pPlayer->pev), CHAN_STATIC, "common/null.wav", 1, ATTN_NORM);
+				STOP_SOUND(ENT(pPlayer->pev), CHAN_STATIC, "common/null.wav");
 			
 				if( ( pPlayer->m_sInfo.team != 1 ) && ( pPlayer->m_sInfo.team != 2 ) )
 					continue;

@@ -64,7 +64,7 @@ void cPEVip::CheckRoundEnd( )
 				if (!pPlayer)
 					continue;
 
-				EMIT_SOUND(ENT(pPlayer->pev), CHAN_STATIC, "common/null.wav", 1, ATTN_NORM);
+				STOP_SOUND(ENT(pPlayer->pev), CHAN_STATIC, "common/null.wav");
 			
 				if( ( pPlayer->m_iTeam != 1 ) && ( pPlayer->m_iTeam != 2 ) )
 					continue;
