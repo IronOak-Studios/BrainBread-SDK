@@ -1767,6 +1767,25 @@ Go to the trouble of combining multiple pellets into a single damage call.
 This version is used by Players, uses the random seed generator to sync client and server side shots.
 ================
 */
+// Spawning zombies are not linked as SOLID so engine traces miss them.
+// Manually test the bullet line against each one via pfnTraceModel.
+static void CheckSpawningZombies( const Vector &vecSrc, const Vector &vecEnd, TraceResult &tr )
+{
+	CBaseEntity *pZ = NULL;
+	while( ( pZ = UTIL_FindEntityByClassname( pZ, "monster_zombie" ) ) != NULL )
+	{
+		if( pZ->pev->takedamage != DAMAGE_AIM || pZ->pev->movetype == MOVETYPE_STEP )
+			continue;
+		TraceResult ztr;
+		UTIL_TraceModel( vecSrc, vecEnd, point_hull, ENT( pZ->pev ), &ztr );
+		if( ztr.flFraction < tr.flFraction )
+		{
+			tr = ztr;
+			tr.pHit = ENT( pZ->pev );
+		}
+	}
+}
+
 extern void Explosion( entvars_t* pev, float flDamage, float flRadius );
 Vector CBaseEntity::FireBulletsPlayer ( ULONG cShots, Vector vecSrc, Vector vecDirShooting, Vector vecSpread, float flDistance, int iBulletType, int iTracerFreq, int iDamage, entvars_t *pevAttacker, int shared_rand )
 {
@@ -1897,7 +1916,8 @@ again:
 
 		vecEnd = vecSrc + vecDir * flDistance;
 		UTIL_TraceLine(vecSrc, vecEnd, dont_ignore_monsters, ENT(pev)/*pentIgnore*/, &tr);
-		
+		CheckSpawningZombies( vecSrc, vecEnd, tr );
+
 		// do damage, paint decals
 		if (tr.flFraction != 1.0)
 		{

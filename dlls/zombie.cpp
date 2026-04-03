@@ -57,6 +57,7 @@ public:
 	void SetYawSpeed( void );
 	void EXPORT MonsterThink();
 	void EXPORT SpawningThink();
+	void EXPORT SpawningDeathThink();
 	int  Classify ( void );
 	void HandleAnimEvent( MonsterEvent_t *pEvent );
 	int IgnoreConditions ( void );
@@ -212,7 +213,34 @@ void CZombie::Killed( entvars_t *pevAttacker, int iGib )
 		  WRITE_SHORT( ((CBasePlayer*)ent)->m_iDeaths );
 	  MESSAGE_END( );
   }*/
+  // If killed during fade-in/spawn (before MonsterInit), the spawning think
+  // functions are still active. Play the death animation, then fade out.
+  BOOL spawning = ( m_MonsterState == MONSTERSTATE_NONE );
   CBaseMonster::Killed( pevAttacker, iGib );
+  if( spawning )
+  {
+    pev->solid = SOLID_NOT;
+    pev->takedamage = DAMAGE_NO;
+
+    // Pick a death animation
+    pev->deadflag = DEAD_NO; // GetDeathActivity requires this
+    Activity deathAct = GetDeathActivity();
+    pev->deadflag = DEAD_DYING;
+    int iSequence = LookupActivity( deathAct );
+    if( iSequence != -1 )
+    {
+      pev->sequence = iSequence;
+      pev->frame = 0;
+      ResetSequenceInfo();
+      m_fAnimTimeout = gpGlobals->time + 4;
+      SetThink( &CZombie::SpawningDeathThink );
+      pev->nextthink = gpGlobals->time + 0.1;
+    }
+    else
+    {
+      FadeMonster();
+    }
+  }
   pev->fuser4 = 0;
 }
 
@@ -791,6 +819,9 @@ void CZombie :: Spawn()
 	if( !diff.value )
 		diff.value = 0.01;
   pev->health *= diff.value;
+	pev->takedamage		= DAMAGE_AIM;
+	pev->deadflag		= DEAD_NO;
+	m_afMemory			= MEMORY_CLEAR;
 	pev->renderamt = 0;
 	pev->rendermode = kRenderTransTexture;
 	pev->view_ofs		= VEC_VIEW;// position of the eyes relative to monster's origin.
@@ -873,6 +904,19 @@ void CZombie::SpawningThink( )
 
 	pev->movetype = MOVETYPE_STEP;
  	MonsterInit();
+}
+
+void CZombie::SpawningDeathThink( )
+{
+	StudioFrameAdvance();
+
+	if( !m_fSequenceFinished && m_fAnimTimeout > gpGlobals->time )
+	{
+		pev->nextthink = gpGlobals->time + 0.1;
+		return;
+	}
+
+	FadeMonster();
 }
 
 //=========================================================
