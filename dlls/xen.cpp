@@ -505,6 +505,8 @@ void CXenSpore :: Spawn( void )
 {
 	Precache();
 
+	if ( pev->skin < 0 || pev->skin >= 3 )
+		pev->skin = 0;
 	SET_MODEL( ENT(pev), pModelNames[pev->skin] );
 	pev->movetype	= MOVETYPE_NONE;
 	pev->solid		= SOLID_BBOX;
@@ -528,6 +530,8 @@ const char *CXenSpore::pModelNames[] =
 
 void CXenSpore :: Precache( void )
 {
+	if ( pev->skin < 0 || pev->skin >= 3 )
+		pev->skin = 0;
 	PRECACHE_MODEL( (char *)pModelNames[pev->skin] );
 }
 

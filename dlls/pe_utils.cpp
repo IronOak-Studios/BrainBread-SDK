@@ -114,7 +114,7 @@ void uSavePlayerData( )
   }
   playerscount = plrlist.size( ) + 32;
   players = new s_xphashitem[playerscount];
-  memset( players, NULL, playerscount * sizeof(s_xphashitem) );
+  memset( players, 0, playerscount * sizeof(s_xphashitem) );
   list<s_xphashitem>::iterator it = plrlist.begin( );
   int o = 0;
   for( ; it != plrlist.end( ); it++ )
@@ -128,7 +128,8 @@ void uSavePlayerData( )
 		CBasePlayer *plr = (CBasePlayer *)UTIL_PlayerByIndex( i );
     if( !plr || !strlen( STRING( plr->pev->netname ) ) )
 			continue;
-    strcpy( id, GETPLAYERAUTHID( plr->edict( ) ) );
+    strncpy( id, GETPLAYERAUTHID( plr->edict( ) ), sizeof(id) );
+    id[sizeof(id) - 1] = '\0';
     hash = ElfHash( id );
     idx = uHashIndex( hash );
     if( idx == -1 )
@@ -144,11 +145,11 @@ void uSavePlayerData( )
       plr->GiveExp( players[idx].value );//uGiveExpToID( id, players[idx].value );
 	}
 
+  char dir[260];
   char file[260];
   char *slash;
-  GET_GAME_DIR( file );
-  strcat( file, "\\" );
-  strcat( file, playerinfofile.string );
+  GET_GAME_DIR( dir );
+  snprintf( file, sizeof(file), "%s\\%s", dir, playerinfofile.string );
 
   if( inittime )
   {
@@ -191,7 +192,7 @@ void uSavePlayerData( )
   if( !fl.is_open( ) )
     return;
   char text[256];
-  sprintf( text, "%ld\n", inittime );
+  snprintf( text, sizeof(text), "%ld\n", inittime );
   fl.write( text, strlen( text ) );
   if( !clearPlayerXp )
   {
@@ -199,7 +200,7 @@ void uSavePlayerData( )
     {
       if( !players[i].key )
         continue;
-      sprintf( text, "%ld %f\n", players[i].key, players[i].value );
+      snprintf( text, sizeof(text), "%ld %f\n", players[i].key, players[i].value );
       fl.write( text, strlen( text ) );
     }
   }

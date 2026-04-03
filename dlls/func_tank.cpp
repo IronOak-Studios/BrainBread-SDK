@@ -192,7 +192,7 @@ void CFuncTank :: Spawn( void )
 
 	if ( m_fireRate <= 0 )
 		m_fireRate = 1;
-	if ( m_spread > MAX_FIRING_SPREADS )
+	if ( m_spread < 0 || m_spread >= MAX_FIRING_SPREADS )
 		m_spread = 0;
 
 	pev->oldorigin = pev->origin;

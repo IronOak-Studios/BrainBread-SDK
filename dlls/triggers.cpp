@@ -754,7 +754,7 @@ void PlayCDTrack( int iTrack )
 
 	if ( iTrack < -1 || iTrack > 30 )
 	{
-		ALERT ( at_console, "TriggerCDAudio - Track %d out of range\n" );
+		ALERT ( at_console, "TriggerCDAudio - Track %d out of range\n", iTrack );
 		return;
 	}
 
@@ -766,7 +766,7 @@ void PlayCDTrack( int iTrack )
 	{
 		char string [ 64 ];
 
-		sprintf( string, "cd play %3d\n", iTrack );
+		snprintf( string, sizeof(string), "cd play %3d\n", iTrack );
 		CLIENT_COMMAND ( pClient, string);
 	}
 }
@@ -1489,14 +1489,16 @@ void CChangeLevel :: KeyValue( KeyValueData *pkvd )
 	{
 		if (strlen(pkvd->szValue) >= cchMapNameMost)
 			ALERT( at_error, "Map name '%s' too long (32 chars)\n", pkvd->szValue );
-		strcpy(m_szMapName, pkvd->szValue);
+		strncpy(m_szMapName, pkvd->szValue, cchMapNameMost);
+		m_szMapName[cchMapNameMost - 1] = '\0';
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "landmark"))
 	{
 		if (strlen(pkvd->szValue) >= cchMapNameMost)
 			ALERT( at_error, "Landmark name '%s' too long (32 chars)\n", pkvd->szValue );
-		strcpy(m_szLandmarkName, pkvd->szValue);
+		strncpy(m_szLandmarkName, pkvd->szValue, cchMapNameMost);
+		m_szLandmarkName[cchMapNameMost - 1] = '\0';
 		pkvd->fHandled = TRUE;
 	}
 	else if (FStrEq(pkvd->szKeyName, "changetarget"))
@@ -1620,7 +1622,8 @@ void CChangeLevel :: ChangeLevelNow( CBaseEntity *pActivator )
 		}
 	}
 	// This object will get removed in the call to CHANGE_LEVEL, copy the params into "safe" memory
-	strcpy(st_szNextMap, m_szMapName);
+	strncpy(st_szNextMap, m_szMapName, sizeof(st_szNextMap));
+	st_szNextMap[sizeof(st_szNextMap) - 1] = '\0';
 
 	m_hActivator = pActivator;
 	SUB_UseTargets( pActivator, USE_TOGGLE, 0 );
@@ -1630,7 +1633,8 @@ void CChangeLevel :: ChangeLevelNow( CBaseEntity *pActivator )
 	pentLandmark = FindLandmark( m_szLandmarkName );
 	if ( !FNullEnt( pentLandmark ) )
 	{
-		strcpy(st_szNextSpot, m_szLandmarkName);
+		strncpy(st_szNextSpot, m_szLandmarkName, sizeof(st_szNextSpot));
+		st_szNextSpot[sizeof(st_szNextSpot) - 1] = '\0';
 		gpGlobals->vecLandmarkOffset = VARS(pentLandmark)->origin;
 	}
 //	ALERT( at_console, "Level touches %d levels\n", ChangeList( levels, 16 ) );
@@ -1664,8 +1668,10 @@ int CChangeLevel::AddTransitionToList( LEVELLIST *pLevelList, int listCount, con
 		if ( pLevelList[i].pentLandmark == pentLandmark && strcmp( pLevelList[i].mapName, pMapName ) == 0 )
 			return 0;
 	}
-	strcpy( pLevelList[listCount].mapName, pMapName );
-	strcpy( pLevelList[listCount].landmarkName, pLandmarkName );
+	strncpy( pLevelList[listCount].mapName, pMapName, sizeof(pLevelList[listCount].mapName) );
+	pLevelList[listCount].mapName[sizeof(pLevelList[listCount].mapName) - 1] = '\0';
+	strncpy( pLevelList[listCount].landmarkName, pLandmarkName, sizeof(pLevelList[listCount].landmarkName) );
+	pLevelList[listCount].landmarkName[sizeof(pLevelList[listCount].landmarkName) - 1] = '\0';
 	pLevelList[listCount].pentLandmark = pentLandmark;
 	pLevelList[listCount].vecLandmarkOrigin = VARS(pentLandmark)->origin;
 
@@ -1785,14 +1791,17 @@ int CChangeLevel::ChangeList( LEVELLIST *pLevelList, int maxList )
 							flags |= FENTTABLE_MOVEABLE;
 						if ( pEntity->pev->globalname && !pEntity->IsDormant() )
 							flags |= FENTTABLE_GLOBAL;
-						if ( flags )
+					if ( flags )
+					{
+						if ( entityCount >= MAX_ENTITY )
 						{
-							pEntList[ entityCount ] = pEntity;
-							entityFlags[ entityCount ] = flags;
-							entityCount++;
-							if ( entityCount > MAX_ENTITY )
-								ALERT( at_error, "Too many entities across a transition!" );
+							ALERT( at_error, "Too many entities across a transition!" );
+							break;
 						}
+						pEntList[ entityCount ] = pEntity;
+						entityFlags[ entityCount ] = flags;
+						entityCount++;
+					}
 //						else
 //							ALERT( at_console, "Failed %s\n", STRING(pEntity->pev->classname) );
 					}
@@ -1844,7 +1853,8 @@ void NextLevel( void )
 	else
 		pChange = GetClassPtr( (CChangeLevel *)VARS(pent));
 	
-	strcpy(st_szNextMap, pChange->m_szMapName);
+	strncpy(st_szNextMap, pChange->m_szMapName, sizeof(st_szNextMap));
+	st_szNextMap[sizeof(st_szNextMap) - 1] = '\0';
 	g_fGameOver = TRUE;
 	
 	if (pChange->pev->nextthink < gpGlobals->time)

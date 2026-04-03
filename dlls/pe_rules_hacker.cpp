@@ -716,7 +716,7 @@ void cPEHacking::EquipPlayer( CBasePlayer *pPlayer )
 	pPlayer->m_iCurSlot = 2;
 
 	//pPlayer->m_iPrimaryWeap = 0;
-	if( slotid[0][pPlayer->m_sInfo.slot[2]] )
+	if( pPlayer->m_sInfo.slot[2] >= 0 && pPlayer->m_sInfo.slot[2] < 35 && slotid[0][pPlayer->m_sInfo.slot[2]] )
 	{
 		pPlayer->m_pLastItem = pPlayer->ItemByName( last );
 		pPlayer->m_iPrimaryWeap = slotid[0][pPlayer->m_sInfo.slot[2]];
@@ -735,7 +735,7 @@ void cPEHacking::EquipPlayer( CBasePlayer *pPlayer )
 			temp = pPlayer->m_sInfo.slot[4];
 		}
 		//ALERT( at_logged, "Weapon: %d Slot: %d\n", temp, pPlayer->m_iCurSlot );
-		if( slotid[1][temp] )
+		if( temp >= 0 && temp < 35 && slotid[1][temp] )
 		{
 			pPlayer->m_pLastItem = pPlayer->ItemByName( last );
 			pPlayer->m_iPrimaryWeap = slotid[1][temp];
@@ -743,6 +743,8 @@ void cPEHacking::EquipPlayer( CBasePlayer *pPlayer )
 			//ALERT( at_logged, "Primary is now: %d\n", slotid[0][pPlayer->m_sInfo.slot[2]] );
 		}
 	}
+	if( pPlayer->m_iPrimaryWeap < 0 || pPlayer->m_iPrimaryWeap >= MAX_WEAPONS )
+		pPlayer->m_iPrimaryWeap = 0;
 	ItemInfo& II = CBasePlayerItem::ItemInfoArray[pPlayer->m_iPrimaryWeap];
 	if( II.iId )
 	{
@@ -938,32 +940,24 @@ int cPEHacking::ClientConnected( edict_t *pEntity, const char *pszName, const ch
 
 void cPEHacking::ClientDisconnected( edict_t *pClient )
 {
-	m_iClients--;
+	m_iClients = max( m_iClients - 1, 0 );
 	if( pClient )
 	{
 		CBasePlayer *pPlayer = (CBasePlayer *)CBaseEntity::Instance( pClient );
 		if( !pPlayer )
 			return;
-		if( pPlayer->m_iTeam == 1 )
+		if( pPlayer->m_iTeam == 1 || pPlayer->m_iTeam == 2 )
 		{
-			m_iPlayers[1]--;
+			int t = pPlayer->m_iTeam;
+			m_iPlayers[t] = max( m_iPlayers[t] - 1, 0 );
 			if( pPlayer->IsAlive( ) )
 			{
-				m_iPlrAlive[0]--;
-				m_iPlrAlive[1]--;
-			}
-		}
-		else if( pPlayer->m_iTeam == 2 )
-		{
-			m_iPlayers[2]--;
-			if( pPlayer->IsAlive( ) )
-			{
-				m_iPlrAlive[0]--;
-				m_iPlrAlive[2]--;
+				m_iPlrAlive[0] = max( m_iPlrAlive[0] - 1, 0 );
+				m_iPlrAlive[t] = max( m_iPlrAlive[t] - 1, 0 );
 			}
 		}
 		else
-			m_iPlayers[0]--;
+			m_iPlayers[0] = max( m_iPlayers[0] - 1, 0 );
 		if( pPlayer->m_bIsSpecial )
 		{
 			m_pHacker = NULL;
@@ -1117,18 +1111,18 @@ void cPEHacking::SetTeam( int iSelection, CBasePlayer *pPlayer, int kill, int mo
       m_iPlrAlive[1]++;
 
 		g_engfuncs.pfnSetClientKeyValue( clientIndex, g_engfuncs.pfnGetInfoKeyBuffer( pPlayer->edict() ), "team", "Not yet undead" );
-    int num;
+    int num = 0;
     if( strlen( pPlayer->m_sModel ) == 10 )
-      num = pPlayer->m_sModel[9] - 48 ;
+      num = pPlayer->m_sModel[9] - '0';
     else if( strlen( pPlayer->m_sModel ) == 9 )
-      num = pPlayer->m_sModel[8] - 48 ;
-    else
+      num = pPlayer->m_sModel[8] - '0';
+    if( num < 1 || num > 6 )
       num = RANDOM_LONG( 1, 6 );
     if( model ) 
       num = model;
     else
       model = num;
-    sprintf( pPlayer->m_sModel, "security%d", num );
+    snprintf( pPlayer->m_sModel, sizeof(pPlayer->m_sModel), "security%d", num );
 
 		SET_MDL( pPlayer->m_sModel );
 		
@@ -1149,12 +1143,12 @@ void cPEHacking::SetTeam( int iSelection, CBasePlayer *pPlayer, int kill, int mo
 		g_engfuncs.pfnSetClientKeyValue( clientIndex, g_engfuncs.pfnGetInfoKeyBuffer( pPlayer->edict() ), "team", "Zombie Horde" );
 //    sprintf( pPlayer->m_sModel, "syndicate%d", pPlayer->m_sModel[8] - 48 );//RANDOM_LONG( 1, 3 ) )
 		
-	int num;
+	int num =0 ;
     if( strlen( pPlayer->m_sModel ) == 10 )
-      num = pPlayer->m_sModel[9] - 48 ;
+      num = pPlayer->m_sModel[9] - '0';
     else if( strlen( pPlayer->m_sModel ) == 9 )
-      num = pPlayer->m_sModel[8] - 48 ;
-    else
+      num = pPlayer->m_sModel[8] - '0';
+    if( num < 1 || num > 6 )
       num = RANDOM_LONG( 1, 6 );
 
     if( model ) 
@@ -1171,7 +1165,7 @@ void cPEHacking::SetTeam( int iSelection, CBasePlayer *pPlayer, int kill, int mo
     else
       model = num;
 
-    sprintf( pPlayer->m_sModel, "syndicate%d", num );
+    snprintf( pPlayer->m_sModel, sizeof(pPlayer->m_sModel), "syndicate%d", num );
 		SET_MDL( pPlayer->m_sModel );
 		UTIL_EdictScreenFade( pPlayer->edict(), Vector( 128, 0, 0 ), 0.1, 50, 85, FFADE_MODULATE | FFADE_STAYOUT );
 		UTIL_ClientPrintAll( HUD_PRINTNOTIFY, UTIL_VarArgs( "%s became a ZOMBIE!\n", STRING(pPlayer->pev->netname)));
@@ -1579,7 +1573,15 @@ BOOL cPEHacking::ClientCommand( CBasePlayer *pPlayer, const char *pcmd )
 			WRITE_BYTE( ENTINDEX( pPlayer->edict( ) ) );
 			WRITE_STRING( "Weapons:\n" );
 		MESSAGE_END( );
-		sprintf( text, "Slot2: %d, %s Slot3: %d, %s Slot4: %d, %s", pPlayer->m_sInfo.slot[2], CBasePlayerItem::ItemInfoArray[slotid[0][pPlayer->m_sInfo.slot[2]]].pszName, pPlayer->m_sInfo.slot[3], CBasePlayerItem::ItemInfoArray[slotid[1][pPlayer->m_sInfo.slot[3]]].pszName, pPlayer->m_sInfo.slot[4], CBasePlayerItem::ItemInfoArray[slotid[1][pPlayer->m_sInfo.slot[4]]].pszName );
+		{
+			int s2 = pPlayer->m_sInfo.slot[2]; if (s2 < 0 || s2 >= 35) s2 = 0;
+			int s3 = pPlayer->m_sInfo.slot[3]; if (s3 < 0 || s3 >= 35) s3 = 0;
+			int s4 = pPlayer->m_sInfo.slot[4]; if (s4 < 0 || s4 >= 35) s4 = 0;
+			const char *n2 = CBasePlayerItem::ItemInfoArray[slotid[0][s2]].pszName;
+			const char *n3 = CBasePlayerItem::ItemInfoArray[slotid[1][s3]].pszName;
+			const char *n4 = CBasePlayerItem::ItemInfoArray[slotid[1][s4]].pszName;
+			snprintf( text, sizeof(text), "Slot2: %d, %s Slot3: %d, %s Slot4: %d, %s", s2, n2 ? n2 : "none", s3, n3 ? n3 : "none", s4, n4 ? n4 : "none" );
+		}
 		MESSAGE_BEGIN( MSG_ONE, gmsgSayText, NULL, pPlayer->pev );
 			WRITE_BYTE( ENTINDEX( pPlayer->edict( ) ) );
 			WRITE_STRING( text );
@@ -1596,7 +1598,7 @@ BOOL cPEHacking::ClientCommand( CBasePlayer *pPlayer, const char *pcmd )
 			WRITE_BYTE( ENTINDEX( pPlayer->edict( ) ) );
 			WRITE_STRING( "Armor:\n" );
 		MESSAGE_END( );
-		sprintf( text, "Head: %d Chest: %d Stomach: %d Armr: %d Arml: %d Legr: %d Legl: %d\n", pPlayer->m_iArmor[AR_HEAD], pPlayer->m_iArmor[AR_CHEST], pPlayer->m_iArmor[AR_STOMACH], pPlayer->m_iArmor[AR_R_ARM], pPlayer->m_iArmor[AR_L_ARM], pPlayer->m_iArmor[AR_R_LEG], pPlayer->m_iArmor[AR_L_LEG] );
+		snprintf( text, sizeof(text), "Head: %d Chest: %d Stomach: %d Armr: %d Arml: %d Legr: %d Legl: %d\n", pPlayer->m_iArmor[AR_HEAD], pPlayer->m_iArmor[AR_CHEST], pPlayer->m_iArmor[AR_STOMACH], pPlayer->m_iArmor[AR_R_ARM], pPlayer->m_iArmor[AR_L_ARM], pPlayer->m_iArmor[AR_R_LEG], pPlayer->m_iArmor[AR_L_LEG] );
 		MESSAGE_BEGIN( MSG_ONE, gmsgSayText, NULL, pPlayer->pev );
 			WRITE_BYTE( ENTINDEX( pPlayer->edict( ) ) );
 			WRITE_STRING( text );
@@ -1785,7 +1787,7 @@ BOOL cPEHacking::ClientCommand( CBasePlayer *pPlayer, const char *pcmd )
 			WRITE_COORD( pLight->pev->origin.x );
 			WRITE_COORD( pLight->pev->origin.y );
 			WRITE_COORD( pLight->pev->origin.z );
-			if( pLight->m_iRefnr != 0 )
+			if( pLight->m_iRefnr != 0 && pLight->m_pRef )
 			{		
 				WRITE_BYTE( 1 );
 				WRITE_COORD( pLight->m_pRef->pev->origin.x );
@@ -2335,7 +2337,7 @@ cPEHacking::cPEHacking( )
 
 	if ( stricmp( mapcfile, szPreviousMapCycleFile ) )
 	{
-		strcpy( szPreviousMapCycleFile, mapcfile );
+		snprintf( szPreviousMapCycleFile, sizeof(szPreviousMapCycleFile), "%s", mapcfile );
 
 		DestroyMapCycle( &mapcycle );
 
@@ -2348,8 +2350,8 @@ cPEHacking::cPEHacking( )
 	{
 		mapcycle_item_s *item;
 
-		strcpy( g_sNextMap, STRING(gpGlobals->mapname) );
-		strcpy( szFirstMapInList, STRING(gpGlobals->mapname) );
+		snprintf( g_sNextMap, sizeof(g_sNextMap), "%s", STRING(gpGlobals->mapname) );
+		snprintf( szFirstMapInList, sizeof(szFirstMapInList), "%s", STRING(gpGlobals->mapname) );
 
 		item = mapcycle.next_item;
 		
@@ -2357,17 +2359,17 @@ cPEHacking::cPEHacking( )
 		mapcycle.next_item = item->next;
 
 		// Perform logic on current item
-		strcpy( g_sNextMap, item->mapname );
+		snprintf( g_sNextMap, sizeof(g_sNextMap), "%s", item->mapname );
 	}
 
 	if ( !IS_MAP_VALID(g_sNextMap) )
 	{
-		strcpy( g_sNextMap, szFirstMapInList );
+		snprintf( g_sNextMap, sizeof(g_sNextMap), "%s", szFirstMapInList );
 	}
 
   char missionsfile[260];
-  memset( missionList, '\0', 20 * 32 );
-  sprintf( missionsfile, "./maps/%s.tsk", STRING(gpGlobals->mapname) );
+  memset( missionList, '\0', sizeof(missionList) );
+  snprintf( missionsfile, sizeof(missionsfile), "./maps/%s.tsk", STRING(gpGlobals->mapname) );
 
   int length;
   char *misfile; 
@@ -2376,11 +2378,11 @@ cPEHacking::cPEHacking( )
   mislist = COM_Parse( mislist, token );
   for( int i = 0; ( i < 20 ) && mislist && length; i++ )
   {
-    strncpy( missionList[i][0], token, 32 );
+    strncpy( missionList[i][0], token, 32 ); missionList[i][0][31] = '\0';
     mislist = COM_Parse( mislist, token );
-    strncpy( missionList[i][1], token, 32 );
+    strncpy( missionList[i][1], token, 32 ); missionList[i][1][31] = '\0';
     mislist = COM_Parse( mislist, token );
-    strncpy( missionList[i][2], token, 32 );
+    strncpy( missionList[i][2], token, 32 ); missionList[i][2][31] = '\0';
     mislist = COM_Parse( mislist, token );
   }
   misLast = false;
@@ -2552,6 +2554,7 @@ void cPEHacking::AbortMission( )
       esc = UTIL_FindEntityByClassname( esc, "bb_escapeair" );
     }
     DisableAll( "bb_funk" );
+    break;
   }
   case MISSION_FRAGS:
   {
@@ -3006,7 +3009,7 @@ void cPEHacking::CheckAllMissions( )
     misNr++;
     if( misNr < 1 )
       misNr = 1;
-    if( !strlen( missionList[misNr][0] ) ) // Last mission
+    if( misNr >= 20 || !strlen( missionList[misNr][0] ) ) // Last mission
       misLast = true;
     else
       misLast = false;

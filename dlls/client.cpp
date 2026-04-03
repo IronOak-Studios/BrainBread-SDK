@@ -459,11 +459,14 @@ void Host_Say( edict_t *pEntity, int teamonly )
 	}
 
 	j = sizeof(text) - 2 - strlen(text);  // -2 for /n and null terminator
+	if ( j < 0 )
+		j = 0;
 	if ( (int)strlen(p) > j )
 		p[j] = 0;
 
-	strcat( text, p );
-	strcat( text, "\n" );
+	strncat( text, p, sizeof(text) - strlen(text) - 1 );
+	strncat( text, "\n", sizeof(text) - strlen(text) - 1 );
+	text[sizeof(text) - 1] = '\0';
 
 
 	player->m_flNextChatTime = gpGlobals->time + CHAT_INTERVAL;
@@ -476,17 +479,17 @@ void Host_Say( edict_t *pEntity, int teamonly )
 	client = NULL;
 	if( !strcmp( p, "timeleft" ) )
 	{
-		sprintf( ans, "Time left on map: %02d:%02d\n", (int)(timeleft.value/60), ( ( ( ( (int)timeleft.value ) % 60 ) > 0 ) ? ( ( (int)timeleft.value ) % 60 ) : 0 ) );
+		snprintf( ans, sizeof(ans), "Time left on map: %02d:%02d\n", (int)(timeleft.value/60), ( ( ( ( (int)timeleft.value ) % 60 ) > 0 ) ? ( ( (int)timeleft.value ) % 60 ) : 0 ) );
 		answer = 1;
 	}
 	else if( !strcmp( p, "nextmap" ) )
 	{
-		sprintf( ans, "Next map in cycle: %s\n", g_sNextMap );
+		snprintf( ans, sizeof(ans), "Next map in cycle: %s\n", g_sNextMap );
 		answer = 1;
 	}
 	else if( !strcmp( p, "peversion" ) || !strcmp(p, "peversion") )
 	{
-		sprintf( ans, "%s, %s", peversion.string, BUILD );
+		snprintf( ans, sizeof(ans), "%s, %s", peversion.string, BUILD );
 		answer = 1;
 	}
 	
@@ -667,7 +670,7 @@ void ClientCommand( edict_t *pEntity )
 		if( pPlayer->HasNamedPlayerItem( "bb_objective_item" ) )
 		{	
 			if( pPlayer->m_pActiveItem )
-				sprintf( pPlayer->m_sLastWeap, "%s", STRING(pPlayer->m_pActiveItem->pev->classname) );
+				snprintf( pPlayer->m_sLastWeap, sizeof(pPlayer->m_sLastWeap), "%s", STRING(pPlayer->m_pActiveItem->pev->classname) );
 			pPlayer->DropPlayerItem( "bb_objective_item" );
 
 			return;
@@ -681,7 +684,7 @@ void ClientCommand( edict_t *pEntity )
       ((CBasePlayerWeapon*)pPlayer->m_pActiveItem)->PrimaryAttack( );
 			return;
     }
-    sprintf( text, "%s", STRING(pPlayer->m_pActiveItem->pev->classname) );
+    snprintf( text, sizeof(text), "%s", STRING(pPlayer->m_pActiveItem->pev->classname) );
 		pPlayer->DropPlayerItem( text );
 	  if( pPlayer->m_sLastWeap )
 			GetClassPtr((CBasePlayer *)pev)->SelectItem( pPlayer->m_sLastWeap );
@@ -1839,7 +1842,8 @@ void UpdateClientData ( const struct edict_s *ent, int sendweapons, struct clien
 	cd->flSwimTime		= ent->v.flSwimTime;
 	cd->waterjumptime	= ent->v.teleport_time;
 
-	strcpy( cd->physinfo, ENGINE_GETPHYSINFO( ent ) );
+	strncpy( cd->physinfo, ENGINE_GETPHYSINFO( ent ), MAX_PHYSINFO_STRING );
+	cd->physinfo[MAX_PHYSINFO_STRING - 1] = '\0';
 
 	cd->maxspeed		= ent->v.maxspeed;
 	cd->fov				= ent->v.fov;
@@ -2037,7 +2041,7 @@ int	InconsistentFile( const edict_t *player, const char *filename, char *disconn
 		return 0;
 
 	// Default behavior is to kick the player
-	sprintf( disconnect_message, "Server is enforcing file consistency for %s\n", filename );
+	snprintf( disconnect_message, 256, "Server is enforcing file consistency for %s\n", filename );
 
 	// Kick now with specified disconnect message.
 	return 1;

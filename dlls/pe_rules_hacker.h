@@ -7,16 +7,19 @@ public:
 	  if( FStrEq( pkvd->szKeyName, "topnotify" ) )
 	  {
 		  strncpy( notify[0], pkvd->szValue, 256 );
+		  notify[0][255] = '\0';
 		  pkvd->fHandled = TRUE;
 	  }	
     else if( FStrEq( pkvd->szKeyName, "midnotifyone" ) )
 	  {
 		  strncpy( notify[1], pkvd->szValue, 256 );
+		  notify[1][255] = '\0';
 		  pkvd->fHandled = TRUE;
 	  }
     else if( FStrEq( pkvd->szKeyName, "midnotifytwo" ) )
 	  {
 		  strncpy( notify[2], pkvd->szValue, 256 );
+		  notify[2][255] = '\0';
 		  pkvd->fHandled = TRUE;
 	  }
   }
@@ -69,8 +72,8 @@ public:
 	virtual int SmallestTeam( );
 	virtual int TeamsUneven( );
 	virtual void UpdTeamScore( );
-	virtual void AddScore( int team, int amount ) { if( m_iCountScores  ) m_iTeamPoints[team] += amount; }
-	virtual void RemoveScore( int team, int amount ) { if( m_iCountScores  ) m_iTeamPoints[team] -= amount; }
+	virtual void AddScore( int team, int amount ) { if( m_iCountScores && team >= 0 && team < 3 ) m_iTeamPoints[team] += amount; }
+	virtual void RemoveScore( int team, int amount ) { if( m_iCountScores && team >= 0 && team < 3 ) m_iTeamPoints[team] -= amount; }
 	virtual int ClientConnected( edict_t *pEntity, const char *pszName, const char *pszAddress, char szRejectReason[] );
 	virtual void ClientDisconnected( edict_t *pClient );
 	virtual BOOL ClientCommand( CBasePlayer *pPlayer, const char *pcmd );

@@ -219,7 +219,7 @@ void CMonsterMaker::MakeMonster( void )
   {
     CBaseEntity *ent = *zombiepool.begin( );
     zombiepool.pop_front( );
-    pent = ent->edict( );
+    pent = ent ? ent->edict( ) : NULL;
     //ALERT( at_logged, "zombies in list: %d/%d\n", zombiepool.size( ), zombiecount );
   }
   else

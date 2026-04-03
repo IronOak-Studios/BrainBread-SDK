@@ -1010,7 +1010,6 @@ int USENTENCEG_PickSequential(int isentenceg, char *szfound, int ipick, int fres
 {
 	char *szgroupname;
 	unsigned char count;
-	char sznum[8];
 	
 	if (!fSentencesInit)
 		return -1;
@@ -1027,10 +1026,7 @@ int USENTENCEG_PickSequential(int isentenceg, char *szfound, int ipick, int fres
 	if (ipick >= count)
 		ipick = count-1;
 
-	strcpy(szfound, "!");
-	strcat(szfound, szgroupname);
-	sprintf(sznum, "%d", ipick);
-	strcat(szfound, sznum);
+	snprintf(szfound, 64, "!%s%d", szgroupname, ipick);
 	
 	if (ipick >= count)
 	{
@@ -1060,7 +1056,6 @@ int USENTENCEG_Pick(int isentenceg, char *szfound)
 	unsigned char *plru;
 	unsigned char i;
 	unsigned char count;
-	char sznum[8];
 	unsigned char ipick;
 	int ffound = FALSE;
 	
@@ -1089,10 +1084,7 @@ int USENTENCEG_Pick(int isentenceg, char *szfound)
 			USENTENCEG_InitLRU(plru, count);
 		else
 		{
-			strcpy(szfound, "!");
-			strcat(szfound, szgroupname);
-			sprintf(sznum, "%d", ipick);
-			strcat(szfound, sznum);
+			snprintf(szfound, 64, "!%s%d", szgroupname, ipick);
 			return ipick;
 		}
 	}
@@ -1114,7 +1106,7 @@ int SENTENCEG_GetIndex(const char *szgroupname)
 	// search rgsentenceg for match on szgroupname
 
 	i = 0;
-	while (rgsentenceg[i].count)
+	while (i < CSENTENCEG_MAX && rgsentenceg[i].count)
 	{
 		if (!strcmp(szgroupname, rgsentenceg[i].szgroupname))
 			return i;
@@ -1205,7 +1197,6 @@ int SENTENCEG_PlaySequentialSz(edict_t *entity, const char *szgroupname,
 void SENTENCEG_Stop(edict_t *entity, int isentenceg, int ipick)
 {
 	char buffer[64];
-	char sznum[8];
 	
 	if (!fSentencesInit)
 		return;
@@ -1213,10 +1204,7 @@ void SENTENCEG_Stop(edict_t *entity, int isentenceg, int ipick)
 	if (isentenceg < 0 || ipick < 0)
 		return;
 	
-	strcpy(buffer, "!");
-	strcat(buffer, rgsentenceg[isentenceg].szgroupname);
-	sprintf(sznum, "%d", ipick);
-	strcat(buffer, sznum);
+	snprintf(buffer, sizeof(buffer), "!%s%d", rgsentenceg[isentenceg].szgroupname, ipick);
 
 	STOP_SOUND(entity, CHAN_VOICE, buffer);
 }
@@ -1282,9 +1270,13 @@ void SENTENCEG_Init()
 		const char *pString = buffer + i;
 
 		if ( strlen( pString ) >= CBSENTENCENAME_MAX )
+		{
 			ALERT( at_warning, "Sentence %s longer than %d letters\n", pString, CBSENTENCENAME_MAX-1 );
+		}
 
-		strcpy( gszallsentencenames[gcallsentences++], pString );
+		strncpy( gszallsentencenames[gcallsentences], pString, CBSENTENCENAME_MAX );
+		gszallsentencenames[gcallsentences][CBSENTENCENAME_MAX - 1] = '\0';
+		gcallsentences++;
 
 		j--;
 		if (j <= i)
@@ -1315,10 +1307,12 @@ void SENTENCEG_Init()
 				break;
 			}
 
-			strcpy(rgsentenceg[isentencegs].szgroupname, &(buffer[i]));
+			strncpy(rgsentenceg[isentencegs].szgroupname, &(buffer[i]), CBSENTENCENAME_MAX);
+			rgsentenceg[isentencegs].szgroupname[CBSENTENCENAME_MAX - 1] = '\0';
 			rgsentenceg[isentencegs].count = 1;
 
-			strcpy(szgroup, &(buffer[i]));
+			strncpy(szgroup, &(buffer[i]), sizeof(szgroup));
+			szgroup[sizeof(szgroup) - 1] = '\0';
 
 			continue;
 		}
@@ -1350,8 +1344,6 @@ void SENTENCEG_Init()
 
 int SENTENCEG_Lookup(const char *sample, char *sentencenum)
 {
-	char sznum[32];
-
 	int i;
 	// this is a sentence name; lookup sentence number
 	// and give to engine as string.
@@ -1360,9 +1352,7 @@ int SENTENCEG_Lookup(const char *sample, char *sentencenum)
 		{
 			if (sentencenum)
 			{
-				strcpy(sentencenum, "!");
-				sprintf(sznum, "%d", i);
-				strcat(sentencenum, sznum);
+				snprintf(sentencenum, 32, "!%d", i);
 			}
 			return i;
 		}
@@ -1554,7 +1544,9 @@ void TEXTURETYPE_Init()
 		// null-terminate name and save in sentences array
 		j = min (j, CBTEXTURENAMEMAX-1+i);
 		buffer[j] = 0;
-		strcpy(&(grgszTextureName[gcTextures++][0]), &(buffer[i]));
+		strncpy(&(grgszTextureName[gcTextures][0]), &(buffer[i]), CBTEXTURENAMEMAX);
+		grgszTextureName[gcTextures][CBTEXTURENAMEMAX - 1] = '\0';
+		gcTextures++;
 	}
 
 	g_engfuncs.pfnFreeFile( pMemFile );
@@ -1636,7 +1628,7 @@ float TEXTURETYPE_PlaySound(TraceResult *ptr,  Vector vecSrc, Vector vecEnd, int
 			if (*pTextureName == '{' || *pTextureName == '!' || *pTextureName == '~' || *pTextureName == ' ')
 				pTextureName++;
 			// '}}'
-			strcpy(szbuffer, pTextureName);
+			strncpy(szbuffer, pTextureName, CBTEXTURENAMEMAX);
 			szbuffer[CBTEXTURENAMEMAX - 1] = 0;
 				
 			// ALERT ( at_console, "texture hit: %s\n", szbuffer);

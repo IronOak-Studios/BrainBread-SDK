@@ -577,7 +577,8 @@ void CHalfLifeTeamplay::RecountTeams( bool bResendInfo )
 	{
 		if ( GetTeamIndex( pName ) < 0 )
 		{
-			strcpy( team_names[num_teams], pName );
+			strncpy( team_names[num_teams], pName, MAX_TEAMNAME_LENGTH );
+			team_names[num_teams][MAX_TEAMNAME_LENGTH - 1] = '\0';
 			num_teams++;
 		}
 		pName = strtok( NULL, ";" );

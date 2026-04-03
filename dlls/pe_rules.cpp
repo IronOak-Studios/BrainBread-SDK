@@ -51,9 +51,11 @@ char folder[10][32] =
 
 void cPERules::Radio( char *szName, CBasePlayer *pPlayer, int iType )
 {
-	char command[64];
+	char command[256];
 
-	sprintf( command, "radio/%s%s.wav", folder[iType], szName );
+	if ( iType < 0 || iType >= 7 )
+		return;
+	snprintf( command, sizeof(command), "radio/%s%s.wav", folder[iType], szName );
 	//CLIENT_COMMAND( pPlayer->edict( ), command );
 //	ALERT( at_console, "%s\n", command );
 	EMIT_SOUND( ENT(pPlayer->pev), CHAN_VOICE, command, 1, ATTN_NORM);
@@ -61,9 +63,11 @@ void cPERules::Radio( char *szName, CBasePlayer *pPlayer, int iType )
 
 void cPERules::RadioAll( char *szName, int iType )
 {
-	char command[64];
+	char command[256];
 
-	sprintf( command, "radio/%s%s.wav", folder[iType], szName );
+	if ( iType < 0 || iType >= 7 )
+		return;
+	snprintf( command, sizeof(command), "radio/%s%s.wav", folder[iType], szName );
 //	ALERT( at_console, "%s\n", command );
 	for ( int i = 1; i <= MAX_PLAYERS; i++ )
 	{
@@ -76,10 +80,12 @@ void cPERules::RadioAll( char *szName, int iType )
 
 void cPERules::RadioTeam( CBasePlayer *pPlayer, char *szName, int iType )
 {
-	char command[64];
+	char command[256];
 	int o = 0, p = 0;
 
-	sprintf( command, "radio/%s%s.wav", folder[iType], szName );
+	if ( iType < 0 || iType >= 7 )
+		return;
+	snprintf( command, sizeof(command), "radio/%s%s.wav", folder[iType], szName );
 //	ALERT( at_console, "%s\n", command );
 	for ( int i = 1; i <= MAX_PLAYERS; i++ )
 	{

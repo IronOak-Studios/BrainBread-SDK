@@ -392,7 +392,7 @@ CSound* CBaseMonster :: PBestScent ( void )
 	{
 		pSound = CSoundEnt::SoundPointerForIndex( iThisScent );
 
-		if ( pSound->FIsScent() )
+		if ( pSound && pSound->FIsScent() )
 		{
 			flDist = ( pSound->m_vecOrigin - pev->origin ).Length();
 
@@ -403,7 +403,10 @@ CSound* CBaseMonster :: PBestScent ( void )
 			}
 		}
 
-		iThisScent = pSound->m_iNextAudible;
+		if ( pSound )
+			iThisScent = pSound->m_iNextAudible;
+		else
+			break;
 	}
 	if ( iBestScent >= 0 )
 	{
@@ -1209,7 +1212,7 @@ void CBaseMonster :: SetSequenceByName ( char *szSequence )
 	else
 	{
 		// Not available try to get default anim
-		ALERT ( at_aiconsole, "%s has no sequence named:%f\n", STRING(pev->classname), szSequence );
+		ALERT ( at_aiconsole, "%s has no sequence named:%s\n", STRING(pev->classname), szSequence );
 		pev->sequence		= 0;	// Set to the reset anim (if it's there)
 	}
 }
@@ -2203,7 +2206,11 @@ int CBaseMonster::IRelationship ( CBaseEntity *pTarget )
 	/*ABIOWEAPON*/	{ R_NO	,R_NO	,R_DL	,R_DL	,R_DL	,R_AL	,R_NO	,R_DL	,R_DL	,R_NO	,R_NO	,R_DL,	R_DL,	R_NO	}
 	};
 
-  return /*( pev->team == pTarget->pev->team ? -2 : 2 );//*/iEnemy[ Classify() ][ pTarget->Classify() ];
+  int iMyClass = Classify();
+  int iOtherClass = pTarget->Classify();
+  if ( iMyClass < 0 || iMyClass >= 14 || iOtherClass < 0 || iOtherClass >= 14 )
+    return R_NO;
+  return /*( pev->team == pTarget->pev->team ? -2 : 2 );//*/iEnemy[ iMyClass ][ iOtherClass ];
 }
 
 //=========================================================

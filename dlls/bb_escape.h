@@ -38,7 +38,8 @@ public:
   {
 	  if( FStrEq( pkvd->szKeyName, "leavewp" ) )
 	  {
-		  strcpy( leavewp, pkvd->szValue );
+		  strncpy( leavewp, pkvd->szValue, sizeof(leavewp) );
+		  leavewp[sizeof(leavewp) - 1] = '\0';
 		  pkvd->fHandled = TRUE;
 	  }
   }

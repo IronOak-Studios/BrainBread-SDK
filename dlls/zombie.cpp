@@ -184,7 +184,7 @@ void CZombie::Killed( entvars_t *pevAttacker, int iGib )
   if( type == BRUTAL )
 	  pnts = 2;
 
-  if( ent->IsPlayer( ) && !points_given )
+  if( ent && ent->IsPlayer( ) && !points_given )
   {
     ((cPEHacking*)g_pGameRules)->misDone[MISSION_FRAGS]++;
     if( !isFred )

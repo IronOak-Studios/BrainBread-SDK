@@ -1598,6 +1598,7 @@ void CTestHull :: BuildNodeGraph( void )
 	FILE	*file;
 
 	char	szNrpFilename [MAX_PATH];// text node report filename
+	int		len;
 
 	CLink	*pTempPool; // temporary link pool 
 
@@ -1647,14 +1648,14 @@ void CTestHull :: BuildNodeGraph( void )
 
 	// make sure directories have been made
 	GET_GAME_DIR( szNrpFilename );
-	strcat( szNrpFilename, "/maps" );
+	len = strlen( szNrpFilename );
+	snprintf( szNrpFilename + len, sizeof(szNrpFilename) - len, "/maps" );
 	CreateDirectory( szNrpFilename, NULL );
-	strcat( szNrpFilename, "/graphs" );
+	len = strlen( szNrpFilename );
+	snprintf( szNrpFilename + len, sizeof(szNrpFilename) - len, "/graphs" );
 	CreateDirectory( szNrpFilename, NULL );
-
-	strcat( szNrpFilename, "/" );
-	strcat( szNrpFilename, STRING( gpGlobals->mapname ) );
-	strcat( szNrpFilename, ".nrp" );
+	len = strlen( szNrpFilename );
+	snprintf( szNrpFilename + len, sizeof(szNrpFilename) - len, "/%s.nrp", STRING( gpGlobals->mapname ) );
 
 	file = fopen ( szNrpFilename, "w+" );
 
@@ -2313,20 +2314,21 @@ int CGraph :: FLoadGraph ( char *szMapName )
 	char	szFilename[MAX_PATH];
 	int		iVersion;
 	int     length;
+	int     len;
 	byte    *aMemFile;
 	byte    *pMemFile;
 
 	// make sure the directories have been made
 	char	szDirName[MAX_PATH];
 	GET_GAME_DIR( szDirName );
-	strcat( szDirName, "/maps" );
+	len = strlen( szDirName );
+	snprintf( szDirName + len, sizeof(szDirName) - len, "/maps" );
 	CreateDirectory( szDirName, NULL );
-	strcat( szDirName, "/graphs" );
+	len = strlen( szDirName );
+	snprintf( szDirName + len, sizeof(szDirName) - len, "/graphs" );
 	CreateDirectory( szDirName, NULL );
 
-	strcpy ( szFilename, "maps/graphs/" );
-	strcat ( szFilename, szMapName );
-	strcat( szFilename, ".nod" );
+	snprintf( szFilename, sizeof(szFilename), "maps/graphs/%s.nod", szMapName );
 
 	pMemFile = aMemFile = LOAD_FILE_FOR_ME(szFilename, &length);
 
@@ -2487,6 +2489,7 @@ int CGraph :: FSaveGraph ( char *szMapName )
 	
 	int		iVersion = GRAPH_VERSION;
 	char	szFilename[MAX_PATH];
+	int		len;
 	FILE	*file;
 
 	if ( !m_fGraphPresent || !m_fGraphPointersSet )
@@ -2497,14 +2500,14 @@ int CGraph :: FSaveGraph ( char *szMapName )
 
 	// make sure directories have been made
 	GET_GAME_DIR( szFilename );
-	strcat( szFilename, "/maps" );
+	len = strlen( szFilename );
+	snprintf( szFilename + len, sizeof(szFilename) - len, "/maps" );
 	CreateDirectory( szFilename, NULL );
-	strcat( szFilename, "/graphs" );
+	len = strlen( szFilename );
+	snprintf( szFilename + len, sizeof(szFilename) - len, "/graphs" );
 	CreateDirectory( szFilename, NULL );
-
-	strcat( szFilename, "/" );
-	strcat( szFilename, szMapName );
-	strcat( szFilename, ".nod" );
+	len = strlen( szFilename );
+	snprintf( szFilename + len, sizeof(szFilename) - len, "/%s.nod", szMapName );
 
 	file = fopen ( szFilename, "wb" );
 
@@ -2621,13 +2624,9 @@ int CGraph :: CheckNODFile ( char *szMapName )
 	char		szGraphFilename[MAX_PATH];
 	
 
-	strcpy ( szBspFilename, "maps/" );
-	strcat ( szBspFilename, szMapName );
-	strcat ( szBspFilename, ".bsp" );
+	snprintf( szBspFilename, sizeof(szBspFilename), "maps/%s.bsp", szMapName );
 
-	strcpy ( szGraphFilename, "maps/graphs/" );
-	strcat ( szGraphFilename, szMapName );
-	strcat ( szGraphFilename, ".nod" );
+	snprintf( szGraphFilename, sizeof(szGraphFilename), "maps/graphs/%s.nod", szMapName );
 	
 	retValue = TRUE;
 

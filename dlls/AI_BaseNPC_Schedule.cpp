@@ -878,6 +878,11 @@ void CBaseMonster :: StartTask ( Task_t *pTask )
 		}
 	case TASK_MOVE_TO_TARGET_RANGE:
 		{
+			if ( m_hTargetEnt == NULL )
+			{
+				TaskFail();
+				break;
+			}
 			if ( (m_hTargetEnt->pev->origin - pev->origin).Length() < 1 )
 				TaskComplete();
 			else
@@ -1331,7 +1336,7 @@ case TASK_GET_PATH_TO_BESTSCENT:
 //=========================================================
 Task_t	*CBaseMonster :: GetTask ( void ) 
 {
-	if ( m_iScheduleIndex < 0 || m_iScheduleIndex >= m_pSchedule->cTasks )
+	if ( !m_pSchedule || m_iScheduleIndex < 0 || m_iScheduleIndex >= m_pSchedule->cTasks )
 	{
 		// m_iScheduleIndex is not within valid range for the monster's current schedule.
 		return NULL;

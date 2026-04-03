@@ -466,7 +466,7 @@ public:
 	int					m_iCurNote;
 	int					m_iCurMidNote;
 	float				m_fCurMidNoteEnd;
-	int					m_iMate[24];
+	int					m_iMate[32];
 	int					m_iCurSlot;
 	int					m_iSlots[3];
 	const char			*m_sAmmoSlot[4];

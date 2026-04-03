@@ -97,7 +97,7 @@ CHalfLifeMultiplay :: CHalfLifeMultiplay()
 			char szCommand[256];
 			
 			ALERT( at_console, "Executing dedicated server config file\n" );
-			sprintf( szCommand, "exec %s\n", servercfgfile );
+			snprintf( szCommand, sizeof(szCommand), "exec %s\n", servercfgfile );
 			SERVER_COMMAND( szCommand );
 		}
 	}
@@ -111,7 +111,7 @@ CHalfLifeMultiplay :: CHalfLifeMultiplay()
 			char szCommand[256];
 			
 			ALERT( at_console, "Executing listen server config file\n" );
-			sprintf( szCommand, "exec %s\n", lservercfgfile );
+			snprintf( szCommand, sizeof(szCommand), "exec %s\n", lservercfgfile );
 			SERVER_COMMAND( szCommand );
 		}
 	}
@@ -1509,7 +1509,8 @@ int ReloadMapCycleFile( char *filename, mapcycle_t *cycle )
 
 				item = new mapcycle_item_s;
 
-				strcpy( item->mapname, szMap );
+				strncpy( item->mapname, szMap, sizeof(item->mapname) );
+				item->mapname[sizeof(item->mapname) - 1] = '\0';
 
 				item->minplayers = 0;
 				item->maxplayers = 0;
@@ -1538,7 +1539,8 @@ int ReloadMapCycleFile( char *filename, mapcycle_t *cycle )
 					g_engfuncs.pfnInfo_RemoveKey( szBuffer, "minplayers" );
 					g_engfuncs.pfnInfo_RemoveKey( szBuffer, "maxplayers" );
 
-					strcpy( item->rulebuffer, szBuffer );
+					strncpy( item->rulebuffer, szBuffer, sizeof(item->rulebuffer) );
+					item->rulebuffer[sizeof(item->rulebuffer) - 1] = '\0';
 				}
 
 				item->next = cycle->items;
@@ -1697,7 +1699,8 @@ void CHalfLifeMultiplay :: ChangeLevel( void )
 	curplayers = CountPlayers();
 
 
-	strcpy( szNextMap, g_sNextMap );
+	strncpy( szNextMap, g_sNextMap, sizeof(szNextMap) );
+	szNextMap[sizeof(szNextMap) - 1] = '\0';
 	//ExtractCommandString( item->rulebuffer, szCommands );
 	//strcpy( szRules, item->rulebuffer );
 
@@ -1784,7 +1787,8 @@ void CHalfLifeMultiplay :: SendMOTDToClient( edict_t *client )
 		
 		if ( strlen( pFileList ) < MAX_MOTD_CHUNK )
 		{
-			strcpy( chunk, pFileList );
+			strncpy( chunk, pFileList, sizeof(chunk) );
+			chunk[sizeof(chunk) - 1] = '\0';
 		}
 		else
 		{

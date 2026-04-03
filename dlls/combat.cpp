@@ -1278,7 +1278,8 @@ int CBaseMonster :: DeadTakeDamage( entvars_t *pevInflictor, entvars_t *pevAttac
 
 float CBaseMonster :: DamageForce( entvars_t *pev, float damage )
 { 
-	float force = damage * ((32 * 32 * 72.0) / (pev->size.x * pev->size.y * pev->size.z)) * 5;
+	float flVolume = pev->size.x * pev->size.y * pev->size.z;
+	float force = (flVolume != 0) ? damage * ((32 * 32 * 72.0) / flVolume) * 5 : 0;
 	
 	if ( force > 1000.0) 
 	{

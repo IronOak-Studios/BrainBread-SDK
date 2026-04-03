@@ -735,6 +735,8 @@ void CGrenade :: UseSatchelCharges( entvars_t *pevOwner, SATCHELCODE code )
 		return;
 
 	CBaseEntity	*pOwner = CBaseEntity::Instance( pevOwner );
+	if ( !pOwner )
+		return;
 
 	pentOwner = pOwner->edict();
 

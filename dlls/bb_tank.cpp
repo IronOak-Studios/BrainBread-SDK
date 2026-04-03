@@ -52,7 +52,8 @@ LINK_ENTITY_TO_CLASS( bb_waypoint, CTankWP );
 void CTankWP::Spawn( )
 {
   CPointEntity::Spawn( );
-  strncpy( messagebkp, STRING( pev->message ), 256 );
+  strncpy( messagebkp, STRING( pev->message ), sizeof(messagebkp) );
+  messagebkp[sizeof(messagebkp) - 1] = '\0';
 }
 
 void CTankWP::ReSpawn( )

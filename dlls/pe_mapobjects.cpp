@@ -396,7 +396,7 @@ void cPEHackerTerminal::ReSpawn()
 
 cPEHackerTerminal::cPEHackerTerminal( )
 {
-	strcpy( m_sTerminal, "" );
+	m_sTerminal[0] = '\0';
 }
 
 void cPEHackerTerminal::Spawn( void )
@@ -428,9 +428,9 @@ void cPEHackerTerminal::Spawn( void )
 	if( strlen(m_sTerminal) <= 0 )
 	{
 		if( m_iTerminal == 0 )
-			sprintf( m_sTerminal, "PRIMARY" );
+			snprintf( m_sTerminal, sizeof(m_sTerminal), "PRIMARY" );
 		else
-			sprintf( m_sTerminal, "SECONDARY" );
+			snprintf( m_sTerminal, sizeof(m_sTerminal), "SECONDARY" );
 	}
 
 	if (m_pClip == NULL)

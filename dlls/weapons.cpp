@@ -280,7 +280,11 @@ void AddAmmoNameToAmmoRegistry( const char *szAmmoname )
 	giAmmoIndex++;
 	ASSERT( giAmmoIndex < MAX_AMMO_SLOTS );
 	if ( giAmmoIndex >= MAX_AMMO_SLOTS )
-		giAmmoIndex = 0;
+	{
+		ALERT( at_error, "Too many ammo types registered (max %d)\n", MAX_AMMO_SLOTS );
+		giAmmoIndex = MAX_AMMO_SLOTS - 1;
+		return;
+	}
 
 	CBasePlayerItem::AmmoInfoArray[giAmmoIndex].pszName = szAmmoname;
 	CBasePlayerItem::AmmoInfoArray[giAmmoIndex].hash = ElfHash( szAmmoname );
@@ -950,7 +954,10 @@ void CBasePlayerItem::AttachToPlayer ( CBasePlayer *pPlayer )
 	pev->effects = EF_NODRAW; // ??
 	pev->modelindex = 0;// server won't send down to clients if modelindex == 0
   if( strlen( STRING(pev->model) ) )
-    strcpy( mdl, STRING(pev->model) );
+  {
+    strncpy( mdl, STRING(pev->model), sizeof(mdl) );
+    mdl[sizeof(mdl) - 1] = '\0';
+  }
 	pev->model = iStringNull;
 	pev->owner = pPlayer->edict();
 	pev->nextthink = gpGlobals->time + .1;
@@ -1226,7 +1233,8 @@ BOOL CBasePlayerWeapon :: DefaultDeploy( char *szViewModel, char *szWeaponModel,
 	m_pPlayer->TabulateAmmo();
 	m_pPlayer->pev->viewmodel = MAKE_STRING(szViewModel);
 	m_pPlayer->pev->weaponmodel = MAKE_STRING(szWeaponModel);
-	strcpy( m_pPlayer->m_szAnimExtention, szAnimExt );
+	strncpy( m_pPlayer->m_szAnimExtention, szAnimExt, sizeof(m_pPlayer->m_szAnimExtention) );
+	m_pPlayer->m_szAnimExtention[sizeof(m_pPlayer->m_szAnimExtention) - 1] = '\0';
 	SendWeaponAnim( iAnim, skiplocal, body );
 
 	m_pPlayer->m_flNextAttack = UTIL_WeaponTimeBase() + 0.5;
@@ -1615,9 +1623,9 @@ void CWeaponBox::Touch( CBaseEntity *pOther )
 
 				pItem = m_rgpPlayerItems[ i ];
 				if( pPlayer->m_pActiveItem )
-					sprintf( pPlayer->m_sLastWeap, "%s", STRING(pPlayer->m_pActiveItem->pev->classname) );
+					snprintf( pPlayer->m_sLastWeap, sizeof(pPlayer->m_sLastWeap), "%s", STRING(pPlayer->m_pActiveItem->pev->classname) );
 				else
-					sprintf( pPlayer->m_sLastWeap, "weapon_knife" );
+					snprintf( pPlayer->m_sLastWeap, sizeof(pPlayer->m_sLastWeap), "weapon_knife" );
 				
 				if( pPlayer->AddPlayerItem( pItem ) )
 				{

@@ -219,7 +219,8 @@ class CBBAmmo : public CBaseEntity
       pev->nextthink = gpGlobals->time + 30;
       return;
     }*/
-	  strcpy( type, STRING(pp->m_pActiveItem->pev->classname) );
+	  strncpy( type, STRING(pp->m_pActiveItem->pev->classname), sizeof(type) );
+	  type[sizeof(type) - 1] = '\0';
     //CBasePlayerItem *item = pp->ItemByName( type );
 	int i;
     for( i = 0; i < MAX_WEAPONS; i++ )

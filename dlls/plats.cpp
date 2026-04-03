@@ -839,7 +839,10 @@ void CFuncTrain :: Activate( void )
 	if ( !m_activated )
 	{
 		m_activated = TRUE;
-		entvars_t	*pevTarg = VARS( FIND_ENTITY_BY_TARGETNAME (NULL, STRING(pev->target) ) );
+		edict_t *pentTarg = FIND_ENTITY_BY_TARGETNAME (NULL, STRING(pev->target) );
+		if ( FNullEnt(pentTarg) )
+			return;
+		entvars_t	*pevTarg = VARS( pentTarg );
 		
 		pev->target = pevTarg->target;
 		m_pevCurrentTarget = pevTarg;// keep track of this since path corners change our target for us.
@@ -1082,7 +1085,7 @@ void CFuncTrackTrain :: Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_
 	{
 		float delta = value;
 
-		delta = ((int)(pev->speed * 4) / (int)m_speed)*0.25 + 0.25 * delta;
+		delta = (m_speed != 0) ? ((int)(pev->speed * 4) / (int)m_speed)*0.25 + 0.25 * delta : 0;
 		if ( delta > 1 )
 			delta = 1;
 		else if ( delta < -1 )

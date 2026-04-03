@@ -174,7 +174,7 @@ void CMultiSource::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE 
 	// if we didn't find it, report error and leave
 	if (i >= m_iTotal)
 	{
-		ALERT(at_console, "MultiSrc:Used by non member %s.\n", STRING(pCaller->pev->classname));
+		ALERT(at_console, "MultiSrc:Used by non member %s.\n", pCaller ? STRING(pCaller->pev->classname) : "null");
 		return;	
 	}
 
@@ -950,7 +950,7 @@ void CMomentaryRotButton::PlaySound( void )
 // current, not future position.
 void CMomentaryRotButton::Use( CBaseEntity *pActivator, CBaseEntity *pCaller, USE_TYPE useType, float value )
 {
-	pev->ideal_yaw = CBaseToggle::AxisDelta( pev->spawnflags, pev->angles, m_start ) / m_flMoveDistance;
+	pev->ideal_yaw = (m_flMoveDistance != 0) ? CBaseToggle::AxisDelta( pev->spawnflags, pev->angles, m_start ) / m_flMoveDistance : 0;
 
 	UpdateAllButtons( pev->ideal_yaw, 1 );
 	UpdateTarget( pev->ideal_yaw );
@@ -1054,7 +1054,7 @@ void CMomentaryRotButton::Off( void )
 
 void CMomentaryRotButton::Return( void )
 {
-	float value = CBaseToggle::AxisDelta( pev->spawnflags, pev->angles, m_start ) / m_flMoveDistance;
+	float value = (m_flMoveDistance != 0) ? CBaseToggle::AxisDelta( pev->spawnflags, pev->angles, m_start ) / m_flMoveDistance : 0;
 
 	UpdateAllButtons( value, 0 );	// This will end up calling UpdateSelfReturn() n times, but it still works right
 	if ( value > 0 )

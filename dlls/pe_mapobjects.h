@@ -86,6 +86,7 @@ public:
 		pev->takedamage		= DAMAGE_NO;
 		pev->health			= 1;
 
+		m_pRef = NULL;
 		CPELRef *pLightRef = (CPELRef *)UTIL_FindEntityByClassname( NULL, "pe_light_ref" );
 		while( pLightRef != NULL )
 		{

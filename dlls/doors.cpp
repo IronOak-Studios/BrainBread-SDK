@@ -721,10 +721,10 @@ void CBaseDoor::Blocked( CBaseEntity *pOther )
 		{
 			pentTarget = FIND_ENTITY_BY_TARGETNAME(pentTarget, STRING(pev->targetname));
 
+			if (FNullEnt(pentTarget))
+				break;
 			if ( VARS( pentTarget ) != pev )
 			{
-				if (FNullEnt(pentTarget))
-					break;
 
 				if ( FClassnameIs ( pentTarget, "func_door" ) || FClassnameIs ( pentTarget, "func_door_rotating" ) )
 				{

@@ -65,7 +65,7 @@ int ExtractBbox( void *pmodel, int sequence, float *mins, float *maxs )
 	studiohdr_t *pstudiohdr;
 	
 	pstudiohdr = (studiohdr_t *)pmodel;
-	if (! pstudiohdr || sequence < 0)
+	if (! pstudiohdr || sequence < 0 || sequence >= pstudiohdr->numseq)
 		return 0;
 
 	mstudioseqdesc_t	*pseqdesc;
@@ -414,11 +414,15 @@ float SetController( void *pmodel, entvars_t *pev, int iController, float flValu
 		}
 	}
 
-	int setting = 255 * (flValue - pbonecontroller->start) / (pbonecontroller->end - pbonecontroller->start);
+	float range = pbonecontroller->end - pbonecontroller->start;
+	int setting = 0;
+	if (range != 0)
+		setting = 255 * (flValue - pbonecontroller->start) / range;
 
 	if (setting < 0) setting = 0;
 	if (setting > 255) setting = 255;
-	pev->controller[iController] = setting;
+	if (iController >= 0 && iController < 4)
+		pev->controller[iController] = setting;
 
 	return setting * (1.0 / 255.0) * (pbonecontroller->end - pbonecontroller->start) + pbonecontroller->start;
 }
@@ -436,7 +440,7 @@ float SetBlending( void *pmodel, entvars_t *pev, int iBlender, float flValue )
 
 	pseqdesc = (mstudioseqdesc_t *)((byte *)pstudiohdr + pstudiohdr->seqindex) + (int)pev->sequence;
 
-	if (pseqdesc->blendtype[iBlender] == 0)
+	if (iBlender < 0 || iBlender >= 2 || pseqdesc->blendtype[iBlender] == 0)
 		return flValue;
 
 	if (pseqdesc->blendtype[iBlender] & (STUDIO_XR | STUDIO_YR | STUDIO_ZR))
@@ -455,7 +459,10 @@ float SetBlending( void *pmodel, entvars_t *pev, int iBlender, float flValue )
 		}
 	}
 
-	int setting = 255 * (flValue - pseqdesc->blendstart[iBlender]) / (pseqdesc->blendend[iBlender] - pseqdesc->blendstart[iBlender]);
+	float blendrange = pseqdesc->blendend[iBlender] - pseqdesc->blendstart[iBlender];
+	int setting = 0;
+	if (blendrange != 0)
+		setting = 255 * (flValue - pseqdesc->blendstart[iBlender]) / blendrange;
 
 	if (setting < 0) setting = 0;
 	if (setting > 255) setting = 255;
@@ -474,6 +481,9 @@ int FindTransition( void *pmodel, int iEndingAnim, int iGoalAnim, int *piDir )
 	
 	pstudiohdr = (studiohdr_t *)pmodel;
 	if (! pstudiohdr)
+		return iGoalAnim;
+
+	if (iEndingAnim < 0 || iEndingAnim >= pstudiohdr->numseq || iGoalAnim < 0 || iGoalAnim >= pstudiohdr->numseq)
 		return iGoalAnim;
 
 	mstudioseqdesc_t	*pseqdesc;
@@ -543,7 +553,7 @@ void SetBodygroup( void *pmodel, entvars_t *pev, int iGroup, int iValue )
 	if (! pstudiohdr)
 		return;
 
-	if (iGroup > pstudiohdr->numbodyparts)
+	if (iGroup < 0 || iGroup >= pstudiohdr->numbodyparts)
 		return;
 
 	mstudiobodyparts_t *pbodypart = (mstudiobodyparts_t *)((byte *)pstudiohdr + pstudiohdr->bodypartindex) + iGroup;
@@ -565,7 +575,7 @@ int GetBodygroup( void *pmodel, entvars_t *pev, int iGroup )
 	if (! pstudiohdr)
 		return 0;
 
-	if (iGroup > pstudiohdr->numbodyparts)
+	if (iGroup < 0 || iGroup >= pstudiohdr->numbodyparts)
 		return 0;
 
 	mstudiobodyparts_t *pbodypart = (mstudiobodyparts_t *)((byte *)pstudiohdr + pstudiohdr->bodypartindex) + iGroup;
