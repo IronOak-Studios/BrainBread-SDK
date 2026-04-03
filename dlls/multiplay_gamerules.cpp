@@ -1228,8 +1228,8 @@ BOOL CHalfLifeMultiplay :: FAllowMonsters( void )
 //======== CHalfLifeMultiplay private functions ===========
 #define INTERMISSION_TIME		6
 
-extern list<CBaseEntity*> zombiepool;
-extern list<CBaseEntity*> gibpool;
+extern std::list<CBaseEntity*> zombiepool;
+extern std::list<CBaseEntity*> gibpool;
 extern int zombiecount;
 extern int gibcount;
 

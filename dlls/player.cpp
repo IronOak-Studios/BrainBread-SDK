@@ -2344,7 +2344,7 @@ void CBasePlayer::PreThink(void)
     }
     else if( nextburn <= gpGlobals->time )
     {
-      list<t_flame_part>::iterator i;
+      std::list<t_flame_part>::iterator i;
       for( i = flame.begin( ); i != flame.end( ); i++ )
       {
           CBaseEntity *ent = UTIL_FindEntityInSphere( NULL, pev->origin, 400 );

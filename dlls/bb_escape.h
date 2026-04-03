@@ -123,6 +123,6 @@ public:
   void EXPORT Think( );
 
 
-  list<CBaseEntity*> entlist;
+  std::list<CBaseEntity*> entlist;
   int numents;
 };

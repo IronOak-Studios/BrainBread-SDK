@@ -701,7 +701,7 @@ void CBasePlayerItem::DefaultTouch( CBaseEntity *pOther )
     pPlayer->m_sAmmoSlot[0] = p.pszAmmo1;
   }*/
 
-  list<vec3_t>::iterator it;
+  std::list<vec3_t>::iterator it;
   for( it = pPlayer->pickupused.begin( ); it != pPlayer->pickupused.end( ); it++ )
   {
     if( *it == pev->origin )

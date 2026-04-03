@@ -19,7 +19,6 @@
 #include "pm_materials.h"
 #include "effects.h"
 #include <list>
-using namespace std;
 
 
 struct s_spawnlist
@@ -571,13 +570,13 @@ public:
   float m_fTransformTime;
   BOOL m_bTransform;
 
-  list<t_flame_part> flame;
+  std::list<t_flame_part> flame;
   float nextpop;
   float nextburn;
   float m_fBurning;
   float m_fNextSpread;
   int clientteam;
-  list<vec3_t> pickupused;
+  std::list<vec3_t> pickupused;
   entvars_t *pevFlamer;
 
 	void GiveExp( float value, bool load = false );
