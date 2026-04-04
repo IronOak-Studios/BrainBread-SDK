@@ -74,6 +74,8 @@ extern cvar_t	zombie_yawspeed;
 extern cvar_t	zombie_lifetime;
 extern cvar_t	zombie_drop_height;
 extern cvar_t	zombie_slide_angle;
+extern cvar_t	zombie_stepsize;
+extern cvar_t	zombie_clip_distance;
 
 // Engine Cvars
 extern cvar_t	*g_psv_gravity;
@@ -81,5 +83,6 @@ extern cvar_t	*g_psv_aim;
 extern cvar_t	*g_psv_allow_autoaim;
 extern cvar_t	*g_footsteps;
 extern cvar_t	*g_psv_cheats;
+extern cvar_t	*g_psv_stepsize;
 
 #endif		// GAME_H

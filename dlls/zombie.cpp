@@ -248,7 +248,21 @@ void CZombie::Killed( entvars_t *pevAttacker, int iGib )
 
 void CZombie::MonsterThink( )
 {
+  // Override engine stepsize for zombie movement if the server
+  // operator changed it from the default.  Restored after think.
+  float flOldStepsize = 0;
+  bool bStepsizeOverride = false;
+  if ( g_psv_stepsize && zombie_stepsize.value != g_psv_stepsize->value )
+  {
+    flOldStepsize = g_psv_stepsize->value;
+    g_psv_stepsize->value = zombie_stepsize.value;
+    bStepsizeOverride = true;
+  }
+
   CBaseMonster::MonsterThink( );
+
+  if ( bStepsizeOverride )
+    g_psv_stepsize->value = flOldStepsize;
   if( dieTime && dieTime <= gpGlobals->time )
   {
     pev->health = 0;
@@ -1137,7 +1151,7 @@ void CZombie::Move( float flInterval )
 			break;
 		}
 
-		Vector vecFar  = pev->origin + vecToGoal * 45 + vecHalfZ;
+		Vector vecFar  = pev->origin + vecToGoal * zombie_clip_distance.value + vecHalfZ;
 		Vector vecNear = pev->origin + vecHalfZ;
 
 		TraceResult trRev;
@@ -1161,7 +1175,7 @@ void CZombie::Move( float flInterval )
 		else
 		{
 			// No obstacle, move to coyote position
-			vecExit = pev->origin + vecToGoal * 45 + vecHalfZ;
+			vecExit = pev->origin + vecToGoal * zombie_clip_distance.value + vecHalfZ;
 			bLedge = true;
 		}
 

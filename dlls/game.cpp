@@ -47,6 +47,8 @@ cvar_t	zombie_yawspeed	= {"sv_zombie_yawspeed", "20", FCVAR_SERVER };
 cvar_t	zombie_lifetime	= {"sv_zombie_lifetime", "60", FCVAR_SERVER };
 cvar_t	zombie_drop_height	= {"sv_zombie_drop_height", "100", FCVAR_SERVER };
 cvar_t	zombie_slide_angle	= {"sv_zombie_slide_angle", "80", FCVAR_SERVER };
+cvar_t	zombie_stepsize	= {"sv_zombie_stepsize", "18", FCVAR_SERVER };
+cvar_t	zombie_clip_distance	= {"sv_zombie_clip_distance", "45", FCVAR_SERVER };
 
 cvar_t	mission_timer_detect	= {"sv_mission_timer_detect", "1", FCVAR_SERVER };
 
@@ -87,6 +89,7 @@ cvar_t	*g_psv_aim = NULL;
 cvar_t	*g_psv_allow_autoaim = NULL;
 cvar_t	*g_footsteps = NULL;
 cvar_t	*g_psv_cheats = NULL;
+cvar_t	*g_psv_stepsize = NULL;
 
 //CVARS FOR SKILL LEVEL SETTINGS
 // Agrunt
@@ -522,6 +525,7 @@ void GameDLLInit( void )
 	g_psv_allow_autoaim = CVAR_GET_POINTER( "sv_allow_autoaim" );
 	g_footsteps = CVAR_GET_POINTER( "mp_footsteps" );
 	g_psv_cheats = CVAR_GET_POINTER( "sv_cheats" );
+	g_psv_stepsize = CVAR_GET_POINTER( "sv_stepsize" );
 
 	CVAR_REGISTER (&displaysoundlist);
 
@@ -546,6 +550,8 @@ void GameDLLInit( void )
 	CVAR_REGISTER (&zombie_lifetime);
 	CVAR_REGISTER (&zombie_drop_height);
 	CVAR_REGISTER (&zombie_slide_angle);
+	CVAR_REGISTER (&zombie_stepsize);
+	CVAR_REGISTER (&zombie_clip_distance);
 
 //	CVAR_REGISTER (&teamspect);
 //	CVAR_REGISTER (&showdmg);
