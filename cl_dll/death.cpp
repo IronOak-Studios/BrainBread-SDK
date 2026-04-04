@@ -125,7 +125,7 @@ int CHudDeathNotice :: Draw( float flTime )
 			int id = (rgDeathNoticeList[i].iId == -1) ? m_HUD_d_skull : rgDeathNoticeList[i].iId;
 			int head = rgDeathNoticeList[i].iHead;
 			int sprW = HudScale( gHUD.GetSpriteRect(id).right - gHUD.GetSpriteRect(id).left );
-			x = ScreenWidth - ConsoleStringLen(rgDeathNoticeList[i].szVictim) - sprW;
+			x = ScreenWidth - ConsoleStringLen(rgDeathNoticeList[i].szVictim) - sprW - HudScale( 10 );
 			if( head >= 0 )
 				x -= HudScale( gHUD.GetSpriteRect( head ).right - gHUD.GetSpriteRect( head ).left );
 
