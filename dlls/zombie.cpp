@@ -973,7 +973,8 @@ void CZombie::Move( float flInterval )
 		return;
 	}
 
-	Vector vecHalfZ = Vector(0, 0, 36); // human_hull half-height
+	Vector vecHalfZ = isFred ? Vector(0, 0, 32) : Vector(0, 0, 36);
+	int iTraceHull = isFred ? large_hull : human_hull;
 
 	// --- Executing a sideway move ---
 	// Slides the zombie perpendicular to its goal direction to get
@@ -1026,7 +1027,7 @@ void CZombie::Move( float flInterval )
 
 		// Abort early if path is now clear
 		TraceResult trFwd;
-		UTIL_TraceHull( pev->origin + vecHalfZ, pev->origin + vecToGoal.Normalize() * 32 + vecHalfZ, ignore_monsters, human_hull, ENT(pev), &trFwd);
+		UTIL_TraceHull( pev->origin + vecHalfZ, pev->origin + vecToGoal.Normalize() * 32 + vecHalfZ, ignore_monsters, iTraceHull, ENT(pev), &trFwd);
 		if ( trFwd.flFraction > 0.9 )
 		{
 			ALERT( at_aiconsole, "zombie sidestep: path clear, aborting early (%.0f remaining)\n", m_flAvoidRemaining );
@@ -1260,8 +1261,8 @@ BOOL CZombie::SlideWalkMove( float flYaw, float flDist, const Vector &vecMoveDir
 	float flSlideThreshold = -sin( zombie_slide_angle.value * M_PI / 180.0 );
 
 	TraceResult tr;
-	Vector vecHalfZ = Vector( 0, 0, 36 );
-	UTIL_TraceHull( pev->origin + vecHalfZ, pev->origin + vecHalfZ + vecMoveDir * flDist, dont_ignore_monsters, human_hull, ENT( pev ), &tr );
+	Vector vecHalfZ = isFred ? Vector( 0, 0, 32 ) : Vector( 0, 0, 36 );
+	UTIL_TraceHull( pev->origin + vecHalfZ, pev->origin + vecHalfZ + vecMoveDir * flDist, dont_ignore_monsters, isFred ? large_hull : human_hull, ENT( pev ), &tr );
 
 	if ( tr.flFraction < 1.0 && !tr.fAllSolid && !tr.fStartSolid )
 	{
