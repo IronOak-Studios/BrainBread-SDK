@@ -1086,7 +1086,10 @@ void cPEHacking::SetTeam( int iSelection, CBasePlayer *pPlayer, int kill, int mo
 	ChangeClass( pPlayer, pPlayer->m_iPrevClass );
 
 	if( pPlayer->m_iTeam <= 0 || pPlayer->m_iTeam > 2 )
-		m_iPlayers[0]--;
+	{
+		if( m_iPlayers[0] > 0 )
+			m_iPlayers[0]--;
+	}
 	else if( pPlayer->m_iTeam == 1 )
 		m_iPlayers[1]--;
 	else if( pPlayer->m_iTeam == 2 )

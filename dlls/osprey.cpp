@@ -394,14 +394,20 @@ void COsprey::FlyThink( void )
 
 	if (gpGlobals->time > m_startTime + m_dTime)
 	{
+		if ( !m_pGoalEnt )
+			return;
+
 		if (m_pGoalEnt->pev->speed == 0)
 		{
 			SetThink( &COsprey::DeployThink );
 		}
 		do {
 			m_pGoalEnt = CBaseEntity::Instance( FIND_ENTITY_BY_TARGETNAME ( NULL, STRING( m_pGoalEnt->pev->target ) ) );
+			if ( !m_pGoalEnt )
+				break;
 		} while (m_pGoalEnt->pev->speed < 400 && !HasDead());
-		UpdateGoal( );
+		if ( m_pGoalEnt )
+			UpdateGoal( );
 	}
 
 	Flight( );

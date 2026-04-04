@@ -1794,7 +1794,12 @@ BOOL CWeaponBox::HasWeapon( CBasePlayerItem *pCheckItem )
 {
 	CBasePlayerItem *pItem;
 	if( pCheckItem->m_pPlayer )
-		pItem = m_rgpPlayerItems[pCheckItem->iItemSlot( pCheckItem->m_pPlayer )];
+	{
+		int iSlot = pCheckItem->iItemSlot( pCheckItem->m_pPlayer );
+		if ( iSlot < 0 || iSlot >= MAX_ITEM_TYPES )
+			return FALSE;
+		pItem = m_rgpPlayerItems[iSlot];
+	}
 	else
 		pItem = m_rgpPlayerItems[0];
 

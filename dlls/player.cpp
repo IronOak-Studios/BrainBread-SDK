@@ -810,7 +810,7 @@ int CBasePlayer :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, 
 		if( m_fBurning <= gpGlobals->time )
 		{
 			m_fBurning = gpGlobals->time + 3.8;
-			pevFlamer = pevAttacker;
+			iFlamerIndex = ENTINDEX( ENT( pevAttacker ) );
 			m_fNextSpread = 0;
 			MESSAGE_BEGIN( MSG_PVS, gmsgSpray, pev->origin );
 			WRITE_BYTE( SPRAY_BURN );
@@ -2382,13 +2382,15 @@ void CBasePlayer::PreThink(void)
   }
   else if( m_fBurning > gpGlobals->time && m_fNextSpread <= gpGlobals->time )
   {
+    edict_t *pFlamerEdict = ( iFlamerIndex > 0 ) ? INDEXENT( iFlamerIndex ) : NULL;
+    entvars_t *pevFlamerResolved = pFlamerEdict ? VARS( pFlamerEdict ) : pev;
     CBaseEntity *ent = UTIL_FindEntityInSphere( NULL, pev->origin, 128 );
     int cnt = 0;
     while( ent != NULL && cnt < 5 )
 		{
       if( ent->pev->takedamage /*&& !FClassnameIs( ent->pev, "player" )*/ )
       {
-        ent->TakeDamage( pevFlamer, pevFlamer, ent == this ? 5 : 2.5, DMG_BURN );
+        ent->TakeDamage( pevFlamerResolved, pevFlamerResolved, ent == this ? 5 : 2.5, DMG_BURN );
         cnt++;
       }
 			ent = UTIL_FindEntityInSphere( ent, pev->origin, 128 );
@@ -4592,11 +4594,15 @@ int CBasePlayer::RemovePlayerItem( CBasePlayerItem *pItem )
 	if ( m_pLastItem == pItem )
 		m_pLastItem = NULL;
 
-	CBasePlayerItem *pPrev = m_rgpPlayerItems[pItem->iItemSlot(this)];
+	int iSlot = pItem->iItemSlot(this);
+	if ( iSlot < 0 || iSlot >= MAX_ITEM_TYPES )
+		return FALSE;
+
+	CBasePlayerItem *pPrev = m_rgpPlayerItems[iSlot];
 
 	if (pPrev == pItem)
 	{
-		m_rgpPlayerItems[pItem->iItemSlot(this)] = pItem->m_pNext;
+		m_rgpPlayerItems[iSlot] = pItem->m_pNext;
 		return TRUE;
 	}
 	else

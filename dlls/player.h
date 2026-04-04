@@ -577,7 +577,7 @@ public:
   float m_fNextSpread;
   int clientteam;
   std::list<vec3_t> pickupused;
-  entvars_t *pevFlamer;
+  int iFlamerIndex;
 
 	void GiveExp( float value, bool load = false );
   void UpdateStats( int type );

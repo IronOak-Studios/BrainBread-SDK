@@ -105,6 +105,8 @@ void CCrossbowBolt::BoltTouch( CBaseEntity *pOther )
 		entvars_t	*pevOwner;
 
 		pevOwner = VARS( pev->owner );
+		if ( !pevOwner )
+			pevOwner = pev;
 
 		// UNDONE: this needs to call TraceAttack instead
 		ClearMultiDamage( );
