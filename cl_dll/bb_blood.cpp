@@ -652,9 +652,9 @@ cBlood *cBlood::NewSpray( char *cfgfile, vec3_t origin, vec3_t dir, int entidx, 
   info.attachments = false;
   info.dynlife = false;
   info.dynnum = false;
-  strcpy( info.sprite, "\0" );
-  strcpy( info.masksprite, "\0" );
-  strcpy( info.detailsprite, "\0" );
+  info.sprite[0] = '\0';
+  info.masksprite[0] = '\0';
+  info.detailsprite[0] = '\0';
   strcpy( info.sizefader, "null" );
   strcpy( info.colfader, "blood" );
   info.falloff = 3;

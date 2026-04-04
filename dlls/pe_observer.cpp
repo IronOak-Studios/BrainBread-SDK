@@ -200,7 +200,7 @@ void CBasePlayer::StopObserver( void )
                 m_hObserverTarget = NULL;
         		observing = 0;
 
-				m_iHideHUD = NULL;
+				m_iHideHUD = 0;
 		}
 		for( int i = 0; i < 32; i++ )
 		{

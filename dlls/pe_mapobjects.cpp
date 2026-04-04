@@ -754,7 +754,6 @@ class CNPCSlavebot: public CBaseAnimating // hat zwar nix mit der class hier zu 
 
 			pev->nextthink = gpGlobals->time + 2;
 			return;
-			break;
 		}
 		ResetSequenceInfo( );
 		m_fSequenceLoops = TRUE;

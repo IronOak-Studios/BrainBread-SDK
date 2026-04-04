@@ -49,6 +49,7 @@ class cPEFontMgr
 
 public:
 	cPEFontMgr( );
+	~cPEFontMgr( );
 	void SetFont( char *name ) { curfont = AddFont( name ); }
 	void SetFont( s_font *fnt ) { curfont = fnt; }
 	s_font *AddFont( char *name );

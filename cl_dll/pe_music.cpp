@@ -215,7 +215,7 @@ void CHudMusic::Think( )
 		PlayStream( 0, m_pSoundStream );
 		SetVolume( FSOUND_ALL, (int)( m_fVolume * 255.0f ) );
     char text[512];
-    sprintf( text, "Playing %s\n\0", gList.GetFilename( ) );
+    snprintf( text, sizeof(text), "Playing %s\n", gList.GetFilename( ) );
     ConsolePrint( text );
 		m_bPlaying = 1;
 	}

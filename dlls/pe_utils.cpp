@@ -5,7 +5,6 @@
 #include "weapons.h"
 #include "player.h"
 #include "pe_utils.h"
-#include "weapons.h"
 #include "gamerules.h"
 #include "pe_rules.h"
 #include "pe_rules_hacker.h"
@@ -42,7 +41,7 @@ extern char *COM_Parse (char *data, char *com_token, int com_token_size );
 extern unsigned long ElfHash( const char *name );
 struct s_xphashitem
 {
-  long key;
+  unsigned long key;
   float value;
 };
 s_xphashitem *players = NULL;
@@ -615,10 +614,7 @@ void ShowText( CBasePlayer* pPlayer, char *Text, float HoldTime, int rColor, int
 		UTIL_HudMessage( pPlayer, hText, ShowTextAll );
 }
 
-void UTIL_GetWpnAmmo( const char *szClassname )
-{
 
-}
 
 const char *uEqPlr( CBasePlayer* pPlayer, int wpn, int ammo, int ammo2 )
 {

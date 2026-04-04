@@ -170,9 +170,9 @@ void cPEHacking::CalcTeamBonus( )
 		temp = pl->m_iNumMates;
 		pl->m_iNumMates = 0;
 
-    for( int i = 1; i <= MAX_PLAYERS; i++ )
+    for( int j = 1; j <= MAX_PLAYERS; j++ )
 		{
-			pl2 = (CBasePlayer *)UTIL_PlayerByIndex (i);
+			pl2 = (CBasePlayer *)UTIL_PlayerByIndex (j);
 		
       if ( !pl2
         || !pl2->IsAlive( )
@@ -443,7 +443,6 @@ void cPEHacking::StartRound( )
 	m_iHacked2 = 0;
 	m_iHack1 = 0;
 	m_iHack2 = 0;
-  misNr = 0;
   misNr = 0;
   misType = 0;
   misHoldoutDuration = 0;
@@ -1816,8 +1815,11 @@ BOOL cPEHacking::ClientCommand( CBasePlayer *pPlayer, const char *pcmd )
 		
 		pLight = (CPELight *)UTIL_FindEntityByClassname( NULL, "pe_light" );
 		MESSAGE_BEGIN( MSG_ONE, gmsgLensRef, NULL, pPlayer->pev );
+		int lightCount = 0;
 		while( pLight != NULL )
 		{
+			if( lightCount >= 30 )
+				break;
 			WRITE_BYTE( 1 );
 			WRITE_COORD( pLight->pev->origin.x );
 			WRITE_COORD( pLight->pev->origin.y );
@@ -1833,6 +1835,7 @@ BOOL cPEHacking::ClientCommand( CBasePlayer *pPlayer, const char *pcmd )
 			{
 				WRITE_BYTE( 0 );
 			}
+			lightCount++;
 			pLight = (CPELight *)UTIL_FindEntityByClassname( pLight, "pe_light" );
 		}
 		WRITE_BYTE( 0 );

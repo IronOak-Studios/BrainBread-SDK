@@ -171,7 +171,7 @@ float CEscape::CalcYaw( vec3_t vec )
     res = MOD( res, 360 );
 	  if( res > 180 ) res -= 360;
 	  if( res < -180 ) res += 360;
-    return abs(res);
+    return fabs(res);
 }
 
 void CEscape::NextTarget( bool rescuepoint )
@@ -491,11 +491,11 @@ void CEscape::Rotate(  )
   
   if( yaw <= 40 && reachedrotspeed >= 20 )
     rotspeed = ( flSide < 0 ? 1 : -1 ) * reachedrotspeed * yaw / 40;
-  else if( abs( rotspeed ) < maxrotspeed )
+  else if( fabs( rotspeed ) < maxrotspeed )
     rotspeed += ( flSide < 0 ? 1 : -1 ) * ESCAPE_ROTATE_ACCEL * deltatime;
 
-  if( reachedrotspeed < abs( rotspeed ) )
-    reachedrotspeed = abs( rotspeed );
+  if( reachedrotspeed < fabs( rotspeed ) )
+    reachedrotspeed = fabs( rotspeed );
   
 	pev->avelocity.y = rotspeed;
 

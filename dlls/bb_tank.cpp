@@ -180,7 +180,7 @@ float CTank::CalcYaw( vec3_t vec )
     res = MOD( res, 360 );
 	  if( res > 180 ) res -= 360;
 	  if( res < -180 ) res += 360;
-    return abs(res);
+    return fabs(res);
 }
 
 void CTank::NextTarget( )
@@ -412,11 +412,11 @@ void CTank::Rotate(  )
   
   if( yaw <= 25 && reachedrotspeed >= 20 )
     rotspeed = ( flSide < 0 ? 1 : -1 ) * reachedrotspeed * yaw / 25;
-  else if( abs( rotspeed ) < maxrotspeed )
+  else if( fabs( rotspeed ) < maxrotspeed )
     rotspeed += ( flSide < 0 ? 1 : -1 ) * TANK_ROTATE_ACCEL * deltatime;
 
-  if( reachedrotspeed < abs( rotspeed ) )
-    reachedrotspeed = abs( rotspeed );
+  if( reachedrotspeed < fabs( rotspeed ) )
+    reachedrotspeed = fabs( rotspeed );
   
 	pev->avelocity.y = rotspeed;
 

@@ -275,36 +275,40 @@ void cPERules::ResetMap( )
 		respawn = UTIL_FindEntityByClassname( respawn, "func_button" );
 	}
 		
-	respawn = UTIL_FindEntityByClassname( NULL, "weaponbox" );
-  DisableAll("weaponbox");
-  DisableAll("monster_zombie");
-  while ( respawn != NULL )
+	DisableAll("weaponbox");
+	DisableAll("monster_zombie");
+	respawn = UTIL_FindEntityByClassname(NULL, "weaponbox");
+	while ( respawn != NULL )
 	{
+		CBaseEntity *pNext = UTIL_FindEntityByClassname( respawn, "weaponbox" );
 		UTIL_Remove( respawn );
-		respawn = UTIL_FindEntityByClassname( respawn, "weaponbox" );
+		respawn = pNext;
 	}
+
+	DisableAll("weapon_case");
 	respawn = UTIL_FindEntityByClassname( NULL, "weapon_case" );
 	while ( respawn != NULL )
 	{
-		DisableAll("weapon_case");
+		CBaseEntity *pNext = UTIL_FindEntityByClassname( respawn, "weapon_case" );
 		UTIL_Remove( respawn );
-		respawn = UTIL_FindEntityByClassname( respawn, "weapon_case" );
+		respawn = pNext;
 	}
 
+	DisableAll("pe_object_case");
 	respawn = UTIL_FindEntityByClassname( NULL, "pe_object_case" );
 	while ( respawn != NULL )
 	{
-		DisableAll("pe_object_case");
 		respawn->Spawn();
 		respawn = UTIL_FindEntityByClassname( respawn, "pe_object_case" );
 	}
 
+	DisableAll("bb_objective_item");
 	respawn = UTIL_FindEntityByClassname( NULL, "bb_objective_item" );
-  DisableAll("bb_objective_item");
 	while ( respawn != NULL )
 	{
+		CBaseEntity *pNext = UTIL_FindEntityByClassname( respawn, "bb_objective_item" );
 		UTIL_Remove( respawn );
-		respawn = UTIL_FindEntityByClassname( respawn, "bb_objective_item" );
+		respawn = pNext;
 	}
 
 	respawn = UTIL_FindEntityByClassname( NULL, "pe_objectclip" );
@@ -324,8 +328,9 @@ void cPERules::ResetMap( )
   respawn = UTIL_FindEntityByClassname( NULL, "grenade" );
 	while ( respawn != NULL )
 	{
+		CBaseEntity* pNext = UTIL_FindEntityByClassname(respawn, "grenade");
 		UTIL_Remove( respawn );
-		respawn = UTIL_FindEntityByClassname( respawn, "grenade" );
+		respawn = pNext;
 	}
 
   respawn = UTIL_FindEntityByClassname( NULL, "bb_escapeair" );

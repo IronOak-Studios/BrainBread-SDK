@@ -232,37 +232,37 @@ int CHudDeathNotice :: MsgFunc_DeathMsg( const char *pszName, int iSize, void *p
   if( killer == 65 )
   {
 		rgDeathNoticeList[i].KillerColor = g_ColorGrey;
-		strncpy( rgDeathNoticeList[i].szKiller, "Z0mBiE\0", MAX_PLAYER_NAME_LENGTH );
+		strncpy( rgDeathNoticeList[i].szKiller, "Z0mBiE", MAX_PLAYER_NAME_LENGTH );
 		rgDeathNoticeList[i].szKiller[MAX_PLAYER_NAME_LENGTH-1] = 0;
   } 
   else if( killer == 67 )
   {
 		rgDeathNoticeList[i].KillerColor = g_ColorGrey;
-		strncpy( rgDeathNoticeList[i].szKiller, "FRED!\0", MAX_PLAYER_NAME_LENGTH );
+		strncpy( rgDeathNoticeList[i].szKiller, "FRED!", MAX_PLAYER_NAME_LENGTH );
 		rgDeathNoticeList[i].szKiller[MAX_PLAYER_NAME_LENGTH-1] = 0;
   }
   else if( killer == 66 )
   {
 		rgDeathNoticeList[i].KillerColor = g_ColorGrey;
-		strncpy( rgDeathNoticeList[i].szKiller, "Marine\0", MAX_PLAYER_NAME_LENGTH );
+		strncpy( rgDeathNoticeList[i].szKiller, "Marine", MAX_PLAYER_NAME_LENGTH );
 		rgDeathNoticeList[i].szKiller[MAX_PLAYER_NAME_LENGTH-1] = 0;
   }
   else if( killer == 68 )
   {
 		rgDeathNoticeList[i].KillerColor = g_ColorGrey;
-		strncpy( rgDeathNoticeList[i].szKiller, "Barney\0", MAX_PLAYER_NAME_LENGTH );
+		strncpy( rgDeathNoticeList[i].szKiller, "Barney", MAX_PLAYER_NAME_LENGTH );
 		rgDeathNoticeList[i].szKiller[MAX_PLAYER_NAME_LENGTH-1] = 0;
   }
   else if( killer == 69 )
   {
 		rgDeathNoticeList[i].KillerColor = g_ColorGrey;
-		strncpy( rgDeathNoticeList[i].szKiller, "Tank\0", MAX_PLAYER_NAME_LENGTH );
+		strncpy( rgDeathNoticeList[i].szKiller, "Tank", MAX_PLAYER_NAME_LENGTH );
 		rgDeathNoticeList[i].szKiller[MAX_PLAYER_NAME_LENGTH-1] = 0;
   }
   else if( killer == 70 )
   {
 		rgDeathNoticeList[i].KillerColor = g_ColorGrey;
-		strncpy( rgDeathNoticeList[i].szKiller, "BlackHawk\0", MAX_PLAYER_NAME_LENGTH );
+		strncpy( rgDeathNoticeList[i].szKiller, "BlackHawk", MAX_PLAYER_NAME_LENGTH );
 		rgDeathNoticeList[i].szKiller[MAX_PLAYER_NAME_LENGTH-1] = 0;
   }
   else if ( killer > 0 && killer <= MAX_PLAYERS )
@@ -287,25 +287,25 @@ int CHudDeathNotice :: MsgFunc_DeathMsg( const char *pszName, int iSize, void *p
   if( victim == 65 )
   {
 		rgDeathNoticeList[i].VictimColor = g_ColorGrey;
-		strncpy( rgDeathNoticeList[i].szVictim, "Z0mBiE\0", MAX_PLAYER_NAME_LENGTH );
+		strncpy( rgDeathNoticeList[i].szVictim, "Z0mBiE", MAX_PLAYER_NAME_LENGTH );
 		rgDeathNoticeList[i].szVictim[MAX_PLAYER_NAME_LENGTH-1] = 0;
   } 
   else if( victim == 67 )
   {
 		rgDeathNoticeList[i].VictimColor = g_ColorGrey;
-		strncpy( rgDeathNoticeList[i].szVictim, "FRED!\0", MAX_PLAYER_NAME_LENGTH );
+		strncpy( rgDeathNoticeList[i].szVictim, "FRED!", MAX_PLAYER_NAME_LENGTH );
 		rgDeathNoticeList[i].szVictim[MAX_PLAYER_NAME_LENGTH-1] = 0;
   }
   else if( victim == 66 )
   {
 		rgDeathNoticeList[i].VictimColor = g_ColorGrey;
-		strncpy( rgDeathNoticeList[i].szVictim, "Marine\0", MAX_PLAYER_NAME_LENGTH );
+		strncpy( rgDeathNoticeList[i].szVictim, "Marine", MAX_PLAYER_NAME_LENGTH );
 		rgDeathNoticeList[i].szVictim[MAX_PLAYER_NAME_LENGTH-1] = 0;
   }
   else if( victim == 68 )
   {
 		rgDeathNoticeList[i].VictimColor = g_ColorGrey;
-		strncpy( rgDeathNoticeList[i].szVictim, "Barney\0", MAX_PLAYER_NAME_LENGTH );
+		strncpy( rgDeathNoticeList[i].szVictim, "Barney", MAX_PLAYER_NAME_LENGTH );
 		rgDeathNoticeList[i].szVictim[MAX_PLAYER_NAME_LENGTH-1] = 0;
   }
   else if ( victim > 0 && victim <= MAX_PLAYERS )

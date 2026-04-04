@@ -30,6 +30,18 @@ static inline int FontScale( const s_font *fnt, int v )
 	return (int)( v * g_flHudScale * GetFontScale() / fnt->scale + 0.5f );
 }
 
+cPEFontMgr::~cPEFontMgr( )
+{
+	s_font *it = ffont;
+	while( it )
+	{
+		s_font *next = it->next;
+		delete it;
+		it = next;
+	}
+	ffont = lfont = curfont = NULL;
+}
+
 cPEFontMgr::cPEFontMgr( )
 {
 	ffont = NULL;

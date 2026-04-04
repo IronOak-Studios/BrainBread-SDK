@@ -434,15 +434,13 @@ void CHudRadar::Disable( int idx )
 	{
 		if( cur->entindex == idx )
 		{
-			if( fradar == cur )
+			if( fradar == cur || !cur->prev )
 			{
+				fradar = cur->next;
+				if ( fradar )
+					fradar->prev = NULL;
 				if( lradar == cur )
 					lradar = NULL;
-				fradar = cur->next;
-				delete cur;
-			}
-			else if( !cur->prev )
-			{
 				delete cur;
 			}
 			else
