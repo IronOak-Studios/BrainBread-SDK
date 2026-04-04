@@ -1101,6 +1101,13 @@ int CBaseMonster :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker,
 		pev->velocity = pev->velocity + vecDir * ( -DamageForce( pev, flDamage ) * ( pev->fuser4 ? 0.2 : 1 ) );
 	}
 
+	// zombies don't damage other zombies
+	if( !FNullEnt( pevInflictor ) && pevInflictor->team == 2 && pev->team == 2
+		&& FClassnameIs( pevInflictor, "monster_zombie" ) )
+	{
+		return 0;
+	}
+
 	// do the damage
   //if( !IsPlayer( ) || pev->health - flTake > 0 || !FNullEnt( pevInflictor ) && !FClassnameIs( pevInflictor, "monster_zombie" ) )
   if( !IsPlayer( ) || FNullEnt( pevInflictor ) || !FClassnameIs( pevInflictor, "monster_zombie" ) ||
