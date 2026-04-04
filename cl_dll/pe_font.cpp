@@ -13,11 +13,21 @@ cPEFontMgr *g_font = NULL;
 s_font *fntBlueHighway = NULL;
 //s_font *fntWepmenu = NULL;
 
+// Return the cl_fontscale cvar value, clamped to a safe range.
+static inline float GetFontScale( void )
+{
+	float s = CVAR_GET_FLOAT( "cl_fontscale" );
+	if( s < 0.5f ) s = 0.5f;
+	if( s > 4.0f ) s = 4.0f;
+	return s;
+}
+
 // Scale a font-space value to screen pixels, accounting for the asset's
 // native scale so that a 2x sprite at 2x HUD scale produces 1:1 pixels.
+// cl_fontscale acts as an additional multiplier on top of HUD scaling.
 static inline int FontScale( const s_font *fnt, int v )
 {
-	return (int)( v * g_flHudScale / fnt->scale + 0.5f );
+	return (int)( v * g_flHudScale * GetFontScale() / fnt->scale + 0.5f );
 }
 
 cPEFontMgr::cPEFontMgr( )
@@ -201,7 +211,7 @@ int cPEFontMgr::GetWidth( char chr )
 		return 0;
 
 	if( (int)chr < PE_FONT_START || (int)chr > PE_FONT_END )
-		return HudScale( SPACE_WIDTH );
+		return (int)( HudScale( SPACE_WIDTH ) * GetFontScale() + 0.5f );
 	return FontScale( curfont, curfont->charWidth[ chr - PE_FONT_START ] );
 }
 
@@ -246,10 +256,11 @@ void cPEFontMgr::DrawChar( int x, int y, char chr, int r, int g, int b )
 	rect.left = curfont->charXPos[chr];
 	rect.right = rect.left + curfont->charWidth[chr] + 1;
 	
+	float drawScale = (float)curfont->scale / GetFontScale();
 	if (curfont->scale > 1)
-		ScaledSPR_DrawHoles( curfont->charSprite, 0, x, y, &rect, r, g, b, (float)curfont->scale );
+		ScaledSPR_DrawHoles( curfont->charSprite, 0, x, y, &rect, r, g, b, drawScale );
 	else
-		ScaledSPR_DrawAdditive(curfont->charSprite, 0, x, y, &rect, r, g, b, (float)curfont->scale);
+		ScaledSPR_DrawAdditive( curfont->charSprite, 0, x, y, &rect, r, g, b, drawScale );
 }
 
 int cPEFontMgr::DrawString( int x, int y, char *string, int r, int g, int b, int a )

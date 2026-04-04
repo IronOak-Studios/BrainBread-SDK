@@ -59,6 +59,7 @@ int CHudMusic::Init( )
 	CVAR_CREATE( "cl_fadesys", "1", FCVAR_ARCHIVE );
 	CVAR_CREATE( "cl_fontsys", "1", FCVAR_ARCHIVE );
 	CVAR_CREATE( "cl_newfont", "1", FCVAR_ARCHIVE);
+	CVAR_CREATE( "cl_fontscale", "1.2", FCVAR_ARCHIVE );
 	CVAR_CREATE( "cl_lensflare", "1", FCVAR_ARCHIVE );
 
 	CVAR_CREATE( "cl_blood", "3", FCVAR_ARCHIVE );

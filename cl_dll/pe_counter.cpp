@@ -10,7 +10,9 @@ extern TeamFortressViewport* gViewPort;
 #include "pe_fader.h"
 #include "pe_font.h"
 
-#define SMALL_CNT_HEIGHT HudScale( 35 )
+#define SMALL_BAR_HEIGHT HudScale( 13 )
+#define SMALL_BAR_GAP    HudScale( 4 )
+#define SMALL_CNT_HEIGHT ( g_font->GetHeight() + SMALL_BAR_HEIGHT + SMALL_BAR_GAP )
 DECLARE_MESSAGE(m_Counter, Counter) 
 DECLARE_MESSAGE(m_Counter, CntDown) 
 DECLARE_MESSAGE(m_Counter, SmallCnt) 
@@ -215,19 +217,21 @@ int CHudCounter::Draw( float flTime )
 		int cy = HudScale( 145 ) + m_iNumCnts * SMALL_CNT_HEIGHT;
 		int cx = HudScale( 10 );
 		int cw = XRES(80);
+		int fontH = g_font->GetHeight();
+		int barTop = cy + fontH;
 		int r = 143, g = 143, b = 54;
 		if (CVAR_GET_FLOAT("cl_newfont"))
 		{
 			r = g = 255;
 			// progress bar background
-			gEngfuncs.pfnFillRGBABlend(cx, cy + HudScale(18), cw, HudScale(13), 0, 0, 0, 180);
+			gEngfuncs.pfnFillRGBABlend(cx, barTop, cw, SMALL_BAR_HEIGHT, 0, 0, 0, 180);
 		}
 		g_font->DrawString( cx, cy, m_sCounters[i].sName, r, g, b );
 
-		UTIL_FillRect( cx, cy + HudScale( 18 ), cw, HudScale( 1 ), r, g, b, 255 );
-		UTIL_FillRect( cx, cy + HudScale( 30 ), cw, HudScale( 1 ), r, g, b, 255 );
-		UTIL_FillRect( cx, cy + HudScale( 19 ), HudScale( 1 ), HudScale( 11 ), r, g, b, 255 );
-		UTIL_FillRect( cx + cw, cy + HudScale( 18 ), HudScale( 1 ), HudScale( 13 ), r, g, b, 255 );
+		UTIL_FillRect( cx, barTop, cw, HudScale( 1 ), r, g, b, 255 );
+		UTIL_FillRect( cx, barTop + SMALL_BAR_HEIGHT - HudScale( 1 ), cw, HudScale( 1 ), r, g, b, 255 );
+		UTIL_FillRect( cx, barTop + HudScale( 1 ), HudScale( 1 ), SMALL_BAR_HEIGHT - HudScale( 2 ), r, g, b, 255 );
+		UTIL_FillRect( cx + cw, barTop, HudScale( 1 ), SMALL_BAR_HEIGHT, r, g, b, 255 );
 		
 		pcent = 100.0f * ( curTime - m_sCounters[i].fStart ) / m_sCounters[i].fTotal;
 		if( pcent > 100 )
@@ -236,7 +240,7 @@ int CHudCounter::Draw( float flTime )
 			smallProgressFaderBad->GetColor( pcent, r, g, b );
 		else
 			smallProgressFaderGood->GetColor( pcent, r, g, b );
-		UTIL_FillRect( cx + HudScale( 2 ), cy + HudScale( 20 ), (cw - HudScale( 4 ))/m_sCounters[i].fTotal*(curTime-m_sCounters[i].fStart), HudScale( 9 ), r, g, b, 255 );
+		UTIL_FillRect( cx + HudScale( 2 ), barTop + HudScale( 2 ), (cw - HudScale( 4 ))/m_sCounters[i].fTotal*(curTime-m_sCounters[i].fStart), SMALL_BAR_HEIGHT - HudScale( 4 ), r, g, b, 255 );
 
 		m_iNumCnts++;		
 	}
