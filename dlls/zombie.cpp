@@ -907,6 +907,7 @@ void CZombie::SpawningThink( )
 
 	pev->movetype = MOVETYPE_STEP;
  	MonsterInit();
+	pev->view_ofs = Vector( 0, 0, pev->size.z * 0.85f );
 }
 
 void CZombie::SpawningDeathThink( )
@@ -1124,7 +1125,7 @@ void CZombie::Move( float flInterval )
 	// clip (configurable height).
 	if ( zombie_behavior.value >= 2 && !isFred ) do
 	{
-		Vector vecEye = pev->origin + Vector( 0, 0, pev->size.z * 0.75f );
+		Vector vecEye = pev->origin + pev->view_ofs;
 
 		TraceResult trHead;
 		UTIL_TraceLine( vecEye, vecEye + vecToGoal * 80, ignore_monsters, ENT( pev ), &trHead );
@@ -1333,7 +1334,7 @@ int CZombie::CheckLocalMove( const Vector &vecStart, const Vector &vecEnd, CBase
 	// New behavior: always force VALID so route-building succeeds with direct paths
 	int iResult = CBaseMonster::CheckLocalMove( vecStart, vecEnd, pTarget, pflDist );
 
-	if ( iResult == LOCALMOVE_INVALID )
+	if ( iResult != LOCALMOVE_VALID )
 	{
 		iResult = LOCALMOVE_VALID;
 	}
