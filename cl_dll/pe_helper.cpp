@@ -419,6 +419,9 @@ void cPEHelper::Draw( float time )
 	s_helpitem *cur = fitem;
 	int x = 0, y = -1000, ox = 0, oy = -1000, r = 0, g = 0, b = 0, maxx = 0, maxy = 0;
 	int br, bg, bb, ba;
+	// Per-region stacking
+	int regionNextYDown[3] = { 0, 0, 0 };
+	int regionNextYUp[3] = { ScreenHeight, ScreenHeight, ScreenHeight };
 
 	while( cur )
 	{
@@ -449,6 +452,31 @@ void cPEHelper::Draw( float time )
 		cur->posFader.GetColor( time, x, y, br, br );
 		x = ox = cur->startpos[0] + (int)( (float)x / 100000.0f * ( cur->pos[0] - cur->startpos[0] ) );
 		y = oy = cur->startpos[1] + (int)( (float)y / 100000.0f * ( cur->pos[1] - cur->startpos[1] ) );
+		// Stack helpers per horizontal region so they don't overlap
+		int region;
+		if( cur->pos[0] < ScreenWidth / 3 )
+			region = 0;
+		else if( cur->pos[0] < ScreenWidth * 2 / 3 )
+			region = 1;
+		else
+			region = 2;
+		int targetOffset = 0;
+		// Stack upwards for bottom helpers, else downwards
+		if( cur->pos[1] > ScreenHeight * 3 / 4 )
+		{
+			int curBottom = cur->pos[1] + cur->max[1];
+			if( curBottom > regionNextYUp[region] )
+				targetOffset = regionNextYUp[region] - curBottom;
+			regionNextYUp[region] = cur->pos[1] + targetOffset - HudScale( 4 );
+		}
+		else
+		{
+			if( cur->pos[1] < regionNextYDown[region] )
+				targetOffset = regionNextYDown[region] - cur->pos[1];
+			regionNextYDown[region] = cur->pos[1] + targetOffset + cur->max[1] + HudScale( 4 );
+		}
+		y += targetOffset;
+		oy += targetOffset;
 		cur->spriteFader.GetColor( time, br, bg, bb, ba );
 		if( cur->blackbg )
 			UTIL_BlackRect(	ox,
