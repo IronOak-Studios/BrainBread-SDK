@@ -6210,99 +6210,63 @@ void SetColorAll( const char* name, int color )
 	}
 }
 
-void CBasePlayer::AddDmgDone( int index, float amount, int hitgroup )
+static void AddDmgEntry( CBasePlayer::_dmginfo *arr, int arrSize,
+						 entvars_t *selfpev, int index, float amount, int hitgroup )
 {
 	int i = 0;
-	for( i = 0; i < 32; i++ )
+	for( i = 0; i < arrSize; i++ )
 	{
-		if( ( dmgdone[i].index == index ) || ( dmgdone[i].index == 0 ) )
+		if( ( arr[i].index == index ) || ( arr[i].index == 0 ) )
 			break;
 	}
 
-	if( i >= 32 )
+	if( i >= arrSize )
 		return;
 
-	if( !VARS(INDEXENT(index)) || ( VARS(INDEXENT(index)) == pev ) )
+	if( !VARS(INDEXENT(index)) || ( VARS(INDEXENT(index)) == selfpev ) )
 		return;
 
 	if( strlen(STRING( VARS(INDEXENT(index))->netname )) > 0 )
 	{
-		strncpy( dmgdone[i].name, STRING( VARS(INDEXENT(index))->netname ), sizeof(dmgdone[i].name) - 1 );
-		dmgdone[i].name[sizeof(dmgdone[i].name) - 1] = '\0';
+		strncpy( arr[i].name, STRING( VARS(INDEXENT(index))->netname ), sizeof(arr[i].name) - 1 );
+		arr[i].name[sizeof(arr[i].name) - 1] = '\0';
 	}
 	else
-		return;//strcpy( dmgdone[i].name, STRING( VARS(INDEXENT(index))->classname ) );
-	dmgdone[i].index = index;
-	dmgdone[i].damage += amount;
-	dmgdone[i].hits++;
+		return;
+
+	arr[i].index = index;
+	arr[i].damage += amount;
+	arr[i].hits++;
+
 	switch( hitgroup )
 	{
 	case 1:
-		dmgdone[i].hitgroup[0]++;
+		arr[i].hitgroup[0]++;
 		break;
 	case 2:
 	case 3:
-		dmgdone[i].hitgroup[1]++;
+		arr[i].hitgroup[1]++;
 		break;
 	case 4:
 	case 5:
 	case 6:
 	case 7:
-		dmgdone[i].hitgroup[2]++;
+		arr[i].hitgroup[2]++;
 		break;
 	default:
-		dmgdone[i].hitgroup[3]++;
+		arr[i].hitgroup[3]++;
 		break;
 	}
 }
 
+void CBasePlayer::AddDmgDone( int index, float amount, int hitgroup )
+{
+	AddDmgEntry( dmgdone, 32, pev, index, amount, hitgroup );
+}
 
 void CBasePlayer::AddDmgReceived( int from_index, float amount, int hitgroup )
 {
-	int i = 0;
-	
-	for( i = 0; i < 32; i++ )
-	{
-		if( ( dmgreceived[i].index == from_index ) || ( dmgreceived[i].index == 0 ) )
-			break;
-	}
-
-	if( i >= 32 )
-		return;
-
-	if( !VARS(INDEXENT(from_index)) || ( VARS(INDEXENT(from_index)) == pev ) )
-		return;
-
-	if( strlen(STRING( VARS(INDEXENT(from_index))->netname )) > 0 )
-	{
-		strncpy( dmgreceived[i].name, STRING( VARS(INDEXENT(from_index))->netname ), sizeof(dmgreceived[i].name) - 1 );
-		dmgreceived[i].name[sizeof(dmgreceived[i].name) - 1] = '\0';
-	}
-	else
-		return;//strcpy( dmgreceived[i].name, STRING( VARS(INDEXENT(from_index))->classname ) );
-	dmgreceived[i].index = from_index;
-	dmgreceived[i].damage += amount;
-	dmgreceived[i].hits++;
-
-	switch( hitgroup )
-	{
-	case 1:
-		dmgreceived[i].hitgroup[0]++;
-		break;
-	case 2:
-	case 3:
-		dmgreceived[i].hitgroup[1]++;
-		break;
-	case 4:
-	case 5:
-	case 6:
-	case 7:
-		dmgreceived[i].hitgroup[2]++;
-		break;
-	default:
-		dmgreceived[i].hitgroup[3]++;
-		break;
-	}
+	AddDmgEntry( dmgreceived, 32, pev, from_index, amount, hitgroup );
 }
 
 #define POINT_BONUS_KILL					0.50f

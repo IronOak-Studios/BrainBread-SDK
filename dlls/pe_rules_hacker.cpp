@@ -1876,11 +1876,11 @@ BOOL cPEHacking::ClientCommand( CBasePlayer *pPlayer, const char *pcmd )
 			return TRUE;
 		for ( int i = 1; i <= MAX_PLAYERS; i++ )
 		{
-			CBasePlayer *pPlayer = (CBasePlayer *)UTIL_PlayerByIndex (i);
+			CBasePlayer *pl = (CBasePlayer *)UTIL_PlayerByIndex (i);
 		
-			if (!pPlayer)
+			if (!pl)
 				continue;
-			pPlayer->pev->body = atoi(CMD_ARGV( 1 ));
+			pl->pev->body = atoi(CMD_ARGV( 1 ));
 		}
 		return TRUE;
 	}
