@@ -478,7 +478,7 @@ void cPEHacking::StartRound( )
           continue;
 
         CBaseDelay *pDelay = static_cast<CBaseDelay*>( pTrigger );
-        if( pDelay->m_flDelay > 0 )
+        if( pDelay->m_flDelay >= 5 )
         {
           // Disable touch so players can't fire it early
           pTrigger->SetTouch( NULL );
@@ -2889,7 +2889,7 @@ void cPEHacking::StartMission( )
           continue;
 
         CBaseDelay *pDelay = static_cast<CBaseDelay*>( pTrigger );
-        if( pDelay->m_flDelay > 0 )
+        if( pDelay->m_flDelay >= 5 )
         {
           misHoldoutDuration = pDelay->m_flDelay;
           // Fire the trigger chain now so timing is synced with the bar
@@ -2910,7 +2910,7 @@ void cPEHacking::StartMission( )
         while ( ( pMgr = UTIL_FindEntityByClassname( pMgr, "multi_manager" ) ) != NULL )
         {
           float delay = UTIL_MultiManagerTargetDelay( pMgr, missionName );
-          if( delay > 0 )
+          if( delay >= 5 )
           {
             misHoldoutDuration = delay;
             break;
