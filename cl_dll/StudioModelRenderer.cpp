@@ -52,6 +52,7 @@ void CStudioModelRenderer::Init( void )
 	m_pCvarHiModels			= IEngineStudio.GetCvar( "cl_himodels" );
 	m_pCvarDeveloper		= IEngineStudio.GetCvar( "developer" );
 	m_pCvarDrawEntities		= IEngineStudio.GetCvar( "r_drawentities" );
+	m_pCvarGore         = IEngineStudio.GetCvar( "cl_gore" );
 
 	m_pChromeSprite			= IEngineStudio.GetChromeSprite();
 
@@ -78,6 +79,7 @@ CStudioModelRenderer::CStudioModelRenderer( void )
 	m_pCvarHiModels		= NULL;
 	m_pCvarDeveloper	= NULL;
 	m_pCvarDrawEntities	= NULL;
+	m_pCvarGore       = NULL;
 	m_pChromeSprite		= NULL;
 	m_pStudioModelCount	= NULL;
 	m_pModelsDrawn		= NULL;
@@ -1164,6 +1166,32 @@ int GetRemapColor( int iTeam, bool bTopColor )
 }
 #endif 
 
+static bool IsGibModel( const char *name )
+{
+	if( !name )
+		return false;
+
+	if( strstr( name, "/gib_" )
+		|| strstr( name, "/hgibs.mdl" )
+		|| strstr( name, "/gibs/" ) )
+		return true;
+
+	return false;
+}
+
+static bool IsZombieModel( const char *name )
+{
+	if( !name )
+		return false;
+
+	if( strstr( name, "/zombie1.mdl" )
+		|| strstr( name, "/zombie2.mdl" )
+		|| strstr( name, "/zombie3.mdl" ) )
+		return true;
+
+	return false;
+}
+
 /*
 ====================
 StudioDrawModel
@@ -1213,6 +1241,19 @@ int CStudioModelRenderer::StudioDrawModel( int flags )
 	}
 
 	m_pRenderModel = m_pCurrentEntity->model;
+
+	// No-gore: hide gib models and reset zombie bodygroups
+	if( m_pCvarGore && !m_pCvarGore->value && m_pRenderModel )
+	{
+		const char *mdlname = m_pRenderModel->name;
+
+		if( IsGibModel( mdlname ) )
+			return 0;
+
+		if( IsZombieModel( mdlname ) )
+			m_pCurrentEntity->curstate.body = 0;
+	}
+
 	m_pStudioHeader = (studiohdr_t *)IEngineStudio.Mod_Extradata (m_pRenderModel);
 	IEngineStudio.StudioSetHeader( m_pStudioHeader );
 	IEngineStudio.SetRenderModel( m_pRenderModel );

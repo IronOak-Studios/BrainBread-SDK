@@ -63,6 +63,7 @@ int CHudMusic::Init( )
 	CVAR_CREATE( "cl_lensflare", "1", FCVAR_ARCHIVE );
 
 	CVAR_CREATE( "cl_blood", "3", FCVAR_ARCHIVE );
+	CVAR_CREATE( "cl_gore", "1", FCVAR_ARCHIVE );
 
 	m_iFlags |= HUD_ACTIVE;
 	gHUD.AddHudElem(this);
@@ -301,6 +302,21 @@ int CHudMusic::MsgFunc_Spray( const char *pszName, int iSize, void *pbuf )
   char file[128] = "";
   //strncpy( file, READ_STRING( ), 128 );
   int type = READ_BYTE( );
+
+  // Suppress all blood spray types when gore is disabled
+  if( !CVAR_GET_FLOAT( "cl_gore" ) )
+  {
+    switch( type )
+    {
+    case SPRAY_BLOOD:
+    case SPRAY_BLOODHEAD:
+    case SPRAY_PLRBLOOD:
+    case SPRAY_PLRBLOODBIG:
+    case SPRAY_PLRBLOODSTREAM:
+      return 1;
+    }
+  }
+
   char gre[32];
   switch( (int)CVAR_GET_FLOAT( "cl_blood" ) )
   {

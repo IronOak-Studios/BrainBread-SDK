@@ -262,6 +262,9 @@ Called by engine every frame that client .dll is loaded
 ==========================
 */
 
+static cvar_t *g_pCvarGore = NULL;
+static cvar_t *g_pCvarDecals = NULL;
+
 void CL_DLLEXPORT HUD_Frame( double time )
 {
 //	RecClHudFrame(time);
@@ -269,6 +272,18 @@ void CL_DLLEXPORT HUD_Frame( double time )
 	ServersThink( time );
 
 	GetClientVoiceMgr()->Frame(time);
+
+	// No-gore: disable all decals when gore is off
+	if( !g_pCvarGore )
+		g_pCvarGore = gEngfuncs.pfnGetCvarPointer( "cl_gore" );
+	if( !g_pCvarDecals )
+		g_pCvarDecals = gEngfuncs.pfnGetCvarPointer( "r_decals" );
+
+	if( g_pCvarGore && g_pCvarDecals )
+	{
+		if( !g_pCvarGore->value && g_pCvarDecals->value != 0 )
+			gEngfuncs.Cvar_SetValue( "r_decals", 0 );
+	}
 }
 
 
