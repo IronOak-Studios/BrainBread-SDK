@@ -7,28 +7,22 @@ Creates two server-only archives from the built DLLs and mod data:
   - dist/brainbread-v{version}-win32server.zip
 
 Usage:
-  python3 package_server.py -v 1.2 --maps-dir /path/to/maps
+  python3 package_server.py -v 1.2
 
 The version argument is validated against:
   - brainbread/liblist.gam   (must match exactly)
   - bb/dlls/game.cpp          (CLI version must be prefixed by the cvar version)
 
-Built binaries and debug symbols are read from game/brainbread/dlls/
-(the canonical post-build output directory):
-  - Linux:   bb.so (stripped) + bb.so.dbg (DWARF debug symbols)
-  - Windows: bb.dll (release)  + bb.pdb   (MSVC debug symbols)
-
-Map BSP files are not stored in the brainbread/ repository and must be
-supplied via the --maps-dir argument.  All .bsp files found in that
-directory are copied into brainbread/maps/ in the archives.
+Built binaries are read from game/brainbread/dlls/ (the canonical
+post-build output directory):
+  - Linux:   bb.so
+  - Windows: bb.dll + bb.pdb (MSVC debug symbols)
 """
 
 import argparse
-import glob
 import os
 import re
 import shutil
-import subprocess
 import sys
 import tarfile
 import tempfile
@@ -241,56 +235,8 @@ def stage_dll(staged_bb: str, dll_src: str, dll_name: str) -> None:
 
 
 def stage_linux_dlls(staged_bb: str) -> None:
-    """Copy bb.so into staged dlls/, strip it, and create a proper .dbg file.
-
-    The build system's gendbg.sh doesn't actually strip the binary, so we
-    do it here:
-      1. Copy bb.so to staging
-      2. Extract debug symbols into bb.so.dbg  (objcopy --only-keep-debug)
-      3. Strip the staged bb.so                (strip --strip-debug)
-      4. Link the two                          (objcopy --add-gnu-debuglink)
-    """
-    dlls_dir = os.path.join(staged_bb, "dlls")
-    os.makedirs(dlls_dir, exist_ok=True)
-
-    dst_so = os.path.join(dlls_dir, "bb.so")
-    dst_dbg = os.path.join(dlls_dir, "bb.so.dbg")
-
-    shutil.copy2(LINUX_SO, dst_so)
-
-    # Remove any existing debuglink section (the build system may have added
-    # one already) before we strip and re-link.
-    subprocess.run(
-        ["objcopy", "--remove-section=.gnu_debuglink", dst_so],
-        check=True,
-    )
-    subprocess.run(
-        ["objcopy", "--only-keep-debug", dst_so, dst_dbg],
-        check=True,
-    )
-    subprocess.run(
-        ["strip", "--strip-debug", dst_so],
-        check=True,
-    )
-    subprocess.run(
-        ["objcopy", "--add-gnu-debuglink=" + dst_dbg, dst_so],
-        check=True,
-    )
-
-
-def stage_maps(staged_bb: str, maps_dir: str) -> int:
-    """Copy .bsp files from maps_dir into the staged brainbread/maps/.
-
-    Returns the number of .bsp files copied.
-    """
-    dst_maps = os.path.join(staged_bb, "maps")
-    os.makedirs(dst_maps, exist_ok=True)
-
-    bsp_files = sorted(glob.glob(os.path.join(maps_dir, "*.bsp")))
-    for bsp in bsp_files:
-        shutil.copy2(bsp, os.path.join(dst_maps, os.path.basename(bsp)))
-
-    return len(bsp_files)
+    """Copy bb.so into the staged brainbread/dlls/ directory."""
+    stage_dll(staged_bb, LINUX_SO, "bb.so")
 
 
 # ---------------------------------------------------------------------------
@@ -324,7 +270,7 @@ def create_zip(staging_dir: str, output_path: str) -> None:
 # Main
 # ---------------------------------------------------------------------------
 
-def check_prerequisites(maps_dir: str | None) -> None:
+def check_prerequisites() -> None:
     """Check that required source files and directories exist."""
     missing = []
     for path, desc in [
@@ -337,18 +283,6 @@ def check_prerequisites(maps_dir: str | None) -> None:
     ]:
         if not os.path.exists(path):
             missing.append(f"  {desc}\n    expected at: {path}")
-
-    if maps_dir is not None:
-        if not os.path.isdir(maps_dir):
-            missing.append(
-                f"  Maps directory\n    expected at: {maps_dir}"
-            )
-        else:
-            bsp_count = len(glob.glob(os.path.join(maps_dir, "*.bsp")))
-            if bsp_count == 0:
-                missing.append(
-                    f"  No .bsp files found in maps directory: {maps_dir}"
-                )
 
     if missing:
         print("Missing required files:", file=sys.stderr)
@@ -365,29 +299,16 @@ def main() -> None:
         required=True,
         help="Release version (e.g. 1.2). Must match liblist.gam and game.cpp.",
     )
-    parser.add_argument(
-        "-m", "--maps-dir",
-        default=None,
-        help=(
-            "Directory containing .bsp map files to include. "
-            "If omitted, packages are built without maps."
-        ),
-    )
     args = parser.parse_args()
     version = args.version
-    maps_dir = os.path.abspath(args.maps_dir) if args.maps_dir else None
 
     # 1. Prerequisite checks
-    check_prerequisites(maps_dir)
+    check_prerequisites()
 
     # 2. Version validation
     validate_version(version)
 
     print(f"Packaging BrainBread v{version} server distributions...")
-
-    if maps_dir is None:
-        print("  WARNING: No --maps-dir specified; packages will not "
-              "contain .bsp map files.", file=sys.stderr)
 
     # 3. Create dist/ output directory
     os.makedirs(DIST_DIR, exist_ok=True)
@@ -408,9 +329,6 @@ def main() -> None:
         staged_bb = stage_mod_data(linux_stage)
         stage_liblist(staged_bb)
         stage_linux_dlls(staged_bb)
-        if maps_dir:
-            n = stage_maps(staged_bb, maps_dir)
-            print(f"  {n} map(s) included")
         create_tar_gz(linux_stage, linux_archive)
         print(f"  -> {linux_archive}")
 
@@ -422,9 +340,6 @@ def main() -> None:
         stage_liblist(staged_bb)
         stage_dll(staged_bb, WIN_DLL, "bb.dll")
         stage_dll(staged_bb, WIN_PDB, "bb.pdb")
-        if maps_dir:
-            n = stage_maps(staged_bb, maps_dir)
-            print(f"  {n} map(s) included")
         create_zip(win_stage, win32_archive)
         print(f"  -> {win32_archive}")
 
