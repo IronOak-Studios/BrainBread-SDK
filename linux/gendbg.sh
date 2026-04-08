@@ -54,7 +54,8 @@ fi
 
 pushd "$INFILEDIR" || exit
 p4_edit "$OUTFILE"
-$OBJCOPY "$INFILE" "$OUTFILE"
+$OBJCOPY --only-keep-debug "$INFILE" "$OUTFILE"
+strip --strip-debug "$INFILE"
 $OBJCOPY --add-gnu-debuglink="$OUTFILE" "$INFILE"
 p4_revert -a "$OUTFILE"
 popd || exit

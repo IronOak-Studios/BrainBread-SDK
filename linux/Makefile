@@ -70,10 +70,10 @@ endif
 
 
 ifeq "$(CFG)" "release"
-ARCH_CFLAGS_I486=-O3 -gdwarf-2 -g2 
-ARCH_CFLAGS_I686=-O3 -gdwarf-2 -g2 
-ARCH_CFLAGS_AMD=-O3 -gdwarf-2 -g2 
-ARCH_CFLAGS_AMD64=-m64 -O3 -gdwarf-2 -g2 
+ARCH_CFLAGS_I486=-O3 -gdwarf-2 -g2 -DNDEBUG
+ARCH_CFLAGS_I686=-O3 -gdwarf-2 -g2 -DNDEBUG
+ARCH_CFLAGS_AMD=-O3 -gdwarf-2 -g2 -DNDEBUG
+ARCH_CFLAGS_AMD64=-m64 -O3 -gdwarf-2 -g2 -DNDEBUG
 else
 ARCH_CFLAGS_I486=-gdwarf-2 -g2 -D_DEBUG
 ARCH_CFLAGS_I686=-gdwarf-2 -g2 -D_DEBUG
@@ -97,7 +97,7 @@ endif
 
 ARCH_CFLAGS="$(ARCH_CFLAGS_I486)"
 
-BASE_CFLAGS=-fpermissive -fno-strict-aliasing -DNDEBUG -DPOSIX -D_POSIX -DLINUX -D_LINUX -DGNUC -DHL1 -Dstricmp=strcasecmp -D_strnicmp=strncasecmp -Dstrnicmp=strncasecmp -D_snprintf=snprintf -DQUIVER -DQUAKE2 -DVALVE_DLL -D_alloca=alloca -fexpensive-optimizations -D_vsnprintf=vsnprintf -DNO_MALLOC_OVERRIDE -Werror=return-type
+BASE_CFLAGS=-fpermissive -fno-strict-aliasing -DPOSIX -D_POSIX -DLINUX -D_LINUX -DGNUC -DHL1 -Dstricmp=strcasecmp -D_strnicmp=strncasecmp -Dstrnicmp=strncasecmp -D_snprintf=snprintf -DQUIVER -DQUAKE2 -DVALVE_DLL -D_alloca=alloca -fexpensive-optimizations -D_vsnprintf=vsnprintf -DNO_MALLOC_OVERRIDE -Werror=return-type
 BASE_CFLAGS+=-w
 
 ifeq ($(OS),Darwin)
