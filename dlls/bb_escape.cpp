@@ -292,7 +292,6 @@ void CEscape::HuntThink( )
 
   //EMIT_SOUND_DYN(ENT(pev), CHAN_STATIC, "ambience/tankidle1.wav", 0.5, 0.3, 0, 110 );
 
-  StudioFrameAdvance( );
   vec3_t tmp = pev->angles;
 	pev->angles.y -= 90;
 
@@ -676,8 +675,9 @@ void CEscape :: ReSpawn()
 	m_flFieldOfView = VIEW_FIELD_NARROW; // 270 degrees
 
 	pev->sequence = 0;
-	ResetSequenceInfo( );
-	pev->frame = RANDOM_LONG(0, 0xFF);
+	// Set framerate manually for client-side animation
+	pev->framerate = 1.0;
+	pev->frame = 0;
 
 	InitBoneControllers();
 

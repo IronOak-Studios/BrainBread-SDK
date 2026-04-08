@@ -26,6 +26,7 @@ extern int gmsgSpray;
 #define TURRET_FIRE 3
 
 #define TANK_SHOT_DELAY 2
+#define TANK_SHOOT_ANIM_DURATION 1.0f  // ~30 frames at 30fps
 
 
 #define TANK_MOVE_TELEPORT 2
@@ -158,6 +159,8 @@ public:
   bool shoulddrive;
   bool shouldteleport;
 
+  float m_flSeqResetTime;  // When to reset sequence back to idle after shoot anim
+
   int TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker, float flDamage, int bitsDamageType );
 };
 
@@ -273,11 +276,17 @@ void CTank::HuntThink( )
   if( turretact == TURRET_FIRE )
     Fire( );
 
+  // Reset to idle after shoot anim so client detects next fire
+  if( m_flSeqResetTime > 0 && gpGlobals->time >= m_flSeqResetTime )
+  {
+    pev->sequence = 0;
+    m_flSeqResetTime = 0;
+  }
+
   deltatime = gpGlobals->time;
 
   //EMIT_SOUND_DYN(ENT(pev), CHAN_STATIC, "ambience/tankidle1.wav", 0.5, 0.3, 0, 110 );
 
-  StudioFrameAdvance( );
 
 	Look( 4092 );
 	m_hEnemy = BestVisibleEnemy( );
@@ -371,6 +380,9 @@ void CTank::Fire(  )
   Explosion( m_posTarget, pev, 1000, 200 );
 
   SetSequenceByName( "shoot" );
+  pev->animtime = 0;
+  pev->frame = 0;
+  m_flSeqResetTime = gpGlobals->time + TANK_SHOOT_ANIM_DURATION;
   turretact = TURRET_AIM;
   m_flNextShot = gpGlobals->time + TANK_SHOT_DELAY;
   Vector posGun, angGun;
@@ -520,8 +532,9 @@ void CTank :: ReSpawn()
 	m_flFieldOfView = VIEW_FIELD_NARROW; // 270 degrees
 
 	pev->sequence = 0;
-	ResetSequenceInfo( );
-	pev->frame = RANDOM_LONG(0, 0xFF);
+	// Set framerate manually for client-side animation
+	pev->framerate = 1.0;
+	pev->frame = 0;
 
 	InitBoneControllers();
 
@@ -532,6 +545,7 @@ void CTank :: ReSpawn()
   m_vecTarget = Vector( 0, 0, 0 );
   turretact = TURRET_IDLE;
   baseact = TANK_IDLE;
+  m_flSeqResetTime = 0;
   m_pGoalEnt = NULL;
   pev->fixangle = 0;
   pev->takedamage = DAMAGE_NO;

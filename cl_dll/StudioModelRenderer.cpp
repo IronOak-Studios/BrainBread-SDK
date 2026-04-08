@@ -476,6 +476,10 @@ void CStudioModelRenderer::StudioSetUpTransform (int trivial_accept)
 			f = 0;
 		}
 
+		// Clamp to prevent model position/angle blowup from near-zero animtime deltas.
+		if (f < -1.0) f = -3.0;
+		if (f > 1.0) f = 3.0;
+
 		{
 			mstudioseqdesc_t *pseqdesc_interp = (mstudioseqdesc_t *)((byte *)m_pStudioHeader + m_pStudioHeader->seqindex) + m_pCurrentEntity->curstate.sequence;
 
@@ -726,7 +730,29 @@ float CStudioModelRenderer::StudioEstimateFrame( mstudioseqdesc_t *pseqdesc )
 {
 	double				dfdt, f;
 
-	if ( m_fDoInterp )
+	// MOVETYPE_NOCLIP with animtime=0: animate client-side to avoid choppy
+	// position-history interpolation. Track sequence changes for one-shot anims.
+	if ( m_pCurrentEntity->curstate.movetype == MOVETYPE_NOCLIP &&
+		 m_pCurrentEntity->curstate.animtime == 0 )
+	{
+		static int   s_noclipLastSeq[4096];
+		static float s_noclipSeqStartTime[4096];
+		int idx = m_pCurrentEntity->curstate.number;
+		if ( idx > 0 && idx < 4096 )
+		{
+			if ( s_noclipLastSeq[idx] != m_pCurrentEntity->curstate.sequence )
+			{
+				s_noclipLastSeq[idx] = m_pCurrentEntity->curstate.sequence;
+				s_noclipSeqStartTime[idx] = m_clTime;
+			}
+			dfdt = (m_clTime - s_noclipSeqStartTime[idx]) * m_pCurrentEntity->curstate.framerate * pseqdesc->fps;
+		}
+		else
+		{
+			dfdt = m_clTime * m_pCurrentEntity->curstate.framerate * pseqdesc->fps;
+		}
+	}
+	else if ( m_fDoInterp )
 	{
 		if ( m_clTime < m_pCurrentEntity->curstate.animtime )
 		{
