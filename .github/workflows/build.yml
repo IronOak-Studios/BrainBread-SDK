@@ -237,6 +237,12 @@ jobs:
           lfs: true
           path: brainbread
 
+      - name: Extract version from liblist.gam
+        id: version
+        run: |
+          VERSION=$(grep -oP '^version\s+"\K[^"]+' brainbread/liblist.gam)
+          echo "version=${VERSION}" >> "$GITHUB_OUTPUT"
+
       - name: Checkout SDK for changelog
         uses: actions/checkout@v6
         with:
@@ -282,7 +288,7 @@ jobs:
           repo: BrainBread
           token: ${{ secrets.BRAINBREAD_PAT }}
           tag: ${{ steps.buildinfo.outputs.tag }}
-          name: "BrainBread ${{ steps.buildinfo.outputs.build_id }}"
+          name: "BrainBread v${{ steps.version.outputs.version }} ${{ steps.buildinfo.outputs.build_id }}"
           body: |
             Automated build from [BrainBread-SDK@${{ github.sha }}](https://github.com/IronOak-Studios/BrainBread-SDK/commit/${{ github.sha }}).
 
