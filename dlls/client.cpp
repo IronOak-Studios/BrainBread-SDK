@@ -493,7 +493,7 @@ void Host_Say( edict_t *pEntity, int teamonly )
 		snprintf( ans, sizeof(ans), "Next map in cycle: %s\n", g_sNextMap );
 		answer = 1;
 	}
-	else if( !strcmp( p, "peversion" ) || !strcmp(p, "peversion") )
+	else if( !strcmp( p, "bbversion" ) || !strcmp(p, "peversion") )
 	{
 		snprintf( ans, sizeof(ans), "%s, %s", peversion.string, BUILD );
 		answer = 1;
