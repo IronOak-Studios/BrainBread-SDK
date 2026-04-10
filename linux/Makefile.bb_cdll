@@ -18,7 +18,7 @@ PM_SHARED_OBJ_DIR=$(BB_CDLL_OBJ_DIR)/pm_shared
 BB_OUTPUT_DIR=$(SOURCE_DIR)/../game/brainbread
 
 CFLAGS=$(BASE_CFLAGS) $(ARCH_CFLAGS) -DCLIENT_DLL -DCLIENT_WEAPONS -DHL_DLL -I/usr/include/malloc -D_snwprintf=swprintf \
-		 -DDISABLE_JUMP_ORIGIN -DDISABLE_VEC_ORIGIN
+		 -DDISABLE_JUMP_ORIGIN -DDISABLE_VEC_ORIGIN -MMD -MP
 
 INCLUDEDIRS=-I$(HL_SRC_DIR) -I$(HL_SRC_DIR)/glstub -I$(HL_SRC_DIR)/glext/include -I../dlls -I../tfc -I$(COMMON_SRC_DIR) -I$(PUBLIC_SRC_DIR) -I../pm_shared -I../engine -I../utils/vgui/include -I ../game_shared -I../external
 
@@ -151,13 +151,13 @@ PM_SHARED_OBJS = \
 	$(PM_SHARED_OBJ_DIR)/pm_math.o \
 
 
-all: client.$(SHLIBEXT)
+all: $(BUILD_DIR)/client.$(SHLIBEXT)
 
-client.$(SHLIBEXT): $(BB_CDLL_OBJS) $(PUBLIC_OBJS) $(COMMON_OBJS) $(GAME_SHARED_OBJS) $(DLL_OBJS) $(PM_SHARED_OBJS)
-	$(CLINK) -o $(BUILD_DIR)/$@ $(BB_CDLL_OBJS) $(PUBLIC_OBJS) $(COMMON_OBJS) $(GAME_SHARED_OBJS) $(DLL_OBJS) $(PM_SHARED_OBJS) $(LDFLAGS) $(CPP_LIB)
+$(BUILD_DIR)/client.$(SHLIBEXT): $(BB_CDLL_OBJS) $(PUBLIC_OBJS) $(COMMON_OBJS) $(GAME_SHARED_OBJS) $(DLL_OBJS) $(PM_SHARED_OBJS)
+	$(CLINK) -o $@ $(BB_CDLL_OBJS) $(PUBLIC_OBJS) $(COMMON_OBJS) $(GAME_SHARED_OBJS) $(DLL_OBJS) $(PM_SHARED_OBJS) $(LDFLAGS) $(CPP_LIB)
 	mkdir -p $(BB_OUTPUT_DIR)/cl_dlls
-	$(P4_EDIT_START) $(BB_OUTPUT_DIR)/cl_dlls/$@ $(P4_EDIT_END)
-	cp $(BUILD_DIR)/$@  $(BB_OUTPUT_DIR)/cl_dlls
+	$(P4_EDIT_START) $(BB_OUTPUT_DIR)/cl_dlls/client.$(SHLIBEXT) $(P4_EDIT_END)
+	cp $@  $(BB_OUTPUT_DIR)/cl_dlls
 	./gendbg.sh $(BB_OUTPUT_DIR)/cl_dlls/client.$(SHLIBEXT)
 
 $(BB_CDLL_OBJ_DIR):
@@ -199,6 +199,14 @@ $(GAME_SHARED_OBJ_DIR)/%.o : $(GAME_SHARED_SRC_DIR)/%.cpp $(filter-out $(wildcar
 
 $(PM_SHARED_OBJ_DIR)/%.o : $(PM_SHARED_SRC_DIR)/%.c $(filter-out $(wildcard  $(PM_SHARED_OBJ_DIR)),  $(PM_SHARED_OBJ_DIR))
 	$(DO_PM_SHARED_CC)
+
+# Pull in auto-generated header dependencies (silently ignored on first build)
+-include $(BB_CDLL_OBJS:.o=.d)
+-include $(DLL_OBJS:.o=.d)
+-include $(PUBLIC_OBJS:.o=.d)
+-include $(COMMON_OBJS:.o=.d)
+-include $(GAME_SHARED_OBJS:.o=.d)
+-include $(PM_SHARED_OBJS:.o=.d)
 
 clean:
 	-rm -rf $(BB_CDLL_OBJ_DIR)
