@@ -93,6 +93,7 @@ public:
   bool CheckMission( );
   void PlayerInitMission( CBasePlayer *plr );
   int RandomMission( bool reset = false );
+  int RemainingFrags( );
   
   float misDone[20];
   float misReq[20];

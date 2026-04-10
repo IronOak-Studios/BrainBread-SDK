@@ -2603,6 +2603,12 @@ int cPEHacking::RandomMission( bool reset )
   return MISSION_FRAGS + ( values[mission] - 1 );
 }
 
+int cPEHacking::RemainingFrags( )
+{
+  int cl = m_iClients ? m_iClients : 1;
+  return (int)( pow( 0.97, cl ) * misReq[MISSION_FRAGS] * cl - misDone[MISSION_FRAGS] ) + 1;
+}
+
 void cPEHacking::AbortMission( )
 {
   switch( misType )
@@ -2708,10 +2714,8 @@ void cPEHacking::PlayerInitMission( CBasePlayer *plr )
   }
   case MISSION_FRAGS:
   {
-    int cl = m_iClients ? m_iClients : 1;
-    int frags = (int)( pow( 0.97, cl ) * misReq[MISSION_FRAGS] * cl - misDone[MISSION_FRAGS] ) + 1;
-    Notify( plr, NTC_MISSION_FRAGS, frags );
- 	  NotifyMid( plr, NTM_MISSION_START + misType );
+    Notify( plr, NTC_MISSION_FRAGS, RemainingFrags( ) );
+    NotifyMid( plr, NTM_MISSION_START + misType );
     return;
   }
   case MISSION_FRED:
@@ -3031,12 +3035,10 @@ bool cPEHacking::CheckMission( )
   }
   case MISSION_FRAGS:
   {
-    // Frags prüfen
     static int lastfrags = 0;
-    int cl = m_iClients ? m_iClients : 1;
-    int frags = (int)( pow( 0.97, cl ) * misReq[MISSION_FRAGS] * cl - misDone[MISSION_FRAGS] ) + 1 /*/ cl*/;
+    int frags = RemainingFrags( );
     if( frags != lastfrags )
-      NotifyTeam( 1, NTC_MISSION_FRAGS, frags + 1 );
+      NotifyTeam( 1, NTC_MISSION_FRAGS, frags );
     lastfrags = frags;
 
     if( frags <= 0 )
