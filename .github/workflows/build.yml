@@ -1,0 +1,294 @@
+# BrainBread CI/CD Pipeline
+#
+# Builds server and client DLLs for Linux and Windows, commits them to
+# the BrainBread repo, and creates release packages on tags.
+#
+# Triggers:
+#   push to master   -> build + commit DLLs to BrainBread repo
+#   pull request     -> build only (compile check)
+#   tag build-*      -> build + commit DLLs + package + GitHub Release
+#
+# Creating a release:
+#   git tag build-260410 && git push origin build-260410
+#
+# Requires secret: BRAINBREAD_PAT (contents:write on IronOak-Studios/BrainBread)
+
+name: Build
+
+on:
+  push:
+    branches: [master]
+    tags: ['build-*']
+  pull_request:
+    branches: [master]
+
+# Cancel in-progress runs for the same branch/PR (but not for tags)
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ !startsWith(github.ref, 'refs/tags/') }}
+
+jobs:
+  # ---------------------------------------------------------------------------
+  # Job 1: Linux build (GNU Make, GCC, 32-bit i386)
+  # Uses ubuntu-22.04 for glibc 2.35 compatibility.
+  # ---------------------------------------------------------------------------
+  build-linux:
+    runs-on: ubuntu-22.04
+    steps:
+      - name: Checkout BrainBread-SDK
+        uses: actions/checkout@v6
+
+      - name: Install 32-bit build dependencies
+        run: |
+          sudo dpkg --add-architecture i386
+          sudo apt-get update
+          sudo apt-get install -y \
+            gcc-multilib \
+            g++-multilib \
+            libc6-dev-i386
+
+      - name: Set CI build number
+        if: startsWith(github.ref, 'refs/tags/build-')
+        run: |
+          BUILD_ID="${GITHUB_REF#refs/tags/build-}"
+          printf '#define BUILD    "Build %s"\n#define BUILD_NR 0\n' "$BUILD_ID" > dlls/build.h
+
+      - name: Build server and client DLLs
+        working-directory: linux
+        run: make
+
+      # The Makefile outputs to ../game/brainbread/ (one level above the repo
+      # root). Collect into the workspace so upload-artifact can find them.
+      - name: Collect build outputs
+        run: |
+          mkdir -p build-out/dlls build-out/cl_dlls
+          cp ../game/brainbread/dlls/bb.so      build-out/dlls/
+          cp ../game/brainbread/dlls/bb.so.dbg  build-out/dlls/
+          cp ../game/brainbread/cl_dlls/client.so      build-out/cl_dlls/
+          cp ../game/brainbread/cl_dlls/client.so.dbg  build-out/cl_dlls/
+
+      - name: Upload Linux server artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: linux-server
+          path: |
+            build-out/dlls/bb.so
+            build-out/dlls/bb.so.dbg
+          if-no-files-found: error
+
+      - name: Upload Linux client artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: linux-client
+          path: |
+            build-out/cl_dlls/client.so
+            build-out/cl_dlls/client.so.dbg
+          if-no-files-found: error
+
+  # ---------------------------------------------------------------------------
+  # Job 2: Windows build (MSBuild, VS2022, Win32)
+  # ---------------------------------------------------------------------------
+  build-windows:
+    runs-on: windows-latest
+    steps:
+      - name: Checkout BrainBread-SDK
+        uses: actions/checkout@v6
+
+      - name: Setup MSBuild
+        uses: microsoft/setup-msbuild@v3
+
+      - name: Set CI build number
+        if: startsWith(github.ref, 'refs/tags/build-')
+        shell: bash
+        run: |
+          BUILD_ID="${GITHUB_REF#refs/tags/build-}"
+          printf '#define BUILD    "Build %s"\n#define BUILD_NR 0\n' "$BUILD_ID" > dlls/build.h
+
+      - name: Build server and client DLLs
+        working-directory: projects\vs2022
+        # Pre/PostBuildEventUseInBuild=false skips increment_build.bat and
+        # filecopy.bat which depend on local dev directory layout.
+        run: >
+          msbuild brainbread.sln
+          /p:Configuration=Release
+          /p:Platform=Win32
+          /p:PreBuildEventUseInBuild=false
+          /p:PostBuildEventUseInBuild=false
+          /m
+
+      - name: Collect build outputs
+        shell: bash
+        run: |
+          mkdir -p build-out/dlls build-out/cl_dlls
+          cp projects/vs2022/Release/bb_dll/bb.dll     build-out/dlls/
+          cp projects/vs2022/Release/bb_dll/bb.pdb     build-out/dlls/
+          cp projects/vs2022/Release/bb_cdll/client.dll  build-out/cl_dlls/
+          cp projects/vs2022/Release/bb_cdll/client.pdb  build-out/cl_dlls/
+
+      - name: Upload Windows server artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: windows-server
+          path: |
+            build-out/dlls/bb.dll
+            build-out/dlls/bb.pdb
+          if-no-files-found: error
+
+      - name: Upload Windows client artifacts
+        uses: actions/upload-artifact@v7
+        with:
+          name: windows-client
+          path: |
+            build-out/cl_dlls/client.dll
+            build-out/cl_dlls/client.pdb
+          if-no-files-found: error
+
+  # ---------------------------------------------------------------------------
+  # Job 3: Commit compiled DLLs to the BrainBread repo (not on PRs)
+  # ---------------------------------------------------------------------------
+  update-brainbread:
+    needs: [build-linux, build-windows]
+    if: github.event_name == 'push'
+    concurrency:
+      group: brainbread-commit
+      cancel-in-progress: false
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout BrainBread repo
+        uses: actions/checkout@v6
+        with:
+          repository: IronOak-Studios/BrainBread
+          token: ${{ secrets.BRAINBREAD_PAT }}
+          lfs: true
+          path: brainbread
+
+      - name: Download all build artifacts
+        uses: actions/download-artifact@v8
+        with:
+          path: artifacts
+
+      - name: Copy built binaries into brainbread repo
+        run: |
+          # Debug: show artifacts
+          find artifacts/ -type f
+
+          # Server DLLs
+          cp artifacts/linux-server/bb.so      brainbread/dlls/bb.so
+          cp artifacts/linux-server/bb.so.dbg  brainbread/dlls/bb.so.dbg
+          cp artifacts/windows-server/bb.dll   brainbread/dlls/bb.dll
+          cp artifacts/windows-server/bb.pdb   brainbread/dlls/bb.pdb
+
+          # Client DLLs
+          cp artifacts/linux-client/client.so      brainbread/cl_dlls/client.so
+          cp artifacts/linux-client/client.so.dbg  brainbread/cl_dlls/client.so.dbg
+          cp artifacts/windows-client/client.dll   brainbread/cl_dlls/client.dll
+          cp artifacts/windows-client/client.pdb   brainbread/cl_dlls/client.pdb
+
+      - name: Commit and push updated binaries
+        working-directory: brainbread
+        run: |
+          git config user.name "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+          git add dlls/ cl_dlls/
+          if git diff --cached --quiet; then
+            echo "No changes to commit."
+          else
+            SDK_SHA="${{ github.sha }}"
+            SDK_SHORT="${SDK_SHA:0:7}"
+            git commit -m "Updated compiled binaries from BrainBread-SDK@${SDK_SHORT}"
+            git push
+          fi
+
+          # For tag pushes, create the same build-* tag on brainbread so the
+          # release job can check out this exact commit and users can clone by tag.
+          if [[ "$GITHUB_REF" == refs/tags/build-* ]]; then
+            TAG="${GITHUB_REF#refs/tags/}"
+            git tag "$TAG"
+            git push origin "$TAG"
+          fi
+
+  # ---------------------------------------------------------------------------
+  # Job 4: Create release packages (only on build-* tags)
+  # Produces client and server packages and publishes them as a GitHub Release
+  # on the BrainBread repo.
+  # ---------------------------------------------------------------------------
+  release:
+    needs: [update-brainbread]
+    if: startsWith(github.ref, 'refs/tags/build-')
+    runs-on: ubuntu-latest
+    steps:
+      - name: Extract build ID from tag
+        id: buildinfo
+        run: |
+          TAG="${GITHUB_REF#refs/tags/}"
+          BUILD_ID="${TAG#build-}"
+          echo "tag=${TAG}" >> "$GITHUB_OUTPUT"
+          echo "build_id=${BUILD_ID}" >> "$GITHUB_OUTPUT"
+          echo "Building release for tag: ${TAG}, build: ${BUILD_ID}"
+
+      - name: Checkout BrainBread repo
+        uses: actions/checkout@v6
+        with:
+          repository: IronOak-Studios/BrainBread
+          ref: ${{ steps.buildinfo.outputs.tag }}
+          token: ${{ secrets.BRAINBREAD_PAT }}
+          fetch-depth: 0
+          fetch-tags: true
+          lfs: true
+          path: brainbread
+
+      - name: Checkout SDK for changelog
+        uses: actions/checkout@v6
+        with:
+          fetch-depth: 0
+          fetch-tags: true
+          path: sdk
+
+      - name: Generate changelog
+        id: changelog
+        run: |
+          CURRENT_TAG="${GITHUB_REF#refs/tags/}"
+          PREV_TAG=$(git -C sdk tag --list 'build-*' --sort=-creatordate | grep -v "^${CURRENT_TAG}$" | head -1)
+
+          if [ -n "$PREV_TAG" ]; then
+            SDK_LOG=$(git -C sdk log --oneline "${PREV_TAG}..${CURRENT_TAG}" -- ':!.github')
+            BB_LOG=$(git -C brainbread log --oneline "${PREV_TAG}..HEAD" --invert-grep --grep="Updated compiled binaries" 2>/dev/null || true)
+          fi
+
+          {
+            echo "log<<EOF"
+            if [ -n "$SDK_LOG" ]; then
+              echo "### Code"
+              echo "$SDK_LOG"
+              echo ""
+            fi
+            if [ -n "$BB_LOG" ]; then
+              echo "### Assets"
+              echo "$BB_LOG"
+              echo ""
+            fi
+            echo "EOF"
+          } >> "$GITHUB_OUTPUT"
+
+      - name: Create packages
+        run: |
+          python3 brainbread/package.py \
+            --build-id "${{ steps.buildinfo.outputs.build_id }}" \
+            --output-dir .
+
+      - name: Create GitHub Release
+        uses: ncipollo/release-action@v1
+        with:
+          repo: BrainBread
+          token: ${{ secrets.BRAINBREAD_PAT }}
+          tag: ${{ steps.buildinfo.outputs.tag }}
+          name: "BrainBread ${{ steps.buildinfo.outputs.build_id }}"
+          body: |
+            Automated build from [BrainBread-SDK@${{ github.sha }}](https://github.com/IronOak-Studios/BrainBread-SDK/commit/${{ github.sha }}).
+
+            ${{ steps.changelog.outputs.log }}
+            ## Packages
+            - **client** - Full mod install for players (all platforms)
+            - **linuxserver** - Dedicated server files for Linux
+            - **win32server** - Dedicated server files for Windows
+          artifacts: "brainbread-v*-linuxserver.tar.gz,brainbread-v*-win32server.zip,brainbread-v*-client.zip"
