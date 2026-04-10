@@ -2394,6 +2394,22 @@ cPEHacking::cPEHacking( )
 		{
 			ALERT( at_console, "Unable to load map cycle file %s\n", mapcfile );
 		}
+
+		// Start with the entry after the current map
+		if ( mapcycle.items )
+		{
+			mapcycle_item_s *start = mapcycle.next_item;
+			mapcycle_item_s *cur = start;
+			do
+			{
+				if ( !stricmp( cur->mapname, STRING(gpGlobals->mapname) ) )
+				{
+					mapcycle.next_item = cur->next;
+					break;
+				}
+				cur = cur->next;
+			} while ( cur != start );
+		}
 	}
 	if ( mapcycle.items )
 	{
