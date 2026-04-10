@@ -4,7 +4,7 @@
 #include <string.h>
 #include <stdio.h>
 #include "vgui_TeamFortressViewport.h"
-#include "vgui_spectatorpanel.h"
+#include "vgui_SpectatorPanel.h"
 #include "demo_api.h"
 
 #include "pe_helper.h"

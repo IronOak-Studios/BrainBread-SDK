@@ -29,7 +29,7 @@
 
 #include "demo.h"
 #include "demo_api.h"
-#include "vgui_scorepanel.h"
+#include "vgui_ScorePanel.h"
 #include "shake.h"
 #include "screenfade.h"
 
