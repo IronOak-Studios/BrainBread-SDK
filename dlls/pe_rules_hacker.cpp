@@ -474,6 +474,11 @@ void cPEHacking::StartRound( )
 {
 	if( m_flRoundEndTime > gpGlobals->time )
 		return;
+
+	// Don't start the round until at least one player has connected.
+	if( m_iClients < 1 )
+		return;
+
   /*if( rounds >= 2 )
     GoToIntermission( );*/
 	//ALERT( at_logged, "sr: recount\n" );
@@ -557,6 +562,10 @@ void cPEHacking::StartRound( )
 		CBasePlayer *pPlayer = (CBasePlayer *)UTIL_PlayerByIndex (i);
 	
 		if (!pPlayer || !strlen( STRING( pPlayer->pev->netname ) ) )
+			continue;
+
+		// Skip spectators who haven't picked a team yet
+		if( pPlayer->m_sInfo.team == 0 )
 			continue;
 		
 		EMIT_SOUND(ENT(pPlayer->pev), CHAN_STATIC, "common/null.wav", 1, ATTN_NORM);
@@ -2159,7 +2168,7 @@ void cPEHacking::Think( )
 	{
 		g_engfuncs.pfnCvar_DirectSet( &scoreleft, UTIL_VarArgs( "%i", score_remaining ) );
 	}
-	if( flTimeLimit != 0 && gpGlobals->time >= flTimeLimit )
+	if( flTimeLimit != 0 && gpGlobals->time >= flTimeLimit && m_iRoundStatus != ROUND_DURING )
 	{
 		GoToIntermission( );
 	}
@@ -2523,6 +2532,8 @@ cPEHacking::cPEHacking( )
   }
   misLast = false;
   curMapMission = NULL;
+
+  ResetMap();
 }
 
 BOOL cPEHacking::FPlayerCanTakeDamage( CBasePlayer *pPlayer, CBaseEntity *pAttacker )
