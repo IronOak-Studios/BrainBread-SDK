@@ -239,6 +239,7 @@ int gmsgPETeam = 0;
 int gmsgSmallCnt = 0;
 int gmsgHelp = 0;
 int gmsgVGUIMenu = 0;
+int gmsgRoundSummary = 0;
 
 void LinkUserMessages( void )
 {
@@ -315,6 +316,7 @@ void LinkUserMessages( void )
 	gmsgSmallCnt = REG_USER_MSG( "SmallCnt", -1 );
 	gmsgHelp = REG_USER_MSG( "Help", 4 );
 	gmsgVGUIMenu = REG_USER_MSG( "VGUIMenu", 1 );
+	gmsgRoundSummary = REG_USER_MSG( "RndSummary", -1 );
   
 }
 

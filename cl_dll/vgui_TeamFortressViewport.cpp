@@ -54,6 +54,7 @@
 #include "vgui_ServerBrowser.h"
 #include "vgui_ScorePanel.h"
 #include "vgui_SpectatorPanel.h"
+#include "vgui_SummaryPanel.h"
 
 extern int g_iVisibleMouse;
 class CCommandMenu;
@@ -620,6 +621,7 @@ TeamFortressViewport::TeamFortressViewport(int x,int y,int wide,int tall) : Pane
 	CreateClassMenu();
 	CreateSpectatorMenu();
 	CreateScoreBoard();
+	CreateSummaryPanel();
 	CreateEquip( );
 	// Init command menus
 	m_iNumMenus = 0;
@@ -664,6 +666,11 @@ void TeamFortressViewport::Initialize( void )
 	{
 		m_pScoreBoard->Initialize();
 		HideScoreBoard();
+	}
+	if (m_pSummaryPanel)
+	{
+		m_pSummaryPanel->Initialize();
+		m_pSummaryPanel->setVisible( false );
 	}
 	if (m_pSpectatorPanel)
 	{
@@ -1365,6 +1372,12 @@ void TeamFortressViewport::ShowScoreBoard( void )
 {
 	if (m_pScoreBoard)
 	{
+		// During intermission, toggle: if summary is showing, hide it and show scoreboard
+		if( gHUD.m_iIntermission && m_pSummaryPanel && m_pSummaryPanel->isVisible() )
+		{
+			m_pSummaryPanel->setVisible( false );
+		}
+
 		m_pScoreBoard->Open();
 		UpdateCursorState();
 	}
@@ -1386,9 +1399,17 @@ bool TeamFortressViewport::IsScoreBoardVisible( void )
 //-----------------------------------------------------------------------------
 void TeamFortressViewport::HideScoreBoard( void )
 {
-	// Prevent removal of scoreboard during intermission
+	// During intermission, toggle back to summary panel instead of hiding everything
 	if ( gHUD.m_iIntermission )
+	{
+		if( m_pSummaryPanel && m_pScoreBoard && m_pScoreBoard->isVisible() )
+		{
+			m_pScoreBoard->setVisible( false );
+			m_pSummaryPanel->Open();
+			UpdateCursorState();
+		}
 		return;
+	}
 
 	if (m_pScoreBoard)
 	{
@@ -1649,6 +1670,83 @@ void TeamFortressViewport::CreateScoreBoard( void )
 	m_pScoreBoard = new ScorePanel(xdent, ydent, ScreenWidth - (xdent * 2), ScreenHeight - (ydent * 2));
 	m_pScoreBoard->setParent(this);
 	m_pScoreBoard->setVisible(false);
+}
+
+//======================================================================
+void TeamFortressViewport::CreateSummaryPanel( void )
+{
+	int xdent = SBOARD_INDENT_X, ydent = SBOARD_INDENT_Y;
+
+	m_pSummaryPanel = new SummaryPanel(xdent, ydent, ScreenWidth - (xdent * 2), ScreenHeight - (ydent * 2));
+	m_pSummaryPanel->setParent(this);
+	m_pSummaryPanel->setVisible(false);
+}
+
+void TeamFortressViewport::ShowSummaryPanel( void )
+{
+	if( m_pSummaryPanel )
+	{
+		CenterPrint( "" );	// clear center text
+		m_pSummaryPanel->Open();
+		UpdateCursorState();
+	}
+}
+
+void TeamFortressViewport::HideSummaryPanel( void )
+{
+	if( m_pSummaryPanel )
+	{
+		m_pSummaryPanel->setVisible( false );
+		UpdateCursorState();
+	}
+}
+
+bool TeamFortressViewport::IsSummaryPanelVisible( void )
+{
+	if( m_pSummaryPanel )
+		return m_pSummaryPanel->isVisible();
+	return false;
+}
+
+bool TeamFortressViewport::HasSummaryData( void )
+{
+	if( m_pSummaryPanel )
+		return m_pSummaryPanel->HasData();
+	return false;
+}
+
+int TeamFortressViewport::MsgFunc_RndSummary( const char *pszName, int iSize, void *pbuf )
+{
+	BEGIN_READ( pbuf, iSize );
+
+	int type = READ_BYTE();
+
+	if( type == 0 )
+	{
+		// Header message: outcome, MVP
+		int outcome = READ_BYTE();
+		int mvpIndex = READ_BYTE();
+
+		if( m_pSummaryPanel )
+			m_pSummaryPanel->SetHeader( outcome, mvpIndex );
+	}
+	else if( type == 1 )
+	{
+		// Per-player entry
+		RoundPlayerEntry_t entry;
+		entry.index = READ_BYTE();
+		entry.zombieKills = READ_SHORT();
+		entry.playerKills = READ_SHORT();
+		entry.headshots = READ_SHORT();
+		entry.damage = READ_LONG();
+		entry.xpEarned = READ_LONG();
+		entry.escaped = READ_BYTE() ? true : false;
+
+		if( m_pSummaryPanel )
+			m_pSummaryPanel->AddPlayerEntry( entry );
+	}
+
+	return 1;
 }
 
 void TeamFortressViewport::CreateServerBrowser( void )

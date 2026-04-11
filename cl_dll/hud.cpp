@@ -300,6 +300,13 @@ int __MsgFunc_Special(const char *pszName, int iSize, void *pbuf)
 	return 0;
 }
 
+int __MsgFunc_RndSummary(const char *pszName, int iSize, void *pbuf)
+{
+	if (gViewPort)
+		return gViewPort->MsgFunc_RndSummary( pszName, iSize, pbuf );
+	return 0;
+}
+
 /*int __MsgFunc_Fog(const char *pszName, int iSize, void *pbuf)
 {
 	if (gViewPort)
@@ -361,6 +368,7 @@ void CHud :: Init( void )
 	HOOK_MESSAGE( TargHlth );
 	HOOK_MESSAGE( RecoilRatio );
 	HOOK_MESSAGE( Special );
+	HOOK_MESSAGE( RndSummary );
 //	HOOK_MESSAGE( Fog );
 //	HOOK_MESSAGE( Rain );
 

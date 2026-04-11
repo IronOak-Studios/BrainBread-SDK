@@ -32,6 +32,7 @@ using namespace vgui;
 
 class Cursor;
 class ScorePanel;
+class SummaryPanel;
 class SpectatorPanel;
 class CCommandMenu;
 class CommandLabel;
@@ -504,7 +505,8 @@ private:
 	void		 CreateClassMenu( void );
 	CMenuPanel*	 ShowClassMenu( void );
 	void		 CreateSpectatorMenu( void );
-	
+	void		 CreateSummaryPanel( void );
+
 	// Scheme handler
 	CSchemeManager m_SchemeManager;
 
@@ -571,6 +573,11 @@ public:
 	void HideScoreBoard( void );
 	bool IsScoreBoardVisible( void );
 
+	void ShowSummaryPanel( void );
+	void HideSummaryPanel( void );
+	bool IsSummaryPanelVisible( void );
+	bool HasSummaryData( void );
+
 	bool AllowedToPrintText( void );
 
 	void ShowVGUIMenu( int iMenu );
@@ -615,6 +622,7 @@ public:
 	int MsgFunc_ResetFade( const char *pszName, int iSize, void *pbuf );
 //	int MsgFunc_Fog( const char *pszName, int iSize, void *pbuf );
 	int MsgFunc_Rain( const char *pszName, int iSize, void *pbuf );
+	int MsgFunc_RndSummary( const char *pszName, int iSize, void *pbuf );
 
 	// Input
 	bool SlotInput( int iSlot );
@@ -636,6 +644,7 @@ public:
 	int						m_PlayerMenu; // a list of current player
 	CClassMenuPanel	*m_pClassMenu;
 	ScorePanel		*m_pScoreBoard;
+	SummaryPanel	*m_pSummaryPanel;
 	SpectatorPanel *		m_pSpectatorPanel;
 	char			m_szServerName[ MAX_SERVERNAME_LENGTH ];
 	// + Spin

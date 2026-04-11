@@ -178,6 +178,7 @@ if not "$(GameInstallDir)"=="" call ..\..\filecopy.bat $(TargetDir)$(TargetName)
     <ClCompile Include="..\..\cl_dll\vgui_MOTDWindow.cpp" />
     <ClCompile Include="..\..\cl_dll\vgui_SchemeManager.cpp" />
     <ClCompile Include="..\..\cl_dll\vgui_ScorePanel.cpp" />
+    <ClCompile Include="..\..\cl_dll\vgui_SummaryPanel.cpp" />
     <ClCompile Include="..\..\cl_dll\vgui_ServerBrowser.cpp" />
     <ClCompile Include="..\..\cl_dll\vgui_SpectatorPanel.cpp" />
     <ClCompile Include="..\..\cl_dll\vgui_TeamFortressViewport.cpp" />

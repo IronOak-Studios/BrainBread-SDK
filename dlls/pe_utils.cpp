@@ -350,6 +350,9 @@ static bool _uLoadPlayerExp(CBasePlayer *plr)
 	else
 		ALERT(at_console, "Exp for %s has expired (age %f)\n", id, age);
 
+	// Re-snapshot after DB load so round summary shows only XP earned this round
+	plr->m_flRoundExpStart = plr->exp;
+
 	sqlite3_finalize(stmt);
 	return true;
 }

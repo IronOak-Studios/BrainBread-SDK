@@ -179,7 +179,7 @@ void CHalfLifeMultiplay::RefreshSkillData( void )
 }
 
 // longest the intermission can last, in seconds
-#define MAX_INTERMISSION_TIME		20
+#define MAX_INTERMISSION_TIME		30
 
 extern cvar_t timeleft, fragsleft;
 

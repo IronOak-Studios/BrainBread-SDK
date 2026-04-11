@@ -100,15 +100,16 @@ int CHud :: Redraw( float flTime, int intermission )
 	if ( m_flTimeDelta < 0 )
 		m_flTimeDelta = 0;
 
-	// Bring up the scoreboard during intermission
+	// Bring up the summary panel (or scoreboard) during intermission
 	if (gViewPort)
 	{
 		if ( m_iIntermission && !intermission )
 		{
-			// Have to do this here so the scoreboard goes away
+			// Have to do this here so the scoreboard/summary goes away
 			m_iIntermission = intermission;
 			gViewPort->HideCommandMenu();
 			gViewPort->HideScoreBoard();
+			gViewPort->HideSummaryPanel();
 			gViewPort->UpdateSpectatorPanel();
 		}
 		else if ( !m_iIntermission && intermission )
@@ -116,7 +117,17 @@ int CHud :: Redraw( float flTime, int intermission )
 			m_iIntermission = intermission;
 			gViewPort->HideCommandMenu();
 			gViewPort->HideVGUIMenu();
-			gViewPort->ShowScoreBoard();
+
+			// Show the summary panel if we have data, otherwise fall back to scoreboard
+			if ( gViewPort->HasSummaryData() )
+			{
+				gViewPort->ShowSummaryPanel();
+				gViewPort->HideScoreBoard();
+			}
+			else
+			{
+				gViewPort->ShowScoreBoard();
+			}
 			gViewPort->UpdateSpectatorPanel();
 
 			// Take a screenshot if the client's got the cvar set

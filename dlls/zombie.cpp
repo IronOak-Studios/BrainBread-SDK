@@ -187,13 +187,18 @@ void CZombie::Killed( entvars_t *pevAttacker, int iGib )
   if( type == BRUTAL )
 	  pnts = 2;
 
-  if( ent && ent->IsPlayer( ) && !points_given )
+  CBasePlayer* plr = ent && ent->IsPlayer() ? (CBasePlayer*)ent : NULL;
+
+  if( plr && !points_given )
   {
     ((cPEHacking*)g_pGameRules)->misDone[MISSION_FRAGS]++;
     if( !isFred )
     {
       points_given = true;
       pevAttacker->frags += pnts;
+      plr->m_iRoundZombieKills++;
+      if( m_LastHitGroup == HITGROUP_HEAD )
+        plr->m_iRoundHeadshots++;
     }
   }
   
@@ -205,6 +210,12 @@ void CZombie::Killed( entvars_t *pevAttacker, int iGib )
     DisableAll( pev );
     points_given = true;
     pevAttacker->frags += pnts;
+    if( plr )
+    {
+      plr->m_iRoundZombieKills++;
+      if( m_LastHitGroup == HITGROUP_HEAD )
+        plr->m_iRoundHeadshots++;
+    }
   }
 
   /*if( ent->IsPlayer( ) )

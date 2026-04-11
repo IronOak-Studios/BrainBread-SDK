@@ -192,6 +192,7 @@ ScorePanel::ScorePanel(int x,int y,int wide,int tall) : Panel(x,y,wide,tall)
 	m_HeaderGrid.setBounds(X_BORDER, SBOARD_TITLE_SIZE_Y, wide - X_BORDER*2, m_HeaderGrid.GetRowHeight(0));
 	m_HeaderGrid.setParent(this);
 	m_HeaderGrid.setBgColor(0,0,0,255);
+	m_HeaderGrid.RepositionContents();
 
 
 	// Now setup the listbox with the actual player data in it.

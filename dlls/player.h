@@ -589,6 +589,13 @@ public:
   int clientDeaths;
   float statsRatio;
 
+  // Per-round stats (reset at StartRound, used for round summary)
+  float m_flRoundExpStart;       // snapshot of exp at round start
+  float m_flRoundDamageDealt;    // accumulated damage dealt this round
+  int   m_iRoundZombieKills;     // zombie NPC kills this round
+  int   m_iRoundPlayerKills;     // player kills this round
+  int   m_iRoundHeadshots;       // headshot kills this round (final blow to head)
+
   float m_fNextSpecCmd;		// shared cooldown for spectate/unspectate/fullupdate
   float m_fNextVotemap;		// per-player votemap cooldown
 };

@@ -4,6 +4,7 @@
 #include	"extdll.h"
 #include	"util.h"
 #include	"cbase.h"
+#include	"monsters.h"
 #include	"player.h"
 #include	"weapons.h"
 #include	"gamerules.h"
@@ -70,6 +71,7 @@ extern int gmsgUpdPoints;
 extern int gmsgSmallCnt;
 extern int gmsgNotify;
 extern int gmsgVGUIMenu;
+extern int gmsgRoundSummary;
 extern cvar_t mission_timer_detect;
 extern float UTIL_MultiManagerTargetDelay( CBaseEntity *pEntity, const char *szTarget );
 
@@ -289,6 +291,55 @@ void cPEHacking::CheckRoundEnd( )
 	if( m_iRestart )
 	{
 		ALERT( at_logged, "New round starting...\n" );
+
+		// --- Send round summary to all clients ---
+		{
+			// Find MVP (highest frags, damage as tiebreaker)
+			int mvpPlayerIndex = 0;
+			float mvpFrags = -1;
+			float mvpDamage = -1;
+
+			for( int i = 1; i <= MAX_PLAYERS; i++ )
+			{
+				CBasePlayer *p = (CBasePlayer *)UTIL_PlayerByIndex( i );
+				if( !p || !strlen( STRING( p->pev->netname ) ) )
+					continue;
+				if( p->pev->frags > mvpFrags ||
+					( p->pev->frags == mvpFrags && p->m_flRoundDamageDealt > mvpDamage ) )
+				{
+					mvpFrags = p->pev->frags;
+					mvpDamage = p->m_flRoundDamageDealt;
+					mvpPlayerIndex = i;
+				}
+			}
+
+			// Header message: outcome, MVP
+			MESSAGE_BEGIN( MSG_ALL, gmsgRoundSummary );
+				WRITE_BYTE( 0 );                 // type 0 = header
+				WRITE_BYTE( m_iRestart );        // outcome: 1=humans, 2=zombies
+				WRITE_BYTE( mvpPlayerIndex );
+			MESSAGE_END();
+
+			// Per-player messages
+			for( int i = 1; i <= MAX_PLAYERS; i++ )
+			{
+				CBasePlayer *p = (CBasePlayer *)UTIL_PlayerByIndex( i );
+				if( !p || !strlen( STRING( p->pev->netname ) ) )
+					continue;
+
+				MESSAGE_BEGIN( MSG_ALL, gmsgRoundSummary );
+					WRITE_BYTE( 1 );                // type 1 = player entry
+					WRITE_BYTE( i );                 // player index
+					WRITE_SHORT( (short)p->m_iRoundZombieKills );
+					WRITE_SHORT( (short)p->m_iRoundPlayerKills );
+					WRITE_SHORT( (short)p->m_iRoundHeadshots );
+					WRITE_LONG( (int)p->m_flRoundDamageDealt );
+					WRITE_LONG( (int)( p->exp - p->m_flRoundExpStart ) );
+					WRITE_BYTE( p->escaped ? 1 : 0 );
+				MESSAGE_END();
+			}
+		}
+
 		//UpdTeamScore( );
     GoToIntermission( );
 
@@ -520,6 +571,14 @@ void cPEHacking::StartRound( )
 			SetTeam( pPlayer->m_sInfo.team, pPlayer, 0 );
 
     pPlayer->escaped = false;
+
+    // Snapshot stats for round summary
+    pPlayer->m_flRoundExpStart = pPlayer->exp;
+    pPlayer->m_flRoundDamageDealt = 0;
+    pPlayer->m_iRoundZombieKills = 0;
+    pPlayer->m_iRoundPlayerKills = 0;
+    pPlayer->m_iRoundHeadshots = 0;
+
   		  MESSAGE_BEGIN( MSG_ONE, gmsgNotify, NULL, pPlayer->edict( ) );
 			   WRITE_COORD( -1 );
 			   WRITE_BYTE( NTM_DONE_HIDE );
@@ -900,7 +959,19 @@ void cPEHacking::PlayerKilled( CBasePlayer *pVictim, entvars_t *pKiller, entvars
 	}
 	CBaseEntity *ktmp = CBaseEntity::Instance( pKiller );
 	if( ktmp && (ktmp->Classify() == CLASS_PLAYER) )
-		AddScore( ((CBasePlayer*)ktmp)->m_iTeam, 1 );
+	{
+		CBasePlayer *pKillerPlayer = (CBasePlayer*)ktmp;
+		// Track player kill and headshot for round summary
+		if( pKillerPlayer != pVictim )
+		{
+			AddScore(pKillerPlayer->m_iTeam, 1);
+			pKillerPlayer->m_iRoundPlayerKills++;
+			if( pVictim->m_iTeam == 2 )
+				pKillerPlayer->m_iRoundZombieKills++;
+			if( pVictim->m_LastHitGroup == HITGROUP_HEAD )
+				pKillerPlayer->m_iRoundHeadshots++;
+		}
+	}
   /*if( pVictim->m_iTeam == 2 )
   {
     pVictim->m_bTransform = FALSE;

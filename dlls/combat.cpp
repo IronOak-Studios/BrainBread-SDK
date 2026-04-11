@@ -1156,8 +1156,16 @@ int CBaseMonster :: TakeDamage( entvars_t *pevInflictor, entvars_t *pevAttacker,
   if( prevh > 0 )
   {
 	  float h2 = max( 0.0f, pev->health );
+	  float flActualDmg = prevh - h2;
 	  if( pevInflictor )
-      Instance( pevInflictor )->GiveExp( ( IsPlayer( ) ? 2 : 1 ) * ( prevh - h2 ) );
+	  {
+      Instance( pevInflictor )->GiveExp( ( IsPlayer( ) ? 2 : 1 ) * flActualDmg );
+
+      // Track round damage for the player who dealt it
+      CBaseEntity *pInf = Instance( pevInflictor );
+      if( pInf && pInf->IsPlayer() )
+        ((CBasePlayer*)pInf)->m_flRoundDamageDealt += flActualDmg;
+	  }
   }
 
 	if( ( !FNullEnt( pevInflictor ) ) && ( pev->health <= 0 ) && (!pevAttacker || pevAttacker->solid != SOLID_TRIGGER) )

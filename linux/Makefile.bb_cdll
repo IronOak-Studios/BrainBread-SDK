@@ -98,6 +98,7 @@ BB_CDLL_OBJS = \
 	$(BB_CDLL_OBJ_DIR)/vgui_MOTDWindow.o \
 	$(BB_CDLL_OBJ_DIR)/vgui_SchemeManager.o \
 	$(BB_CDLL_OBJ_DIR)/vgui_ScorePanel.o \
+	$(BB_CDLL_OBJ_DIR)/vgui_SummaryPanel.o \
 	$(BB_CDLL_OBJ_DIR)/vgui_ServerBrowser.o \
 	$(BB_CDLL_OBJ_DIR)/vgui_TeamFortressViewport.o \
 	$(BB_CDLL_OBJ_DIR)/vgui_SpectatorPanel.o \
