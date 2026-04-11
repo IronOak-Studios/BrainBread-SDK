@@ -2677,7 +2677,9 @@ int cPEHacking::RandomMission( bool reset )
 int cPEHacking::RemainingFrags( )
 {
   int cl = m_iClients ? m_iClients : 1;
-  return (int)( pow( 0.97, cl ) * misReq[MISSION_FRAGS] * cl - misDone[MISSION_FRAGS] ) + 1;
+  int total = (int)( pow( 0.97, cl ) * misReq[MISSION_FRAGS] * cl ) + 1;
+  int remaining = total - (int)misDone[MISSION_FRAGS];
+  return remaining > 0 ? remaining : 0;
 }
 
 void cPEHacking::AbortMission( )
