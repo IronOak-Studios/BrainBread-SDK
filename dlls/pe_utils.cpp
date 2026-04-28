@@ -39,6 +39,8 @@ void uGiveExpToID( char *id, float amount )
 
 extern char *COM_Parse (char *data, char *com_token, int com_token_size );
 extern unsigned long ElfHash( const char *name );
+extern int gmsgStats;
+
 struct s_xphashitem
 {
   unsigned long key;
@@ -281,7 +283,7 @@ static bool _dbOpen( void )
 	}
 
 	// Ensure schema exists on every open
-	if (sqlite3_exec(g_expDb, "CREATE TABLE IF NOT EXISTS player (steamid TEXT PRIMARY KEY, exp DOUBLE NOT NULL, time INT NOT NULL)", NULL, NULL, NULL) != SQLITE_OK)
+	if (sqlite3_exec(g_expDb, "CREATE TABLE IF NOT EXISTS player (steamid TEXT PRIMARY KEY, exp DOUBLE NOT NULL, time INT NOT NULL, hp INT DEFAULT 0, speed INT DEFAULT 0, skill INT DEFAULT 0)", NULL, NULL, NULL) != SQLITE_OK)
 	{
 		ALERT(at_error, "Player EXP DB: Failed to create schema (%s)\n", sqlite3_errmsg(g_expDb));
 		sqlite3_close(g_expDb);
@@ -322,7 +324,7 @@ static bool _uLoadPlayerExp(CBasePlayer *plr)
 	_getSteamId(plr, id, sizeof(id));
 
 	sqlite3_stmt *stmt = NULL;
-	if (sqlite3_prepare_v2(g_expDb, "SELECT exp, time FROM player WHERE steamid=?", -1, &stmt, NULL) != SQLITE_OK)
+	if (sqlite3_prepare_v2(g_expDb, "SELECT exp, time, hp, speed, skill FROM player WHERE steamid=?", -1, &stmt, NULL) != SQLITE_OK)
 		return _dbError("prepare load query", stmt);
 
 	if (sqlite3_bind_text(stmt, 1, id, strlen(id), SQLITE_TRANSIENT) != SQLITE_OK)
@@ -331,11 +333,15 @@ static bool _uLoadPlayerExp(CBasePlayer *plr)
 	int step = sqlite3_step(stmt);
 	double exp = 0;
 	int saveTime = 0;
+	int allocated_stats[3] = { 0 };
 
 	if (step == SQLITE_ROW)
 	{
 		exp = sqlite3_column_double(stmt, 0);
 		saveTime = sqlite3_column_int(stmt, 1);
+		allocated_stats[0] = sqlite3_column_int(stmt, 2); // HP
+		allocated_stats[1] = sqlite3_column_int(stmt, 3); // Speed
+		allocated_stats[2] = sqlite3_column_int(stmt, 4); // Skill
 	}
 	else if (step != SQLITE_DONE)
 		return _dbError("run load query", stmt);
@@ -352,6 +358,29 @@ static bool _uLoadPlayerExp(CBasePlayer *plr)
 
 	// Re-snapshot after DB load so round summary shows only XP earned this round
 	plr->m_flRoundExpStart = plr->exp;
+	// If true, we set the skill points to what was saved in our DB.
+	if ( save_skills.value > 0 )
+	{
+		// Set the allocated skill points to what was saved in the database.
+		plr->hppnts = allocated_stats[0];
+		plr->speedpnts = allocated_stats[1];
+		plr->dmgpnts = allocated_stats[2];
+		// Now we get rid of excess points.
+		int totalPoints = allocated_stats[0] + allocated_stats[1] + allocated_stats[2];
+		int currentPoints = (int)plr->m_fPointsMax - totalPoints;
+		plr->m_fPointsMax = currentPoints;
+
+		// Let's tell the client about the loaded skill points if we have any.
+		if ( gmsgStats > 0 )
+		{
+			MESSAGE_BEGIN( MSG_ONE, gmsgStats, NULL, plr->pev );
+				WRITE_BYTE( plr->hppnts );
+				WRITE_BYTE( plr->speedpnts );
+				WRITE_BYTE( plr->dmgpnts );
+				WRITE_BYTE( (int)plr->m_fPointsMax );
+			MESSAGE_END();
+		}
+	}
 
 	sqlite3_finalize(stmt);
 	return true;
@@ -385,7 +414,7 @@ bool uSavePlayerExp(CBasePlayer *plr)
 		return false;
 
 	sqlite3_stmt *stmt = NULL;
-	if (sqlite3_prepare_v2(g_expDb, "INSERT OR REPLACE INTO player (steamid, exp, time) VALUES(?,?,?)", -1, &stmt, NULL) != SQLITE_OK)
+	if (sqlite3_prepare_v2(g_expDb, "INSERT OR REPLACE INTO player (steamid, exp, time, hp, speed, skill) VALUES(?,?,?,?,?,?)", -1, &stmt, NULL) != SQLITE_OK)
 		return _dbError("prepare single insert", stmt);
 
 	if (sqlite3_bind_text(stmt, 1, id, strlen(id), SQLITE_TRANSIENT) != SQLITE_OK)
@@ -394,6 +423,12 @@ bool uSavePlayerExp(CBasePlayer *plr)
 		return _dbError("bind single insert exp", stmt);
 	if (sqlite3_bind_int(stmt, 3, time(NULL)) != SQLITE_OK)
 		return _dbError("bind single insert time", stmt);
+	if (sqlite3_bind_int(stmt, 4, plr->hppnts) != SQLITE_OK)
+		return _dbError("bind single insert hp", stmt);
+	if (sqlite3_bind_int(stmt, 5, plr->speedpnts) != SQLITE_OK)
+		return _dbError("bind single insert speed", stmt);
+	if (sqlite3_bind_int(stmt, 6, plr->dmgpnts) != SQLITE_OK)
+		return _dbError("bind single insert skill", stmt);
 
 	if (sqlite3_step(stmt) != SQLITE_DONE)
 		return _dbError("run single insert", stmt);
@@ -415,7 +450,7 @@ bool uSaveAllExp()
 		return false;
 
 	sqlite3_stmt *stmt = NULL;
-	if (sqlite3_prepare_v2(g_expDb, "INSERT OR REPLACE INTO player (steamid, exp, time) VALUES(?,?,?)", -1, &stmt, NULL) != SQLITE_OK)
+	if (sqlite3_prepare_v2(g_expDb, "INSERT OR REPLACE INTO player (steamid, exp, time, hp, speed, skill) VALUES(?,?,?,?,?,?)", -1, &stmt, NULL) != SQLITE_OK)
 		return _dbError("prepare insert statement", stmt);
 
 	if (sqlite3_exec(g_expDb, "BEGIN TRANSACTION", NULL, NULL, NULL) != SQLITE_OK)
@@ -456,6 +491,21 @@ bool uSaveAllExp()
 		if (sqlite3_bind_int(stmt, 3, time(NULL)) != SQLITE_OK)
 		{
 			ok = _dbError("bind insert time", stmt);
+			break;
+		}
+		if (sqlite3_bind_int(stmt, 4, plr->hppnts) != SQLITE_OK)
+		{
+			ok = _dbError("bind insert hp", stmt);
+			break;
+		}
+		if (sqlite3_bind_int(stmt, 5, plr->speedpnts) != SQLITE_OK)
+		{
+			ok = _dbError("bind insert speed", stmt);
+			break;
+		}
+		if (sqlite3_bind_int(stmt, 6, plr->dmgpnts) != SQLITE_OK)
+		{
+			ok = _dbError("bind insert skill", stmt);
 			break;
 		}
 
