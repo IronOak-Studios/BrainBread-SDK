@@ -31,6 +31,7 @@ cvar_t	expperlevel	= {"sv_expperlevel", "150", FCVAR_SERVER };
 cvar_t	maxlevel	= {"sv_maxlevel", "-1", FCVAR_SERVER };
 
 cvar_t	savexp	= {"sv_savexp", "24", FCVAR_SERVER };
+cvar_t	save_skills = { "sv_saveskills", "0", FCVAR_SERVER }; // If enabled, we read the saved skills instead of the default XP.
 
 cvar_t	diff	= {"sv_difficulty", "1.1", FCVAR_SERVER };
 cvar_t	missions	= {"sv_missions", "4", FCVAR_SERVER };
@@ -533,6 +534,7 @@ void GameDLLInit( void )
   CVAR_REGISTER (&expperlevel);
   CVAR_REGISTER (&maxlevel);
   CVAR_REGISTER (&savexp);
+  CVAR_REGISTER (&save_skills);
 
 	CVAR_REGISTER (&diff);
 //	CVAR_REGISTER (&missions);
