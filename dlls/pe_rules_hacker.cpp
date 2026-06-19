@@ -1053,6 +1053,7 @@ void cPEHacking::ClientDisconnected( edict_t *pClient )
 		pPlayer->m_iSpawnDelayed = 0;
 		pPlayer->ResetRadar( );
 		pPlayer->statsRatio = 1;
+		uSavePlayerExp( pPlayer );
     pPlayer->speedpnts = 0;
 	  pPlayer->hppnts = 0;
     pPlayer->dmgpnts = 0;
@@ -1069,7 +1070,6 @@ void cPEHacking::ClientDisconnected( edict_t *pClient )
     pPlayer->clientFrags = 0;
     pPlayer->clientDeaths = 0;
    	pPlayer->m_fPointsMax = 0;
-		uSavePlayerExp( pPlayer );
     pPlayer->exp = 0;
 		pPlayer->expLoaded = false;
     SetBits( pPlayer->pev->flags, FL_NOTARGET );

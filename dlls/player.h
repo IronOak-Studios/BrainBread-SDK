@@ -195,6 +195,10 @@ struct s_radarentry
 #define BASE_SPEED_VALUE ( 90 / ( diff.value ? diff.value : 1 ) )
 #define BASE_DMG_VALUE ( 85 / ( diff.value ? diff.value : 1 ) )
 
+#define MAX_HEALTH 280
+#define MAX_SPEED 175
+#define MAX_DMG 250
+
 #define PLR_SPEED(a) ((BASE_SPEED_VALUE+(a)->speedpnts*SPEED_GIVE)*( (a)->statsRatio ? (a)->statsRatio : 1 ))
 #define PLR_HP(a) ((BASE_HP_VALUE+(a)->hppnts*HEALTH_GIVE)*( (a)->statsRatio ? (a)->statsRatio : 1 ))
 #define PLR_DMG(a) ((BASE_DMG_VALUE+(a)->dmgpnts*DMG_GIVE)*( (a)->statsRatio ? (a)->statsRatio : 1 ))

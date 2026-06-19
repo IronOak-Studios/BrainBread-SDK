@@ -28,6 +28,7 @@ extern cvar_t	expperlevel;
 extern cvar_t	exppotence;
 extern cvar_t	maxlevel;
 extern cvar_t	savexp;
+extern cvar_t	save_skills;
 
 extern cvar_t	diff;
 extern cvar_t	missions;
