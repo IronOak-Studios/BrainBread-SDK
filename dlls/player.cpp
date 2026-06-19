@@ -6377,10 +6377,6 @@ void CBasePlayer::GiveExp( float value, bool load )
 	MESSAGE_END( );
 }
 
-#define MAX_HEALTH 280
-#define MAX_SPEED 175
-#define MAX_DMG 250
-
 void CBasePlayer::UpdateStats( int type )
 {
   if( m_fPointsMax - 1 < 0 )
