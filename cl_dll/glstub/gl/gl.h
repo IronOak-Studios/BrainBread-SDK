@@ -115,6 +115,10 @@ typedef ptrdiff_t       GLintptr;
 #define GL_UNPACK_ALIGNMENT     0x0CF5
 
 /* Commonly used GL entry points */
+#ifdef __cplusplus
+extern "C" {
+#endif
+
 GLAPI void APIENTRY glEnable(GLenum cap);
 GLAPI void APIENTRY glDisable(GLenum cap);
 GLAPI void APIENTRY glBegin(GLenum mode);
@@ -157,5 +161,9 @@ GLAPI void APIENTRY glGetFloatv(GLenum pname, GLfloat *params);
 GLAPI const GLubyte * APIENTRY glGetString(GLenum name);
 GLAPI void APIENTRY glReadPixels(GLint x, GLint y, GLsizei width, GLsizei height, GLenum format, GLenum type, void *pixels);
 GLAPI GLenum APIENTRY glGetError(void);
+
+#ifdef __cplusplus
+}
+#endif
 
 #endif /* __gl_h_ */
