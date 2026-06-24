@@ -92,16 +92,26 @@ static void DrawScaledSprite( HSPRITE hSprite, int frame, int x, int y,
 	int scaledFullW = (int)( fullW * effectiveScale + 0.5f );
 	int scaledFullH = (int)( fullH * effectiveScale + 0.5f );
 
-	if (prc)
+	if( prc )
 	{
-		rect_s rc = *prc;
-		rc.left = (int)(prc->left * effectiveScale + 0.5f);
-		rc.right = (int)(prc->right * effectiveScale + 0.5f);
-		rc.top = (int)(prc->top * effectiveScale + 0.5f);
-		rc.bottom = (int)(prc->bottom * effectiveScale + 0.5f);
-		prc = &rc;
+		// Draw the full scaled sprite and scissor to the requested sub-rect.
+		int clipW = (int)( ( prc->right - prc->left ) * effectiveScale + 0.5f );
+		int clipH = (int)( ( prc->bottom - prc->top ) * effectiveScale + 0.5f );
+
+		if( clipW <= 0 || clipH <= 0 )
+			return;
+
+		int drawX = x - (int)( prc->left * effectiveScale + 0.5f );
+		int drawY = y - (int)( prc->top * effectiveScale + 0.5f );
+
+		SPR_EnableScissor( x, y, clipW, clipH );
+		gEngfuncs.pfnSPR_DrawGeneric( frame, drawX, drawY, NULL,
+			blendSrc, blendDst, scaledFullW, scaledFullH );
+		SPR_DisableScissor();
+		return;
 	}
-	gEngfuncs.pfnSPR_DrawGeneric( frame, x, y, prc,
+
+	gEngfuncs.pfnSPR_DrawGeneric( frame, x, y, NULL,
 		blendSrc, blendDst, scaledFullW, scaledFullH );
 }
 
