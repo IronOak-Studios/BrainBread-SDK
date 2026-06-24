@@ -628,6 +628,7 @@ public:
 	bool SlotInput( int iSlot );
 
 	virtual void paintBackground();
+	virtual void paintTraverse(bool repaint);
 
 	CSchemeManager *GetSchemeManager( void ) { return &m_SchemeManager; }
 	ScorePanel *GetScoreBoard( void ) { return m_pScoreBoard; }

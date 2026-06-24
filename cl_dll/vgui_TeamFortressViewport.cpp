@@ -56,6 +56,10 @@
 #include "vgui_SpectatorPanel.h"
 #include "vgui_SummaryPanel.h"
 
+static bool g_bUseVGuiDesktopOffset = false;
+static int g_iVGuiDesktopX = 0;
+static int g_iVGuiDesktopY = 0;
+
 extern int g_iVisibleMouse;
 class CCommandMenu;
 int g_iPlayerClass;
@@ -646,6 +650,13 @@ TeamFortressViewport::TeamFortressViewport(int x,int y,int wide,int tall) : Pane
 	UpdatePlayerMenu(m_PlayerMenu);
 
 	CreateServerBrowser();
+}
+
+void VGui_ResetDesktopBounds( void )
+{
+	g_bUseVGuiDesktopOffset = false;
+	g_iVGuiDesktopX = 0;
+	g_iVGuiDesktopY = 0;
 }
 
 //-----------------------------------------------------------------------------
@@ -2173,6 +2184,42 @@ void TeamFortressViewport::UpdateCursorState()
 	App::getInstance()->setCursorOveride( App::getInstance()->getScheme()->getCursor(Scheme::SchemeCursor::scu_none) );
 }
 
+void TeamFortressViewport::paintTraverse(bool repaint)
+{
+	bool useDesktopOffset = false;
+	Panel* root = getParent();
+	if( root )
+	{
+		int x, y, wide, tall;
+		root->getBounds( x, y, wide, tall );
+		useDesktopOffset = ( x != 0 || y != 0 || wide != ScreenWidth || tall != ScreenHeight );
+
+#ifndef _WIN32
+		if( useDesktopOffset )
+			g_bUseVGuiDesktopOffset = true;
+		if( useDesktopOffset )
+		{
+			if( x >= 0 && y >= 0 )
+			{
+				g_iVGuiDesktopX = x;
+				g_iVGuiDesktopY = y;
+			}
+
+			root->setBounds( 0, 0, ScreenWidth, ScreenHeight );
+			setBounds( 0, 0, ScreenWidth, ScreenHeight );
+			root->solveTraverse();
+		}
+#else
+		g_bUseVGuiDesktopOffset = false;
+		g_iVGuiDesktopX = 0;
+		g_iVGuiDesktopY = 0;
+#endif
+
+	}
+
+	Panel::paintTraverse(repaint);
+}
+
 void TeamFortressViewport::UpdateHighlights()
 {
 	if (m_pCurrentCommandMenu)
@@ -2235,6 +2282,13 @@ void TeamFortressViewport::paintBackground()
 
 	int extents[4];
 	getAbsExtents(extents[0],extents[1],extents[2],extents[3]);
+	if( g_bUseVGuiDesktopOffset )
+	{
+		extents[0] += g_iVGuiDesktopX;
+		extents[1] += g_iVGuiDesktopY;
+		extents[2] += g_iVGuiDesktopX;
+		extents[3] += g_iVGuiDesktopY;
+	}
 	VGui_ViewportPaintBackground(extents);
 }
 

@@ -72,6 +72,8 @@ protected:
 
 using namespace vgui;
 
+void VGui_ResetDesktopBounds( void );
+
 void VGui_ViewportPaintBackground(int extents[4])
 {
 	gEngfuncs.VGui_ViewportPaintBackground(extents);
@@ -107,9 +109,19 @@ void VGui_Startup()
 	}
 	else
 	{
+#ifdef _WIN32
 		gViewPort = new TeamFortressViewport(0,0,root->getWide(),root->getTall());
+#else
+		gViewPort = new TeamFortressViewport(0,0,ScreenWidth,ScreenHeight);
+#endif
 		gViewPort->setParent(root);
 	}
+	VGui_ResetDesktopBounds();
+#ifdef _WIN32
+	gViewPort->setBounds( 0, 0, root->getWide(), root->getTall() );
+#else
+	gViewPort->setBounds( 0, 0, ScreenWidth, ScreenHeight );
+#endif
 
 	/*
 	TexturePanel* texturePanel=new TexturePanel();
