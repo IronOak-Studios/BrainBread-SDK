@@ -1568,7 +1568,7 @@ BOOL cPEHacking::ClientCommand( CBasePlayer *pPlayer, const char *pcmd )
 		{
 			if( ( slot >= 1 ) && ( slot <= 8 ) )
 			{
-				uPrintTeam( pPlayer->m_iTeam, HUD_PRINTTALK, UTIL_VarArgs( "(Radio) %s: %s", STRING(pPlayer->pev->netname) ), radio1_text[slot-1] );
+				uPrintTeam( pPlayer->m_iTeam, HUD_PRINTTALK, UTIL_VarArgs( "(Radio) %s: %%s", STRING(pPlayer->pev->netname) ), radio1_text[slot-1] );
 				RadioTeam( pPlayer, radio1_sound[slot-1], 3 );
 			}
 			else if(slot == 0)
@@ -1581,7 +1581,7 @@ BOOL cPEHacking::ClientCommand( CBasePlayer *pPlayer, const char *pcmd )
 		{
 			if( ( slot >= 1 ) && ( slot <= 8 ) )
 			{
-				uPrintTeam( pPlayer->m_iTeam, HUD_PRINTTALK, UTIL_VarArgs( "(Radio) %s: %s", STRING(pPlayer->pev->netname) ), radio2_text[slot-1] );
+				uPrintTeam( pPlayer->m_iTeam, HUD_PRINTTALK, UTIL_VarArgs( "(Radio) %s: %%s", STRING(pPlayer->pev->netname) ), radio2_text[slot-1] );
 				RadioTeam( pPlayer, radio2_sound[slot-1], 4 );
 			}
 			else if(slot == 0)
@@ -1594,7 +1594,7 @@ BOOL cPEHacking::ClientCommand( CBasePlayer *pPlayer, const char *pcmd )
 		{
 			if( ( slot >= 1 ) && ( slot <= 7 ) )
 			{
-				uPrintTeam( pPlayer->m_iTeam, HUD_PRINTTALK, UTIL_VarArgs( "(Radio) %s: %s", STRING(pPlayer->pev->netname) ), radio3_text[slot-1] );
+				uPrintTeam( pPlayer->m_iTeam, HUD_PRINTTALK, UTIL_VarArgs( "(Radio) %s: %%s", STRING(pPlayer->pev->netname) ), radio3_text[slot-1] );
 				RadioTeam( pPlayer, radio3_sound[slot-1], 5 );
 			}
 			else if(slot == 0)
