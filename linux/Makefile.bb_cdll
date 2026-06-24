@@ -20,7 +20,7 @@ BB_OUTPUT_DIR=$(SOURCE_DIR)/../game/brainbread
 CFLAGS=$(BASE_CFLAGS) $(ARCH_CFLAGS) -DCLIENT_DLL -DCLIENT_WEAPONS -DHL_DLL -I/usr/include/malloc -D_snwprintf=swprintf \
 		 -DDISABLE_JUMP_ORIGIN -DDISABLE_VEC_ORIGIN -MMD -MP
 
-INCLUDEDIRS=-I$(HL_SRC_DIR) -I$(HL_SRC_DIR)/glstub -I$(HL_SRC_DIR)/glext/include -I../dlls -I../tfc -I$(COMMON_SRC_DIR) -I$(PUBLIC_SRC_DIR) -I../pm_shared -I../engine -I../utils/vgui/include -I ../game_shared -I../external
+INCLUDEDIRS=-I$(HL_SRC_DIR) -I$(HL_SRC_DIR)/glstub -I$(HL_SRC_DIR)/glext/include -I../dlls -I../tfc -I$(PUBLIC_SRC_DIR) -I$(COMMON_SRC_DIR) -I../pm_shared -I../engine -I../utils/vgui/include -I ../game_shared -I../external
 
 ifeq ($(OS),Darwin)
 LDFLAGS=$(SHLIBLDFLAGS) $(CPP_LIB) -framework Carbon $(CFG)/vgui.dylib -L. -lSDL2-2.0.0
@@ -29,7 +29,7 @@ LDFLAGS=$(SHLIBLDFLAGS) $(CPP_LIB) -L$(CFG) vgui.so -L. -lSDL2
 endif
 
 DO_CC=$(CPLUS) $(INCLUDEDIRS) $(CFLAGS) -o $@ -c $<
-DO_PUBLIC_CC=$(CPLUS) $(COMMON_INCLUDEDIRS) $(CFLAGS) $(SHLIBCFLAGS) -o $@ -c $<
+DO_PUBLIC_CC=$(CPLUS) $(INCLUDEDIRS) $(CFLAGS) $(SHLIBCFLAGS) -o $@ -c $<
 DO_COMMON_CC=$(CPLUS) $(INCLUDEDIRS)  $(CFLAGS) $(SHLIBCFLAGS) -o $@ -c $<
 DO_PM_SHARED_CC=$(CC) $(INCLUDEDIRS)  $(CFLAGS) $(SHLIBCFLAGS) -o $@ -c $<
 
