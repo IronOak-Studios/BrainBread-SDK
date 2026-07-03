@@ -160,7 +160,7 @@ void CMicrouzi_a::PrimaryAttack()
 	else
 		flSpread = 0.03;
 
-	vecDir = m_pPlayer->FireBulletsPlayer( 1, vecSrc, vecAiming, Vector( flSpread, flSpread, flSpread ), 8192, BULLET_PLAYER_MICROUZI, 2, 0, m_pPlayer->pev, m_pPlayer->random_seed );
+	vecDir = m_pPlayer->FireBulletsPlayer( 1, vecSrc, vecAiming, Vector( flSpread, flSpread, flSpread ), 8192, BULLET_PLAYER_MICROUZI_A, 2, 0, m_pPlayer->pev, m_pPlayer->random_seed );
 ////	m_pPlayer->pev->punchangle.x = -m_pPlayer->m_fSpread * (float)m_pPlayer->m_iShots;
 	int flags;
 #if defined( CLIENT_WEAPONS )
@@ -259,7 +259,7 @@ void CMicrouzi_a::SecondaryAttack( void )
 	else
 		flSpread = 0.03;
 
-	vecDir = m_pPlayer->FireBulletsPlayer( 1, vecSrc, vecAiming, Vector( flSpread, flSpread, flSpread ), 8192, BULLET_PLAYER_MICROUZI, 2, 0, m_pPlayer->pev, m_pPlayer->random_seed );
+	vecDir = m_pPlayer->FireBulletsPlayer( 1, vecSrc, vecAiming, Vector( flSpread, flSpread, flSpread ), 8192, BULLET_PLAYER_MICROUZI_A, 2, 0, m_pPlayer->pev, m_pPlayer->random_seed );
 	int flags;
 #if defined( CLIENT_WEAPONS )
 	flags = FEV_NOTHOST;
