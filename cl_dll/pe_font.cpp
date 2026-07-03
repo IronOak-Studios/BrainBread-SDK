@@ -16,7 +16,14 @@ s_font *fntBlueHighway = NULL;
 // Return the cl_fontscale cvar value, clamped to a safe range.
 static inline float GetFontScale( void )
 {
-	float s = CVAR_GET_FLOAT( "cl_fontscale" );
+	static cvar_t *fontscale = NULL;
+	if( !fontscale )
+	{
+		fontscale = gEngfuncs.pfnGetCvarPointer( "cl_fontscale" );
+		if( !fontscale )
+			return 1.2f;
+	}
+	float s = fontscale->value;
 	if( s < 0.5f ) s = 0.5f;
 	if( s > 4.0f ) s = 4.0f;
 	return s;
