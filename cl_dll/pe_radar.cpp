@@ -536,7 +536,6 @@ int CHudRadar::MsgFunc_RadarOff(const char *pszName,  int iSize, void *pbuf )
 	//ClearRadar( );
 	BEGIN_READ( pbuf, iSize );
 	m_fOn = READ_BYTE();
-	m_fOn = TRUE; // :)
 	return 1;
 }
 
