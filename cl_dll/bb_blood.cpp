@@ -187,9 +187,6 @@ cBlood::cBlood( t_bloodpartinfo *info )
   gLBlood->next = ni;
   ni->prev = gLBlood;
   gLBlood = ni;
-
-  if( !m_sSpr[0] )
-    delete this;
 	//bla( "New: psec: %d, speed: %f, size: %f, spread: %f, type: %d\n", info->iPartsPerSec, info->fSpeed, info->fSize, info->fSideSpread, info->iType );
 	//bla( "Set: delay: %f, speed: %f\n", m_fParticleDelay, m_fParticleSpeed );	
 }
@@ -601,6 +598,20 @@ void cBlood::Think( s_bloodlist **it, float fTime )
 
 extern list<t_bloodpartinfo> infol;
 
+// A system whose main sprite failed to load can never draw; destroy it
+// (~cBlood unlinks it from the global list) rather than keeping it in the
+// draw list. Deleting here instead of in the constructor, where "delete
+// this" during construction is undefined behavior.
+static cBlood *ValidateSpray( cBlood *sys )
+{
+  if( !sys->m_sSpr[0] )
+  {
+    delete sys;
+    return NULL;
+  }
+  return sys;
+}
+
 cBlood *cBlood::NewSpray( char *cfgfile, vec3_t origin, vec3_t dir, int entidx, float maxlife, int maxnum )
 {
   if( !CVAR_GET_FLOAT( "cl_partsys" ) )
@@ -629,7 +640,7 @@ cBlood *cBlood::NewSpray( char *cfgfile, vec3_t origin, vec3_t dir, int entidx, 
         info.life = maxlife;
       if( info.dynnum )
         info.num = maxnum;
-      return new cBlood( &info );
+      return ValidateSpray( new cBlood( &info ) );
     }
   }
   
@@ -831,7 +842,7 @@ cBlood *cBlood::NewSpray( char *cfgfile, vec3_t origin, vec3_t dir, int entidx, 
 	gEngfuncs.COM_FreeFile( pstart );
 
   infol.push_front( info );
-  return new cBlood( &info );
+  return ValidateSpray( new cBlood( &info ) );
 }
 
 void cBlood::KillAll( s_bloodlist *bldlist )
@@ -840,7 +851,8 @@ void cBlood::KillAll( s_bloodlist *bldlist )
   while( bldlist )
   {
     tmp = bldlist->next;
-    delete bldlist;
+    // ~cBlood unlinks and frees the list node itself
+    delete bldlist->item;
     bldlist = tmp;
   }
   gFBlood = gLBlood = NULL;
