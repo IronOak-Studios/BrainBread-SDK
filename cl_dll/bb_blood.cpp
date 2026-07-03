@@ -421,11 +421,13 @@ void cBlood::Draw( )
      else*/
     orig = check->vOrigin;
 
+    r = g = b = a = 255;
     partcolfade.GetColor( ( check->fLifed / check->fLifetime ), r, g, b, a );
   	  gEngfuncs.pTriAPI->Color4f( r / 255.0f, g / 255.0f, b / 255.0f, a / 255.0f );
     if( mode == kRenderTransTexture )
 	    gEngfuncs.pTriAPI->Brightness( a / 255.0f );
-   
+
+    c = d = e = 100000;
     partsizefade.GetColor( ( check->fLifed / check->fLifetime ), c, d, e, e );
     x = c / 100000.0f * check->fSizeX;
     y = d / 100000.0f * check->fSizeY;

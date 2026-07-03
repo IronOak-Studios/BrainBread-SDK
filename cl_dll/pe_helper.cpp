@@ -483,6 +483,7 @@ void cPEHelper::Draw( float time )
 		}
 		y += targetOffset;
 		oy += targetOffset;
+		br = bg = bb = ba = 255;
 		cur->spriteFader.GetColor( time, br, bg, bb, ba );
 		if( cur->blackbg )
 			UTIL_BlackRect(	ox,
@@ -507,6 +508,7 @@ void cPEHelper::Draw( float time )
 		if( strlen( cur->text ) )
 		{
 			g_font->SetFont( cur->font );
+			r = g = b = 255;
 			cur->textFader.GetColor( time, r, g, b );
 			g_font->DrawStringML( x, y, cur->text, r, g, b );
 		}

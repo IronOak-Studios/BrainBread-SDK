@@ -221,11 +221,6 @@ void cPEFader::GetColor( float time, int &r, int &g, int &b )
 
 void cPEFader::GetColor( float time, int &r, int &g, int &b, int &a )
 {
-	r = 255;
-	g = 255;
-	b = 255;
-	a = 255;
-
 	if( !type || time < start || !length )
 		return;
 	/*if( time > ( start + length ) )
