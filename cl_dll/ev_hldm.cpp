@@ -1546,7 +1546,7 @@ void EV_FireMicrouzi_a( event_args_t *args )
 	EV_GetGunPosition( args, vecSrc, origin );
 	VectorCopy( forward, vecAiming );
 
-	EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_MICROUZI_A, 2, SafeTracerCount(idx), args->fparam1, args->fparam2 );
+	EV_HLDM_FireBullets( idx, forward, right, up, 1, vecSrc, vecAiming, 8192, BULLET_PLAYER_MICROUZI, 2, SafeTracerCount(idx), args->fparam1, args->fparam2 );
 }
 
 enum usp_e
