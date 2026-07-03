@@ -171,7 +171,7 @@ void CTank::DoRadiusDamage( float amount )
   CBaseEntity *ent = UTIL_FindEntityInSphere( NULL, pev->origin, 80 );
 	while ( ent != NULL )
 	{
-    if( 1 || FClassnameIs( ent->pev, "monster_zombie" ) )
+    if( FClassnameIs( ent->pev, "monster_zombie" ) )
       ent->TakeDamage( pev, pev, amount, DMG_CRUSH );
 		ent = UTIL_FindEntityInSphere( ent, pev->origin, 80 );
 	}
