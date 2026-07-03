@@ -90,6 +90,7 @@ extern CGraph	WorldGraph;
 #define DMG_INFO_DELAY 1.5f
 #define CYBERBOMB_DAMAGE 240
 #define MATE_DMG_BONUS 0.05
+#define MATE_DMG_BONUS_MAX 0.5
 
 // Global Savedata for player
 TYPEDESCRIPTION	CBasePlayer::m_playerSaveData[] = 
@@ -665,7 +666,11 @@ void CBasePlayer :: TraceAttack( entvars_t *pevAttacker, float flDamage, Vector 
 		if( FBitSet( bitsDamageType, DMG_CLUB ) )
 			flDamage *= 0.5;
 
-		flDamage -= flDamage * ( (float)m_iNumMates * MATE_DMG_BONUS );
+		// Cap mate bonus so clustered teammates can't null or invert damage.
+		float flMateBonus = (float)m_iNumMates * MATE_DMG_BONUS;
+		if( flMateBonus > MATE_DMG_BONUS_MAX )
+			flMateBonus = MATE_DMG_BONUS_MAX;
+		flDamage -= flDamage * flMateBonus;
 
     if( m_iTeam == 2 )
       flDamage *= 0.20;
