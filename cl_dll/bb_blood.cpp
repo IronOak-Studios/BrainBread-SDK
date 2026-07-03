@@ -380,7 +380,10 @@ void cBlood::Draw( )
 		return;
 
 	vec3_t up, v_forward, v_right, v_up, orig;
-  int r, g, b, a, c, d, e;
+  // Defaults in case GetColor bails without writing its outputs (fader
+  // missing from pe_faders.cfg, or faders disabled): full color, full size.
+  int r = 255, g = 255, b = 255, a = 255;
+  int c = 100000, d = 100000, e = 100000;
   float x, y;
   bool detailsprites = ( CVAR_GET_FLOAT( "cl_detailsprites" ) ? true : false );
 	

@@ -253,6 +253,8 @@ void cPEFader::GetColor( float time, int &r, int &g, int &b, int &a )
 		nextstep = start + length * ( step->percent / 100.0f );
 	}*/
   step = type->fstep;
+  if( !step )
+    return;
   float curpercent = ( time - start ) / length * 100.0f;
   if( !( type->flags & TYPE_NOREPEAT ) )
   {
@@ -265,20 +267,24 @@ void cPEFader::GetColor( float time, int &r, int &g, int &b, int &a )
 		  curpercent = 100.0f;
   }
 
-  if( curpercent != 100.0f )
+  if( curpercent < type->lstep->percent )
   {
     while( step->percent <= curpercent )
 	  {
-		  if( !step->next )
-			  step = type->fstep->next;
-		  else
-			  step = step->next;
+		  step = step->next;
 		  if( !step )
 			  return;
 	  }
   }
   else
-    step = type->lstep;
+  {
+	  // At or past the last step (cfg steps may end below 100%): hold its
+	  // color instead of cycling the step list forever looking for a
+	  // higher percent that doesn't exist.
+	  step = type->lstep;
+	  if( curpercent > step->percent )
+		  curpercent = step->percent;
+  }
 
 	if( !step->prev )
 		return;
