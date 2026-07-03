@@ -214,13 +214,18 @@ void cPEFader::Start( char *fname, float starttime, float endtime )
 
 void cPEFader::GetColor( float time, int &r, int &g, int &b )
 {
-	int a;
+	int a = 255;
 	GetColor( time, r, g, b, a );
 	ScaleColors( r, g, b, a );
 }
 
 void cPEFader::GetColor( float time, int &r, int &g, int &b, int &a )
 {
+	r = 255;
+	g = 255;
+	b = 255;
+	a = 255;
+
 	if( !type || time < start || !length )
 		return;
 	/*if( time > ( start + length ) )
@@ -253,6 +258,8 @@ void cPEFader::GetColor( float time, int &r, int &g, int &b, int &a )
 		nextstep = start + length * ( step->percent / 100.0f );
 	}*/
   step = type->fstep;
+  if( !step )
+    return;
   float curpercent = ( time - start ) / length * 100.0f;
   if( !( type->flags & TYPE_NOREPEAT ) )
   {
@@ -265,20 +272,21 @@ void cPEFader::GetColor( float time, int &r, int &g, int &b, int &a )
 		  curpercent = 100.0f;
   }
 
-  if( curpercent != 100.0f )
+  if( curpercent < type->lstep->percent )
   {
     while( step->percent <= curpercent )
 	  {
-		  if( !step->next )
-			  step = type->fstep->next;
-		  else
-			  step = step->next;
+		  step = step->next;
 		  if( !step )
 			  return;
 	  }
   }
   else
+  {
     step = type->lstep;
+    if( curpercent > step->percent )
+      curpercent = step->percent;
+  }
 
 	if( !step->prev )
 		return;

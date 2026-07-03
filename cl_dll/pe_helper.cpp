@@ -418,7 +418,7 @@ void cPEHelper::Draw( float time )
 {
 	s_helpitem *cur = fitem;
 	int x = 0, y = -1000, ox = 0, oy = -1000, r = 0, g = 0, b = 0, maxx = 0, maxy = 0;
-	int br, bg, bb, ba;
+	int br = 255, bg = 255, bb = 255, ba = 255;
 	// Per-region stacking
 	int regionNextYDown[4] = { 0, 0, 0, 0 };
 	int regionNextYUp[4] = { ScreenHeight, ScreenHeight, ScreenHeight, ScreenHeight };
@@ -449,6 +449,7 @@ void cPEHelper::Draw( float time )
 			cur = cur->next;
 			continue;
 		}
+		x = y = 100000;
 		cur->posFader.GetColor( time, x, y, br, br );
 		x = ox = cur->startpos[0] + (int)( (float)x / 100000.0f * ( cur->pos[0] - cur->startpos[0] ) );
 		y = oy = cur->startpos[1] + (int)( (float)y / 100000.0f * ( cur->pos[1] - cur->startpos[1] ) );
