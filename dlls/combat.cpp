@@ -1784,19 +1784,37 @@ This version is used by Players, uses the random seed generator to sync client a
 */
 // Spawning zombies are not linked as SOLID so engine traces miss them.
 // Manually test the bullet line against each one via pfnTraceModel.
-static void CheckSpawningZombies( const Vector &vecSrc, const Vector &vecEnd, TraceResult &tr )
+// The entity list walk is done once per volley (CollectSpawningZombies),
+// not once per pellet, since it is O(all edicts).
+#define MAX_SPAWNING_ZOMBIES 256
+
+static int CollectSpawningZombies( edict_t **list, int maxCount )
 {
+	int count = 0;
 	CBaseEntity *pZ = NULL;
-	while( ( pZ = UTIL_FindEntityByClassname( pZ, "monster_zombie" ) ) != NULL )
+	while( count < maxCount && ( pZ = UTIL_FindEntityByClassname( pZ, "monster_zombie" ) ) != NULL )
 	{
 		if( pZ->pev->takedamage != DAMAGE_AIM || pZ->pev->movetype == MOVETYPE_STEP )
 			continue;
+		list[count++] = ENT( pZ->pev );
+	}
+	return count;
+}
+
+static void CheckSpawningZombies( const Vector &vecSrc, const Vector &vecEnd, TraceResult &tr, edict_t **list, int count )
+{
+	for( int i = 0; i < count; i++ )
+	{
+		// Re-check takedamage: an earlier pellet of this volley may have
+		// killed the zombie already.
+		if( list[i]->v.takedamage != DAMAGE_AIM )
+			continue;
 		TraceResult ztr;
-		UTIL_TraceModel( vecSrc, vecEnd, point_hull, ENT( pZ->pev ), &ztr );
+		UTIL_TraceModel( vecSrc, vecEnd, point_hull, list[i], &ztr );
 		if( ztr.flFraction < tr.flFraction )
 		{
 			tr = ztr;
-			tr.pHit = ENT( pZ->pev );
+			tr.pHit = list[i];
 		}
 	}
 }
@@ -1818,6 +1836,9 @@ Vector CBaseEntity::FireBulletsPlayer ( ULONG cShots, Vector vecSrc, Vector vecD
 
 	ClearMultiDamage();
 	gMultiDamage.type = DMG_BULLET;//| DMG_NEVERGIB;
+
+	edict_t *spawningZombies[MAX_SPAWNING_ZOMBIES];
+	int numSpawningZombies = CollectSpawningZombies( spawningZombies, MAX_SPAWNING_ZOMBIES );
 
 	if( iBulletType != BULLET_NONE )
 	{
@@ -1931,7 +1952,7 @@ again:
 
 		vecEnd = vecSrc + vecDir * flDistance;
 		UTIL_TraceLine(vecSrc, vecEnd, dont_ignore_monsters, ENT(pev)/*pentIgnore*/, &tr);
-		CheckSpawningZombies( vecSrc, vecEnd, tr );
+		CheckSpawningZombies( vecSrc, vecEnd, tr, spawningZombies, numSpawningZombies );
 
 		// do damage, paint decals
 		if (tr.flFraction != 1.0)
