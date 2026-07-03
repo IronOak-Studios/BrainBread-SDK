@@ -1740,7 +1740,7 @@ BOOL cPEHacking::ClientCommand( CBasePlayer *pPlayer, const char *pcmd )
 		if( ( pPlayer->m_iTeam == 1 || pPlayer->m_iTeam == 2 ) && pPlayer->m_bCanRespawn == TRUE )
 		{
 			pPlayer->m_nMenu = Menu_Radio1;
-			ShowMenu (pPlayer, 0x23F, 0, 0, "#Radio1");
+			ShowMenu (pPlayer, 0x2FF, 0, 0, "#Radio1");
 		}
 		return TRUE;
 	}
@@ -1749,7 +1749,7 @@ BOOL cPEHacking::ClientCommand( CBasePlayer *pPlayer, const char *pcmd )
 		if( ( pPlayer->m_iTeam == 1 || pPlayer->m_iTeam == 2 ) && pPlayer->m_bCanRespawn == TRUE )
 		{
 			pPlayer->m_nMenu = Menu_Radio2;
-			ShowMenu (pPlayer, 0x23F, 0, 0, "#Radio2");
+			ShowMenu (pPlayer, 0x2FF, 0, 0, "#Radio2");
 		}
 		return TRUE;
 	}
@@ -1758,7 +1758,7 @@ BOOL cPEHacking::ClientCommand( CBasePlayer *pPlayer, const char *pcmd )
 		if( ( pPlayer->m_iTeam == 1 || pPlayer->m_iTeam == 2 ) && pPlayer->m_bCanRespawn == TRUE )
 		{
 			pPlayer->m_nMenu = Menu_Radio3;
-			ShowMenu (pPlayer, 0x23F, 0, 0, "#Radio3");
+			ShowMenu (pPlayer, 0x27F, 0, 0, "#Radio3");
 		}
 		return TRUE;
 	}
@@ -2177,6 +2177,8 @@ void cPEHacking::Think( )
 		g_engfuncs.pfnCvar_DirectSet( &timeleft, UTIL_VarArgs( "%i", time_remaining ) );
 	}
 	last_time  = time_remaining;
+	last_frags = frags_remaining;
+	last_score = score_remaining;
 	//----------
 
 	g_VoiceGameMgr.Update( gpGlobals->frametime );
