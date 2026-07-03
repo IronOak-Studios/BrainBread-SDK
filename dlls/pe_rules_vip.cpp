@@ -155,7 +155,7 @@ void cPEVip::CheckRoundEnd( )
 		m_iRestart = 1;
 	}
 
-	if( m_flRoundEndTime < gpGlobals->time )
+	if( ROUND_TIME && m_flRoundEndTime < gpGlobals->time )
 	{
 		AddScore( 2, 10 );
 		RadioAll( "syn_wins" );
@@ -163,7 +163,7 @@ void cPEVip::CheckRoundEnd( )
 		NotifyAll( NTM_VTIMEUP );
 		m_iRestart = 2;
 		MESSAGE_BEGIN( MSG_ALL, gmsgCounter, NULL );
-			WRITE_LONG( 0 );
+			WRITE_COORD( 0 );
 		MESSAGE_END( );
 	}
 
@@ -448,8 +448,8 @@ void cPEVip::Think( )
 	float flFragLimit = fraglimit.value;
 	float flScoreLimit = teamscorelimit.value;
 	int time_remaining = (int)( flTimeLimit ? ( flTimeLimit - gpGlobals->time ) : 0);
-	int frags_remaining;
-	int score_remaining;
+	int frags_remaining = 0;
+	int score_remaining = 0;
 	if( flScoreLimit )
 	{
 		int remain, bestscore = 9999;
@@ -512,6 +512,8 @@ void cPEVip::Think( )
 		g_engfuncs.pfnCvar_DirectSet( &timeleft, UTIL_VarArgs( "%i", time_remaining ) );
 	}
 	last_time  = time_remaining;
+	last_frags = frags_remaining;
+	last_score = score_remaining;
 	//----------
 
 
