@@ -1,37 +1,3 @@
-//---------------------------------------
-// Escape Zone für V.I.P Scenario
-//---------------------------------------
-/*class cPEEscape : public CBaseEntity
-{
-public:
-	void Spawn( );
-	void Touch( CBaseEntity *pOther );
-};
-
-//-------------------------
-// Hacker Scenario Targets
-//-------------------------
-class cPEHackerTerminal : public CBaseAnimating
-{
-public:
-	cPEHackerTerminal( );
-	void ReSpawn( );
-	void Spawn( );
-	void Precache( );
-	void KeyValue( KeyValueData *pkvd );
-	EXPORT void Touch( CBaseEntity *pOther );
-	EXPORT void Think( );
-
-	bool m_bDone;
-	float m_fHackEnd;
-	int m_bReached;
-	int m_iTerminal;
-	char m_sTerminal[128];
-	CBaseEntity *m_pClip;
-	CBasePlayer *m_pPlayer;
-	CBasePlayerItem *m_pWeapon;
-};*/
-
 class CPELRef : public CBaseEntity
 {
 public:

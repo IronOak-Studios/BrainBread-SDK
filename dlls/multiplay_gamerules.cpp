@@ -24,7 +24,6 @@
 #include	"gamerules.h"
 #include	"pe_rules.h"
 #include	"pe_rules_hacker.h"
-#include	"pe_rules_vip.h"
  
 #include	"skill.h"
 #include	"game.h"
@@ -1833,4 +1832,3 @@ void CHalfLifeMultiplay::ClientUserInfoChanged( CBasePlayer *pPlayer, char *info
 {
 	// No-op for BrainBread
 }
-

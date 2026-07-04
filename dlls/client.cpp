@@ -41,7 +41,6 @@
 #include "game.h"
 #include "pe_rules.h"
 #include "pe_rules_hacker.h"
-#include "pe_rules_vip.h"
 #include "pe_utils.h"
 #include "pe_menus.h"
 #include "pe_notify.h"
