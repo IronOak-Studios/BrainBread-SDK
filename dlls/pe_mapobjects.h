@@ -8,7 +8,9 @@ public:
 		pev->solid = SOLID_NOT;
 		//pev->effects |= EF_BRIGHTLIGHT;
 
-		SET_MODEL(ENT(pev), "models/hairt.mdl");
+		SET_MODEL(ENT(pev), "sprites/laserdot.spr");
+		pev->rendermode = kRenderTransTexture;
+		pev->renderamt = 0;
 		UTIL_SetSize( pev, Vector( -1, -1, -1 ), Vector( 1, 1, 1 ) );
 		UTIL_SetOrigin( pev, pev->origin );
 
@@ -21,7 +23,7 @@ public:
 	}
 	void Precache( )
 	{
-		PRECACHE_MODEL("models/hairt.mdl");
+		PRECACHE_MODEL("sprites/laserdot.spr");
 	}
 	void KeyValue( KeyValueData *pkvd )
 	{
@@ -45,7 +47,9 @@ public:
 		pev->solid = SOLID_NOT;
 		//pev->effects |= EF_BRIGHTLIGHT;
 
-		SET_MODEL(ENT(pev), "models/hairt.mdl");
+		SET_MODEL(ENT(pev), "sprites/laserdot.spr");
+		pev->rendermode = kRenderTransTexture;
+		pev->renderamt = 0;
 		UTIL_SetSize( pev, Vector( -1, -1, -1 ), Vector( 1, 1, 1 ) );
 		UTIL_SetOrigin( pev, pev->origin );
 
@@ -71,7 +75,7 @@ public:
 	}
 	void Precache( )
 	{
-		PRECACHE_MODEL("models/hairt.mdl");
+		PRECACHE_MODEL("sprites/laserdot.spr");
 	}
 	void KeyValue( KeyValueData *pkvd )
 	{
