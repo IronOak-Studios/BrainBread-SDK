@@ -51,6 +51,12 @@ public:
   bool complete;
 };
 
+struct s_mission_param
+{
+  char key[32];
+  char value[128];
+};
+
 class cPEHacking : public cPERules
 {
 public:
@@ -94,11 +100,24 @@ public:
   void PlayerInitMission( CBasePlayer *plr );
   int RandomMission( bool reset = false );
   int RemainingFrags( );
+  const char *MissionParam( int missionIndex, const char *key );
+  void ParseMissionSpec( int missionIndex, const char *token );
+  void ResolveDefendZone( int missionIndex );
+  bool PointInDefendZone( const Vector &origin );
+  bool EntityInDefendZone( CBaseEntity *ent );
+  bool IsHoldoutActive( );
+  bool IsDefendZoneActive( );
+  bool HumanInDefendZone( );
+  void SendSmallCounterAdd( const char *name, float amount );
+  void AddHoldoutProgress( float amount );
+  float HoldoutRemaining( );
+  void UpdateHoldoutTimer( );
   
   float misDone[20];
   float misReq[20];
 
   char missionList[20][3][32];
+  s_mission_param missionParams[20][8];
   int missionTimes[5];
 
   bool oneEscaped;
@@ -107,6 +126,11 @@ public:
   int misNr;
   float misStart;
   float misHoldoutDuration;
+  float misHoldoutBonus;
+  float misHoldoutLastUpdate;
+  bool misDefendZoneActive;
+  Vector misDefendMins;
+  Vector misDefendMaxs;
   bool misComplete;
   bool misLast;
 #ifdef _DEBUG

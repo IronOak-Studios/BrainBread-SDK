@@ -52,6 +52,9 @@ cvar_t	zombie_stepsize	= {"sv_zombie_stepsize", "18", FCVAR_SERVER };
 cvar_t	zombie_clip_distance	= {"sv_zombie_clip_distance", "45", FCVAR_SERVER };
 
 cvar_t	mission_timer_detect	= {"sv_mission_timer_detect", "1", FCVAR_SERVER };
+cvar_t	defend_zones	= {"sv_defend_zones", "1", FCVAR_SERVER };
+cvar_t	defend_kill_bonus	= {"sv_defend_kill_bonus", "10", FCVAR_SERVER };
+cvar_t	defend_zone_bonus	= {"sv_defend_zone_bonus", "1", FCVAR_SERVER };
 
 cvar_t	teamspect	= {"mp_teamspectator", "0", FCVAR_SERVER };
 cvar_t	showdmg		= {"sv_damageinfo", "0", FCVAR_SERVER };
@@ -546,6 +549,9 @@ void GameDLLInit( void )
 
 	CVAR_REGISTER (&gibcnt);
 	CVAR_REGISTER (&mission_timer_detect);
+	CVAR_REGISTER (&defend_zones);
+	CVAR_REGISTER (&defend_kill_bonus);
+	CVAR_REGISTER (&defend_zone_bonus);
 	CVAR_REGISTER (&zombiecnt);
 	CVAR_REGISTER (&zombie_behavior);
 	CVAR_REGISTER (&zombie_yawspeed);
@@ -999,4 +1005,3 @@ void GameDLLInit( void )
 
 	SERVER_COMMAND( "exec skill.cfg\n" );
 }
-

@@ -40,6 +40,10 @@ extern cvar_t	playerinfofile;
 
 extern cvar_t	gibcnt;
 extern cvar_t	zombiecnt;
+extern cvar_t	mission_timer_detect;
+extern cvar_t	defend_zones;
+extern cvar_t	defend_kill_bonus;
+extern cvar_t	defend_zone_bonus;
 
 extern cvar_t	teamspect;
 extern cvar_t	showdmg;

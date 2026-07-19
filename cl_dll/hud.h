@@ -655,6 +655,7 @@ public:
  int Draw(float flTime);
  int MsgFunc_Counter( const char *pszName,int iSize, void *pbuf );
  int MsgFunc_SmallCnt( const char *pszName,int iSize, void *pbuf );
+ int MsgFunc_SmallCntAdd( const char *pszName,int iSize, void *pbuf );
  int MsgFunc_CntDown( const char *pszName,int iSize, void *pbuf );
 
 public:
@@ -662,8 +663,10 @@ public:
  {
 	 float	fTotal;
 	 float	fStart;
+	 float	fProgressOffset;
 	 char	sName[128];
 	 bool	iActive;
+	 bool	bManual;
  } m_sCounters[10];
  int m_iNumCnts;
  float m_flRoundTime, m_fCntDown, m_fStep, m_fCntTotal;
@@ -988,4 +991,3 @@ extern int g_iTeamNumber;
 extern int g_iUser1;
 extern int g_iUser2;
 extern int g_iUser3;
-

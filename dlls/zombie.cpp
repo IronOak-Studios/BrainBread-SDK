@@ -189,6 +189,10 @@ void CZombie::Killed( entvars_t *pevAttacker, int iGib )
 
   CBasePlayer* plr = ent && ent->IsPlayer() ? (CBasePlayer*)ent : NULL;
 
+  cPEHacking *rules = (cPEHacking*)g_pGameRules;
+  if( plr && defend_kill_bonus.value > 0 && rules->IsHoldoutActive( ) && ( !rules->IsDefendZoneActive( ) || rules->EntityInDefendZone( plr ) || rules->EntityInDefendZone( this ) ) )
+    rules->AddHoldoutProgress( defend_kill_bonus.value / max( rules->m_iPlayers[1], 1 ) );
+
   if( plr && !points_given )
   {
     ((cPEHacking*)g_pGameRules)->misDone[MISSION_FRAGS]++;

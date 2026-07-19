@@ -16,6 +16,7 @@ extern TeamFortressViewport* gViewPort;
 DECLARE_MESSAGE(m_Counter, Counter) 
 DECLARE_MESSAGE(m_Counter, CntDown) 
 DECLARE_MESSAGE(m_Counter, SmallCnt) 
+DECLARE_MESSAGE(m_Counter, SmallCntAdd)
 
 extern int g_sprHUD1;
 extern int g_iTeamNumber;
@@ -43,6 +44,7 @@ int CHudCounter::Init(void)
 	HOOK_MESSAGE( Counter ); 
 	HOOK_MESSAGE( CntDown ); 
 	HOOK_MESSAGE( SmallCnt ); 
+	HOOK_MESSAGE( SmallCntAdd );
 
 	progressFader = new cPEFader( );
 	smallProgressFaderGood = new cPEFader( );
@@ -91,12 +93,15 @@ int CHudCounter::MsgFunc_SmallCnt( const char *pszName, int iSize, void *pbuf )
 	char name[128];
 	BEGIN_READ( pbuf, iSize );
 	snprintf( name, sizeof(name), "%s", READ_STRING( ) );
+	float total = READ_COORD( );
 	for( i = 0; i < 10; i++ )
 		if( !strcmp( name, m_sCounters[i].sName ) && m_sCounters[i].iActive )
 		{
-			m_sCounters[i].fTotal = READ_COORD( );
+			m_sCounters[i].bManual = total < 0;
+			m_sCounters[i].fTotal = total < 0 ? -total : total;
 			m_sCounters[i].iActive = m_sCounters[i].fTotal > 0 ? true : false;
 			m_sCounters[i].fStart = gEngfuncs.GetClientTime();
+			m_sCounters[i].fProgressOffset = 0;
 			return 1;
 		}
 	for( i = 0; i < 10; i++ )
@@ -106,9 +111,36 @@ int CHudCounter::MsgFunc_SmallCnt( const char *pszName, int iSize, void *pbuf )
 		return 0;
 
 	snprintf( m_sCounters[i].sName, sizeof(m_sCounters[i].sName), "%s", name );
-	m_sCounters[i].fTotal = READ_COORD( );
+	m_sCounters[i].bManual = total < 0;
+	m_sCounters[i].fTotal = total < 0 ? -total : total;
 	m_sCounters[i].iActive = m_sCounters[i].fTotal > 0 ? true : false;
 	m_sCounters[i].fStart = gEngfuncs.GetClientTime();
+	m_sCounters[i].fProgressOffset = 0;
+
+	return 1;
+}
+
+int CHudCounter::MsgFunc_SmallCntAdd( const char *pszName, int iSize, void *pbuf )
+{
+	char name[128];
+	BEGIN_READ( pbuf, iSize );
+	snprintf( name, sizeof(name), "%s", READ_STRING( ) );
+	float amount = READ_COORD( );
+	float curTime = gEngfuncs.GetClientTime();
+
+	for( int i = 0; i < 10; i++ )
+	{
+		if( strcmp( name, m_sCounters[i].sName ) || !m_sCounters[i].iActive )
+			continue;
+
+		float progress = ( m_sCounters[i].bManual ? 0 : curTime - m_sCounters[i].fStart ) + m_sCounters[i].fProgressOffset + amount;
+		if( progress < 0 )
+			progress = 0;
+		if( progress > m_sCounters[i].fTotal )
+			progress = m_sCounters[i].fTotal;
+		m_sCounters[i].fProgressOffset = progress - ( m_sCounters[i].bManual ? 0 : curTime - m_sCounters[i].fStart );
+		return 1;
+	}
 
 	return 1;
 }
@@ -211,8 +243,13 @@ int CHudCounter::Draw( float flTime )
 			continue;
 		if( m_sCounters[i].fStart < 0 )
 			m_sCounters[i].fStart = curTime;
-		if( curTime > ( m_sCounters[i].fStart + m_sCounters[i].fTotal ) )
+		float progress = ( m_sCounters[i].bManual ? 0 : curTime - m_sCounters[i].fStart ) + m_sCounters[i].fProgressOffset;
+		if( !m_sCounters[i].bManual && progress > m_sCounters[i].fTotal )
 			m_sCounters[i].iActive = 0;
+		if( progress < 0 )
+			progress = 0;
+		if( progress > m_sCounters[i].fTotal )
+			progress = m_sCounters[i].fTotal;
 
 		int cy = HudScale( 145 ) + m_iNumCnts * SMALL_CNT_HEIGHT;
 		int cx = HudScale( 10 );
@@ -233,14 +270,14 @@ int CHudCounter::Draw( float flTime )
 		UTIL_FillRect( cx, barTop + HudScale( 1 ), HudScale( 1 ), SMALL_BAR_HEIGHT - HudScale( 2 ), r, g, b, 255 );
 		UTIL_FillRect( cx + cw, barTop, HudScale( 1 ), SMALL_BAR_HEIGHT, r, g, b, 255 );
 		
-		pcent = 100.0f * ( curTime - m_sCounters[i].fStart ) / m_sCounters[i].fTotal;
+		pcent = 100.0f * progress / m_sCounters[i].fTotal;
 		if( pcent > 100 )
 			pcent = 100;
 		if( g_iTeamNumber == 1 && strstr( m_sCounters[i].sName, "ombie" ) )
 			smallProgressFaderBad->GetColor( pcent, r, g, b );
 		else
 			smallProgressFaderGood->GetColor( pcent, r, g, b );
-		UTIL_FillRect( cx + HudScale( 2 ), barTop + HudScale( 2 ), (cw - HudScale( 4 ))/m_sCounters[i].fTotal*(curTime-m_sCounters[i].fStart), SMALL_BAR_HEIGHT - HudScale( 4 ), r, g, b, 255 );
+		UTIL_FillRect( cx + HudScale( 2 ), barTop + HudScale( 2 ), (cw - HudScale( 4 ))/m_sCounters[i].fTotal*progress, SMALL_BAR_HEIGHT - HudScale( 4 ), r, g, b, 255 );
 
 		m_iNumCnts++;		
 	}

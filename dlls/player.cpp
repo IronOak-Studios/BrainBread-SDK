@@ -238,6 +238,7 @@ int gmsgSetVol = 0;
 int gmsgUpdPoints = 0;
 int gmsgPETeam = 0;
 int gmsgSmallCnt = 0;
+int gmsgSmallCntAdd = 0;
 int gmsgHelp = 0;
 int gmsgVGUIMenu = 0;
 int gmsgRoundSummary = 0;
@@ -315,6 +316,7 @@ void LinkUserMessages( void )
 	gmsgUpdPoints = REG_USER_MSG( "UpdPoints", 4 );
 	gmsgPETeam = REG_USER_MSG( "PETeam", 1 );
 	gmsgSmallCnt = REG_USER_MSG( "SmallCnt", -1 );
+	gmsgSmallCntAdd = REG_USER_MSG( "SmallCntAdd", -1 );
 	gmsgHelp = REG_USER_MSG( "Help", 4 );
 	gmsgVGUIMenu = REG_USER_MSG( "VGUIMenu", 1 );
 	gmsgRoundSummary = REG_USER_MSG( "RndSummary", -1 );
