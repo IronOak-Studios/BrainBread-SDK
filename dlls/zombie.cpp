@@ -190,20 +190,14 @@ void CZombie::Killed( entvars_t *pevAttacker, int iGib )
   CBasePlayer* plr = ent && ent->IsPlayer() ? (CBasePlayer*)ent : NULL;
 
   cPEHacking *rules = (cPEHacking*)g_pGameRules;
-  if( plr && defend_kill_bonus.value > 0 && rules->IsHoldoutActive( ) && ( !rules->IsDefendZoneActive( ) || rules->EntityInDefendZone( plr ) || rules->EntityInDefendZone( this ) ) )
-    rules->AddHoldoutProgress( defend_kill_bonus.value / max( rules->m_iPlayers[1], 1 ) );
 
-  if( plr && !points_given )
+  if( !points_given && !isFred && rules->CreditZombieKill( plr, this ) )
   {
-    ((cPEHacking*)g_pGameRules)->misDone[MISSION_FRAGS]++;
-    if( !isFred )
-    {
-      points_given = true;
-      pevAttacker->frags += pnts;
-      plr->m_iRoundZombieKills++;
-      if( m_LastHitGroup == HITGROUP_HEAD )
-        plr->m_iRoundHeadshots++;
-    }
+    points_given = true;
+    pevAttacker->frags += pnts;
+    plr->m_iRoundZombieKills++;
+    if( m_LastHitGroup == HITGROUP_HEAD )
+      plr->m_iRoundHeadshots++;
   }
   
   if( pev->fuser4 && !points_given && ent )

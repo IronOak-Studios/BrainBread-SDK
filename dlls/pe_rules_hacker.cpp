@@ -35,6 +35,7 @@ LINK_ENTITY_TO_CLASS( bb_custommission, cBBMapMission );
 
 // *shrug* let's get it working as quick&dirty as possible
 #define BONUS_PER_ZOMBIE 0.2f
+#define FRAG_COUNTER_NAME "Zombie kills"
 float humanStatsRatio = 1;
 
 //extern hash_map<const char*, float> players;
@@ -74,6 +75,12 @@ extern int gmsgNotify;
 extern int gmsgVGUIMenu;
 extern int gmsgRoundSummary;
 extern float UTIL_MultiManagerTargetDelay( CBaseEntity *pEntity, const char *szTarget );
+
+static void ResetHoldoutState( cPEHacking *rules );
+static int FragTarget( cPEHacking *rules );
+static void SendSmallCounter( const char *name, float total, float progress = 0, CBasePlayer *plr = NULL, bool manual = false );
+static void ParseMissionSpec( cPEHacking *rules, int missionIndex, char *token );
+static float HoldoutRemaining( cPEHacking *rules );
 
 
 #define NO_TEAM 0
@@ -501,10 +508,7 @@ void cPEHacking::StartRound( )
 	m_iHack2 = 0;
   misNr = 0;
   misType = 0;
-  misHoldoutDuration = 0;
-  misHoldoutBonus = 0;
-  misHoldoutLastUpdate = 0;
-  misDefendZoneActive = false;
+  ResetHoldoutState( this );
   oneEscaped = false;
 #ifdef _DEBUG
   misForceComplete = false;
@@ -1276,6 +1280,9 @@ void cPEHacking::SetTeam( int iSelection, CBasePlayer *pPlayer, int kill, int mo
 		UTIL_ClientPrintAll( HUD_PRINTNOTIFY, UTIL_VarArgs( "%s has become a Spectator\n", STRING(pPlayer->pev->netname)));        
 	}
   pPlayer->pev->fuser4 = ( pPlayer->m_iTeam == 2 ? 1 : 0 );
+
+  if( pPlayer->m_iTeam != 1 )
+    SendSmallCounter( FRAG_COUNTER_NAME, 0, 0, pPlayer );
 
 	MESSAGE_BEGIN( MSG_ALL, gmsgTeamInfo );
 		WRITE_BYTE( clientIndex );
@@ -2050,10 +2057,7 @@ BOOL cPEHacking::ClientCommand( CBasePlayer *pPlayer, const char *pcmd )
 	{
 		if ( CMD_ARGC() < 2 )
 			return TRUE;
-		MESSAGE_BEGIN( MSG_ALL, gmsgSmallCnt, NULL );
-			WRITE_STRING( CMD_ARGV( 1 ) );
-			WRITE_COORD( atof(CMD_ARGV( 2 )) );
-		MESSAGE_END( );
+		SendSmallCounter( CMD_ARGV( 1 ), atof(CMD_ARGV( 2 ) ) );
 		return TRUE;
 	}
 	else if( FStrEq(pcmd, "pl_act" ) && IsUber(pPlayer->edict( )) )
@@ -2452,12 +2456,7 @@ cPEHacking::cPEHacking( )
 	m_flRoundEndTime = 0;
 	m_flRoundTimeUsed = 0;
 	strcpy( m_sValidMdls[0][0], "hacker" );
-	misHoldoutDuration = 0;
-	misHoldoutBonus = 0;
-	misHoldoutLastUpdate = 0;
-	misDefendZoneActive = false;
-	misDefendMins = g_vecZero;
-	misDefendMaxs = g_vecZero;
+	ResetHoldoutState( this );
 	strcpy( m_sValidMdls[0][1], "vip" );
 	strcpy( m_sValidMdls[0][2], "" );
 	strcpy( m_sValidMdls[1][0], "security1;security2;security3;security4;security5;security6" );
@@ -2532,10 +2531,11 @@ cPEHacking::cPEHacking( )
   char *misfile; 
   char *mislist = misfile = (char*)LOAD_FILE_FOR_ME( missionsfile, &length );
   char token[1500];
+  // Parameterized mission specs must be quoted: "mission{defend=zone}" - -
   mislist = COM_Parse( mislist, token, sizeof(token) );
   for( int i = 0; ( i < 20 ) && mislist && length; i++ )
   {
-    ParseMissionSpec( i, token );
+    ParseMissionSpec( this, i, token );
     mislist = COM_Parse( mislist, token, sizeof(token) );
     strncpy( missionList[i][1], token, 32 ); missionList[i][1][31] = '\0';
     mislist = COM_Parse( mislist, token, sizeof(token) );
@@ -2699,54 +2699,112 @@ int cPEHacking::RandomMission( bool reset )
 
 int cPEHacking::RemainingFrags( )
 {
-  int cl = m_iClients ? m_iClients : 1;
-  int total = (int)( pow( 0.97, cl ) * misReq[MISSION_FRAGS] * cl ) + 1;
+  int total = FragTarget( this );
   int remaining = total - (int)misDone[MISSION_FRAGS];
   return remaining > 0 ? remaining : 0;
 }
 
-const char *cPEHacking::MissionParam( int missionIndex, const char *key )
+static void ResetHoldoutState( cPEHacking *rules )
+{
+  rules->misHoldoutDeadline = 0;
+  rules->misHoldoutTotal = 0;
+  rules->misHoldoutLastUpdate = 0;
+  rules->misDefendZoneConfigured = false;
+  rules->misDefendZoneActive = false;
+  rules->misDefendMins = g_vecZero;
+  rules->misDefendMaxs = g_vecZero;
+}
+
+static int FragTarget( cPEHacking *rules )
+{
+  int cl = rules->m_iClients ? rules->m_iClients : 1;
+  return (int)( pow( 0.97, cl ) * rules->misReq[MISSION_FRAGS] * cl ) + 1;
+}
+
+static void SendFragCounter( cPEHacking *rules, CBasePlayer *plr = NULL )
+{
+  int total = FragTarget( rules );
+  if( total <= 0 )
+    return;
+
+  SendSmallCounter( FRAG_COUNTER_NAME, total, min( rules->misDone[MISSION_FRAGS], (float)total ), plr, true );
+}
+
+static void SendSmallCounter( const char *name, float total, float progress, CBasePlayer *plr, bool manual )
+{
+  if( !name )
+    return;
+  if( total <= 0 )
+  {
+    MESSAGE_BEGIN( plr ? MSG_ONE : MSG_ALL, gmsgSmallCnt, NULL, plr ? plr->edict( ) : NULL );
+      WRITE_STRING( name );
+      WRITE_COORD( 0 );
+    MESSAGE_END( );
+    return;
+  }
+
+  if( progress < 0 )
+    progress = 0;
+  if( progress > total )
+    progress = total;
+
+  if( plr )
+  {
+    if( plr->m_iTeam != 1 )
+      return;
+
+    MESSAGE_BEGIN( MSG_ONE, gmsgSmallCnt, NULL, plr->edict( ) );
+      WRITE_STRING( name );
+      WRITE_COORD( manual ? -total : total );
+      WRITE_COORD( progress );
+    MESSAGE_END( );
+    return;
+  }
+
+  for( int i = 1; i <= MAX_PLAYERS; i++ )
+  {
+    CBasePlayer *pPlayer = (CBasePlayer*)UTIL_PlayerByIndex( i );
+    if( pPlayer && pPlayer->m_iTeam == 1 )
+      SendSmallCounter( name, total, progress, pPlayer, manual );
+  }
+}
+
+static const char *MissionParam( cPEHacking *rules, int missionIndex, const char *key )
 {
   if( missionIndex < 0 || missionIndex >= 20 || !key )
     return NULL;
 
   for( int i = 0; i < 8; i++ )
   {
-    if( !missionParams[missionIndex][i].key[0] )
-      continue;
-    if( !strcmp( missionParams[missionIndex][i].key, key ) )
-      return missionParams[missionIndex][i].value;
+    if( !strcmp( rules->missionParams[missionIndex][i].key, key ) )
+      return rules->missionParams[missionIndex][i].value;
   }
   return NULL;
 }
 
-void cPEHacking::ParseMissionSpec( int missionIndex, const char *token )
+static void ParseMissionSpec( cPEHacking *rules, int missionIndex, char *token )
 {
   if( missionIndex < 0 || missionIndex >= 20 || !token )
     return;
 
-  memset( missionParams[missionIndex], '\0', sizeof( missionParams[missionIndex] ) );
+  memset( rules->missionParams[missionIndex], '\0', sizeof( rules->missionParams[missionIndex] ) );
 
-  const char *open = strchr( token, '{' );
-  const char *close = open ? strrchr( open, '}' ) : NULL;
+  char *open = strchr( token, '{' );
+  char *close = open ? strrchr( open, '}' ) : NULL;
 
   if( !open || !close || close <= open )
   {
-    strncpy( missionList[missionIndex][0], token, 32 );
-    missionList[missionIndex][0][31] = '\0';
+    strncpy( rules->missionList[missionIndex][0], token, 32 );
+    rules->missionList[missionIndex][0][31] = '\0';
     return;
   }
 
-  int nameLen = min( (int)( open - token ), 31 );
-  strncpy( missionList[missionIndex][0], token, nameLen );
-  missionList[missionIndex][0][nameLen] = '\0';
+  *open = '\0';
+  *close = '\0';
+  strncpy( rules->missionList[missionIndex][0], token, 32 );
+  rules->missionList[missionIndex][0][31] = '\0';
 
-  char params[512];
-  int paramLen = min( (int)( close - open - 1 ), (int)sizeof( params ) - 1 );
-  strncpy( params, open + 1, paramLen );
-  params[paramLen] = '\0';
-
-  char *pair = params;
+  char *pair = open + 1;
   int slot = 0;
   while( pair && *pair && slot < 8 )
   {
@@ -2761,10 +2819,10 @@ void cPEHacking::ParseMissionSpec( int missionIndex, const char *token )
       char *value = eq + 1;
       if( *value )
       {
-        strncpy( missionParams[missionIndex][slot].key, pair, 32 );
-        missionParams[missionIndex][slot].key[31] = '\0';
-        strncpy( missionParams[missionIndex][slot].value, value, 128 );
-        missionParams[missionIndex][slot].value[127] = '\0';
+        strncpy( rules->missionParams[missionIndex][slot].key, pair, 32 );
+        rules->missionParams[missionIndex][slot].key[31] = '\0';
+        strncpy( rules->missionParams[missionIndex][slot].value, value, 128 );
+        rules->missionParams[missionIndex][slot].value[127] = '\0';
         slot++;
       }
     }
@@ -2773,84 +2831,65 @@ void cPEHacking::ParseMissionSpec( int missionIndex, const char *token )
   }
 }
 
-void cPEHacking::ResolveDefendZone( int missionIndex )
+static void ResolveDefendZone( cPEHacking *rules, int missionIndex )
 {
-  misDefendZoneActive = false;
-  misDefendMins = g_vecZero;
-  misDefendMaxs = g_vecZero;
+  rules->misDefendZoneConfigured = false;
+  rules->misDefendZoneActive = false;
+  rules->misDefendMins = g_vecZero;
+  rules->misDefendMaxs = g_vecZero;
 
-  const char *defend = MissionParam( missionIndex, "defend" );
+  const char *defend = MissionParam( rules, missionIndex, "defend" );
   if( !defend || !defend[0] )
     return;
+
+  rules->misDefendZoneConfigured = true;
 
   float x1, y1, z1, x2, y2, z2;
   if( sscanf( defend, "%f,%f,%f,%f,%f,%f", &x1, &y1, &z1, &x2, &y2, &z2 ) == 6 )
   {
-    misDefendMins = Vector( min( x1, x2 ), min( y1, y2 ), min( z1, z2 ) );
-    misDefendMaxs = Vector( max( x1, x2 ), max( y1, y2 ), max( z1, z2 ) );
+    rules->misDefendMins = Vector( min( x1, x2 ), min( y1, y2 ), min( z1, z2 ) );
+    rules->misDefendMaxs = Vector( max( x1, x2 ), max( y1, y2 ), max( z1, z2 ) );
   }
   else
   {
     CBaseEntity *zone = UTIL_FindEntityByTargetname( NULL, defend );
     if( zone )
     {
-      misDefendMins = zone->pev->absmin;
-      misDefendMaxs = zone->pev->absmax;
+      rules->misDefendMins = zone->pev->absmin;
+      rules->misDefendMaxs = zone->pev->absmax;
     }
   }
 
-  Vector size = misDefendMaxs - misDefendMins;
+  Vector size = rules->misDefendMaxs - rules->misDefendMins;
   if( size.x > 0 && size.y > 0 && size.z > 0 )
-    misDefendZoneActive = true;
+    rules->misDefendZoneActive = true;
 
-  if( !misDefendZoneActive )
+  if( !rules->misDefendZoneActive )
     ALERT( at_logged, "Mission defend zone '%s' not found or invalid.\n", defend );
 }
 
-bool cPEHacking::PointInDefendZone( const Vector &origin )
+static bool EntityInDefendZone( cPEHacking *rules, CBaseEntity *ent )
 {
-  if( !misDefendZoneActive )
+  if( !rules->misDefendZoneActive || !ent )
     return false;
 
-  return origin.x >= misDefendMins.x && origin.y >= misDefendMins.y && origin.z >= misDefendMins.z &&
-         origin.x <= misDefendMaxs.x && origin.y <= misDefendMaxs.y && origin.z <= misDefendMaxs.z;
+  const Vector &origin = ent->pev->origin;
+  return origin.x >= rules->misDefendMins.x && origin.y >= rules->misDefendMins.y && origin.z >= rules->misDefendMins.z &&
+         origin.x <= rules->misDefendMaxs.x && origin.y <= rules->misDefendMaxs.y && origin.z <= rules->misDefendMaxs.z;
 }
 
-bool cPEHacking::EntityInDefendZone( CBaseEntity *ent )
+static bool IsDefendZoneActive( cPEHacking *rules )
 {
-  if( !ent )
-    return false;
-  return PointInDefendZone( ent->pev->origin );
+  return defend_zones.value > 0 && HoldoutRemaining( rules ) > 0 && rules->misDefendZoneActive;
 }
 
-bool cPEHacking::IsHoldoutActive( )
+static void SendSmallCounterAdd( const char *name, float progress, float popupAmount )
 {
-  return misType == MISSION_CUSTOM && misHoldoutDuration > 0;
-}
-
-bool cPEHacking::IsDefendZoneActive( )
-{
-  return defend_zones.value > 0 && IsHoldoutActive( ) && misDefendZoneActive;
-}
-
-bool cPEHacking::HumanInDefendZone( )
-{
-  if( !IsDefendZoneActive( ) )
-    return false;
-
-  for( int i = 1; i <= MAX_PLAYERS; i++ )
-  {
-    CBasePlayer *plr = (CBasePlayer*)UTIL_PlayerByIndex( i );
-    if( plr && plr->m_iTeam == 1 && plr->IsAlive( ) && PointInDefendZone( plr->pev->origin ) )
-      return true;
-  }
-  return false;
-}
-
-void cPEHacking::SendSmallCounterAdd( const char *name, float amount )
-{
-  if( !name || amount == 0 )
+  if( !name )
     return;
+
+  if( progress < 0 )
+    progress = 0;
 
   for( int i = 1; i <= MAX_PLAYERS; i++ )
   {
@@ -2859,48 +2898,70 @@ void cPEHacking::SendSmallCounterAdd( const char *name, float amount )
     {
       MESSAGE_BEGIN( MSG_ONE, gmsgSmallCntAdd, NULL, plr->edict( ) );
         WRITE_STRING( name );
-        WRITE_COORD( amount );
+        WRITE_COORD( progress );
+        WRITE_COORD( popupAmount );
       MESSAGE_END( );
     }
   }
 }
 
-void cPEHacking::AddHoldoutProgress( float amount )
+static void AddHoldoutProgress( cPEHacking *rules, float amount )
 {
-  if( !IsHoldoutActive( ) || amount <= 0 )
+  if( amount <= 0 )
     return;
 
-  float remaining = HoldoutRemaining( );
+  float remaining = HoldoutRemaining( rules );
   if( remaining <= 0 )
     return;
 
   float applied = min( amount, remaining );
-  misHoldoutBonus += applied;
-  SendSmallCounterAdd( "Survive!", applied );
+  rules->misHoldoutDeadline -= applied;
+  SendSmallCounterAdd( "Survive!", rules->misHoldoutTotal - HoldoutRemaining( rules ), applied );
 }
 
-float cPEHacking::HoldoutRemaining( )
+bool cPEHacking::CreditZombieKill( CBasePlayer *plr, CBaseEntity *zombie )
 {
-  if( misHoldoutDuration <= 0 )
+  if( !plr || plr->m_iTeam != 1 )
+    return false;
+
+  misDone[MISSION_FRAGS]++;
+  if( misType == MISSION_FRAGS )
+    SendSmallCounterAdd( FRAG_COUNTER_NAME, min( misDone[MISSION_FRAGS], (float)FragTarget( this ) ), 1 );
+  if( defend_zones.value > 0 && defend_kill_bonus.value > 0 && HoldoutRemaining( this ) > 0 && ( !misDefendZoneConfigured || ( IsDefendZoneActive( this ) && ( EntityInDefendZone( this, plr ) || EntityInDefendZone( this, zombie ) ) ) ) )
+    AddHoldoutProgress( this, defend_kill_bonus.value / max( m_iPlayers[1], 1 ) );
+
+  return true;
+}
+
+static float HoldoutRemaining( cPEHacking *rules )
+{
+  if( rules->misType != MISSION_CUSTOM || rules->misHoldoutDeadline <= 0 )
     return 0;
 
-  float remaining = misHoldoutDuration - ( gpGlobals->time - misStart ) - misHoldoutBonus;
+  float remaining = rules->misHoldoutDeadline - gpGlobals->time;
   return remaining > 0 ? remaining : 0;
 }
 
-void cPEHacking::UpdateHoldoutTimer( )
+static void UpdateHoldoutTimer( cPEHacking *rules )
 {
-  if( !IsDefendZoneActive( ) || defend_zone_bonus.value <= 0 )
+  if( !IsDefendZoneActive( rules ) || defend_zone_bonus.value <= 0 )
     return;
 
   float now = gpGlobals->time;
-  if( misHoldoutLastUpdate <= 0 )
-    misHoldoutLastUpdate = now;
+  if( rules->misHoldoutLastUpdate <= 0 )
+    rules->misHoldoutLastUpdate = now;
 
-  if( HumanInDefendZone( ) )
-    AddHoldoutProgress( ( now - misHoldoutLastUpdate ) * defend_zone_bonus.value );
+  for( int i = 1; i <= MAX_PLAYERS; i++ )
+  {
+    CBasePlayer *plr = (CBasePlayer*)UTIL_PlayerByIndex( i );
+    if( plr && plr->m_iTeam == 1 && plr->IsAlive( ) && EntityInDefendZone( rules, plr ) )
+    {
+      AddHoldoutProgress( rules, ( now - rules->misHoldoutLastUpdate ) * defend_zone_bonus.value );
+      break;
+    }
+  }
 
-  misHoldoutLastUpdate = now;
+  rules->misHoldoutLastUpdate = now;
 }
 
 void cPEHacking::AbortMission( )
@@ -2969,14 +3030,8 @@ void cPEHacking::AbortMission( )
       curMapMission = NULL;
     }
 
-    // Cancel holdout progress bar if active
-    if( misHoldoutDuration > 0 )
-    {
-      MESSAGE_BEGIN( MSG_ALL, gmsgSmallCnt, NULL );
-        WRITE_STRING( "Survive!" );
-        WRITE_COORD( 0 );
-      MESSAGE_END( );
-    }
+    if( misHoldoutDeadline > 0 )
+      SendSmallCounter( "Survive!", 0 );
     break;
   }
   }
@@ -3009,6 +3064,7 @@ void cPEHacking::PlayerInitMission( CBasePlayer *plr )
   case MISSION_FRAGS:
   {
     Notify( plr, NTC_MISSION_FRAGS, RemainingFrags( ) );
+    SendFragCounter( this, plr );
     NotifyMid( plr, NTM_MISSION_START + misType );
     return;
   }
@@ -3050,17 +3106,12 @@ void cPEHacking::PlayerInitMission( CBasePlayer *plr )
     Notify( plr, NTC_CUSTOM, -1, curMapMission->notify[0] );
     NotifyMid( plr, NTM_CUSTOM, 5, curMapMission->notify[1], curMapMission->notify[2] );
 
-    // Send holdout progress bar with remaining time for late joiners
-    if( misHoldoutDuration > 0 )
+    // Send holdout progress bar with current progress for late joiners
+    if( misHoldoutDeadline > 0 )
     {
-      float remaining = HoldoutRemaining( );
+      float remaining = HoldoutRemaining( this );
       if( remaining > 0 )
-      {
-        MESSAGE_BEGIN( MSG_ONE, gmsgSmallCnt, NULL, plr->edict( ) );
-          WRITE_STRING( "Survive!" );
-          WRITE_COORD( remaining );
-        MESSAGE_END( );
-      }
+        SendSmallCounter( "Survive!", misHoldoutTotal, misHoldoutTotal - remaining, plr );
     }
     return;
   }
@@ -3114,6 +3165,7 @@ void cPEHacking::StartMission( )
     // Fragcount reseten
     misDone[MISSION_FRAGS] = 0;
     misReq[MISSION_FRAGS] = 30;
+    SendFragCounter( this );
     break;
   case MISSION_FRED:
   {
@@ -3191,6 +3243,7 @@ void cPEHacking::StartMission( )
     if( mission_timer_detect.value )
     {
       const char *missionName = STRING( curMapMission->pev->targetname );
+      float holdoutDuration = 0;
       CBaseEntity *pTrigger = NULL;
       while( ( pTrigger = UTIL_FindEntityByClassname( pTrigger, "trigger_once" ) ) != NULL )
       {
@@ -3205,7 +3258,7 @@ void cPEHacking::StartMission( )
         CBaseDelay *pDelay = static_cast<CBaseDelay*>( pTrigger );
         if( pDelay->m_flDelay >= 5 )
         {
-          misHoldoutDuration = pDelay->m_flDelay;
+          holdoutDuration = pDelay->m_flDelay;
           // Fire the trigger chain now so timing is synced with the bar
           pDelay->SUB_UseTargets( NULL, USE_TOGGLE, 0 );
           // Remove the trigger_once (mirrors ActivateMultiTrigger self-removal)
@@ -3218,7 +3271,7 @@ void cPEHacking::StartMission( )
 
       // If no trigger_once found, check if there is a multi_manager
       // with a delayed entry targeting the mission entity
-      if( misHoldoutDuration <= 0 )
+      if( holdoutDuration <= 0 )
       {
         CBaseEntity *pMgr = NULL;
         while ( ( pMgr = UTIL_FindEntityByClassname( pMgr, "multi_manager" ) ) != NULL )
@@ -3226,33 +3279,27 @@ void cPEHacking::StartMission( )
           float delay = UTIL_MultiManagerTargetDelay( pMgr, missionName );
           if( delay >= 5 )
           {
-            misHoldoutDuration = delay;
+            holdoutDuration = delay;
             break;
           }
         }
       }
 
-      if( defend_zones.value > 0 && misHoldoutDuration > 0 )
+      if( holdoutDuration > 0 )
       {
-        ResolveDefendZone( misNr - 1 );
+        misHoldoutTotal = holdoutDuration;
+        misHoldoutDeadline = gpGlobals->time + holdoutDuration;
+      }
+
+      if( holdoutDuration > 0 )
+      {
+        ResolveDefendZone( this, misNr - 1 );
         misHoldoutLastUpdate = gpGlobals->time;
       }
 
       // Send progress bar if we found a holdout duration
-      if( misHoldoutDuration > 0 )
-      {
-        for( int i = 1; i <= MAX_PLAYERS; i++ )
-        {
-          CBasePlayer *plr = (CBasePlayer*)UTIL_PlayerByIndex( i );
-          if( plr && plr->m_iTeam == 1 )
-          {
-            MESSAGE_BEGIN( MSG_ONE, gmsgSmallCnt, NULL, plr->edict( ) );
-              WRITE_STRING( "Survive!" );
-              WRITE_COORD( misHoldoutDuration );
-            MESSAGE_END( );
-          }
-        }
-      }
+      if( holdoutDuration > 0 )
+        SendSmallCounter( "Survive!", holdoutDuration );
     }
     return;
   }
@@ -3336,10 +3383,15 @@ bool cPEHacking::CheckMission( )
   case MISSION_FRAGS:
   {
     static int lastfrags = 0;
+    static int lasttarget = 0;
     int frags = RemainingFrags( );
+    int target = FragTarget( this );
     if( frags != lastfrags )
       NotifyTeam( 1, NTC_MISSION_FRAGS, frags );
+    if( target != lasttarget )
+      SendFragCounter( this );
     lastfrags = frags;
+    lasttarget = target;
 
     if( frags <= 0 )
       return TRUE;
@@ -3367,8 +3419,8 @@ bool cPEHacking::CheckMission( )
     return FALSE;
   default: // Map mission: Check pev->fuser4 or something of the mission ent
   {
-    UpdateHoldoutTimer( );
-    if( IsHoldoutActive( ) && HoldoutRemaining( ) <= 0 )
+    UpdateHoldoutTimer( this );
+    if( misHoldoutDeadline > 0 && HoldoutRemaining( this ) <= 0 )
     {
       if( curMapMission )
       {
@@ -3400,13 +3452,11 @@ void cPEHacking::CheckAllMissions( )
   misComplete = CheckMission( );
 
   // Cancel holdout progress bar on mission completion
-  if( misComplete && misHoldoutDuration > 0 )
-  {
-    MESSAGE_BEGIN( MSG_ALL, gmsgSmallCnt, NULL );
-      WRITE_STRING( "Survive!" );
-      WRITE_COORD( 0 );
-    MESSAGE_END( );
-  }
+  if( misComplete && misHoldoutDeadline > 0 )
+    SendSmallCounter( "Survive!", 0 );
+
+  if( misComplete && misType == MISSION_FRAGS )
+    SendSmallCounter( FRAG_COUNTER_NAME, 0 );
 
   if( ( misComplete && !misLast ) || !misNr )
   {
@@ -3422,12 +3472,7 @@ void cPEHacking::CheckAllMissions( )
     if( misNr >= 2 && missionList[misNr-2][2][0] != '-' )
       FireTargets( missionList[misNr-2][2], NULL, NULL, USE_TOGGLE, 0 );
 
-    misHoldoutDuration = 0;
-    misHoldoutBonus = 0;
-    misHoldoutLastUpdate = 0;
-    misDefendZoneActive = false;
-    misDefendMins = g_vecZero;
-    misDefendMaxs = g_vecZero;
+    ResetHoldoutState( this );
 
     if( !strcmp( missionList[misNr-1][0], "random" ) )
     {
@@ -3466,7 +3511,6 @@ void cPEHacking::CheckAllMissions( )
       misType = RANDOM_LONG( MISSION_FRAGS, MISSION_OBJECT );
       break;
     }*/
-    misStart = gpGlobals->time;
     misComplete = false;
     StartMission( );
     return;

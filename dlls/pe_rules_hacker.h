@@ -100,18 +100,7 @@ public:
   void PlayerInitMission( CBasePlayer *plr );
   int RandomMission( bool reset = false );
   int RemainingFrags( );
-  const char *MissionParam( int missionIndex, const char *key );
-  void ParseMissionSpec( int missionIndex, const char *token );
-  void ResolveDefendZone( int missionIndex );
-  bool PointInDefendZone( const Vector &origin );
-  bool EntityInDefendZone( CBaseEntity *ent );
-  bool IsHoldoutActive( );
-  bool IsDefendZoneActive( );
-  bool HumanInDefendZone( );
-  void SendSmallCounterAdd( const char *name, float amount );
-  void AddHoldoutProgress( float amount );
-  float HoldoutRemaining( );
-  void UpdateHoldoutTimer( );
+  bool CreditZombieKill( CBasePlayer *plr, CBaseEntity *zombie );
   
   float misDone[20];
   float misReq[20];
@@ -124,10 +113,10 @@ public:
 
   int misType;
   int misNr;
-  float misStart;
-  float misHoldoutDuration;
-  float misHoldoutBonus;
+  float misHoldoutDeadline;
+  float misHoldoutTotal;
   float misHoldoutLastUpdate;
+  bool misDefendZoneConfigured;
   bool misDefendZoneActive;
   Vector misDefendMins;
   Vector misDefendMaxs;

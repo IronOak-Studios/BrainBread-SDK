@@ -664,10 +664,23 @@ public:
 	 float	fTotal;
 	 float	fStart;
 	 float	fProgressOffset;
+	 float	fBonusPopupCarry;
 	 char	sName[128];
 	 bool	iActive;
 	 bool	bManual;
  } m_sCounters[10];
+ struct _sCounterPopup
+ {
+	 bool iActive;
+	 int iCounter;
+	 float fStart;
+	 float fLife;
+	 int iStartX;
+	 int iStartY;
+	 int iDriftX;
+	 int iDriftY;
+	 char sText[16];
+ } m_sCounterPopups[12];
  int m_iNumCnts;
  float m_flRoundTime, m_fCntDown, m_fStep, m_fCntTotal;
  HSPRITE m_hSprite;

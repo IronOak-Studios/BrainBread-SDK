@@ -60,6 +60,7 @@ int CHudCounter::VidInit(void)
 	fTime = 0; 
 	m_hSprite = 0;
 	memset( m_sCounters, 0, sizeof(m_sCounters) );
+	memset( m_sCounterPopups, 0, sizeof(m_sCounterPopups) );
 	m_iNumCnts = 0;
 	m_flRoundTime = 0;
 	m_fCntDown = 0;
@@ -92,8 +93,16 @@ int CHudCounter::MsgFunc_SmallCnt( const char *pszName, int iSize, void *pbuf )
 	int i = 0;
 	char name[128];
 	BEGIN_READ( pbuf, iSize );
-	snprintf( name, sizeof(name), "%s", READ_STRING( ) );
+	char *msgName = READ_STRING( );
+	int nameLen = strlen( msgName );
+	snprintf( name, sizeof(name), "%s", msgName );
 	float total = READ_COORD( );
+	int remaining = iSize - nameLen - 1 - 2;
+	float initialProgress = remaining >= 2 ? READ_COORD( ) : 0;
+	if( initialProgress < 0 )
+		initialProgress = 0;
+	if( initialProgress > ( total < 0 ? -total : total ) )
+		initialProgress = total < 0 ? -total : total;
 	for( i = 0; i < 10; i++ )
 		if( !strcmp( name, m_sCounters[i].sName ) && m_sCounters[i].iActive )
 		{
@@ -101,7 +110,11 @@ int CHudCounter::MsgFunc_SmallCnt( const char *pszName, int iSize, void *pbuf )
 			m_sCounters[i].fTotal = total < 0 ? -total : total;
 			m_sCounters[i].iActive = m_sCounters[i].fTotal > 0 ? true : false;
 			m_sCounters[i].fStart = gEngfuncs.GetClientTime();
-			m_sCounters[i].fProgressOffset = 0;
+			m_sCounters[i].fProgressOffset = initialProgress;
+			m_sCounters[i].fBonusPopupCarry = 0;
+			for( int p = 0; p < 12; p++ )
+				if( m_sCounterPopups[p].iCounter == i )
+					m_sCounterPopups[p].iActive = false;
 			return 1;
 		}
 	for( i = 0; i < 10; i++ )
@@ -115,7 +128,8 @@ int CHudCounter::MsgFunc_SmallCnt( const char *pszName, int iSize, void *pbuf )
 	m_sCounters[i].fTotal = total < 0 ? -total : total;
 	m_sCounters[i].iActive = m_sCounters[i].fTotal > 0 ? true : false;
 	m_sCounters[i].fStart = gEngfuncs.GetClientTime();
-	m_sCounters[i].fProgressOffset = 0;
+	m_sCounters[i].fProgressOffset = initialProgress;
+	m_sCounters[i].fBonusPopupCarry = 0;
 
 	return 1;
 }
@@ -125,7 +139,8 @@ int CHudCounter::MsgFunc_SmallCntAdd( const char *pszName, int iSize, void *pbuf
 	char name[128];
 	BEGIN_READ( pbuf, iSize );
 	snprintf( name, sizeof(name), "%s", READ_STRING( ) );
-	float amount = READ_COORD( );
+	float absoluteProgress = READ_COORD( );
+	float popupAmount = READ_COORD( );
 	float curTime = gEngfuncs.GetClientTime();
 
 	for( int i = 0; i < 10; i++ )
@@ -133,12 +148,48 @@ int CHudCounter::MsgFunc_SmallCntAdd( const char *pszName, int iSize, void *pbuf
 		if( strcmp( name, m_sCounters[i].sName ) || !m_sCounters[i].iActive )
 			continue;
 
-		float progress = ( m_sCounters[i].bManual ? 0 : curTime - m_sCounters[i].fStart ) + m_sCounters[i].fProgressOffset + amount;
+		float progress = absoluteProgress;
 		if( progress < 0 )
 			progress = 0;
 		if( progress > m_sCounters[i].fTotal )
 			progress = m_sCounters[i].fTotal;
 		m_sCounters[i].fProgressOffset = progress - ( m_sCounters[i].bManual ? 0 : curTime - m_sCounters[i].fStart );
+
+		if( popupAmount > 0 )
+		{
+			m_sCounters[i].fBonusPopupCarry += popupAmount;
+			int popupAmountInt = (int)m_sCounters[i].fBonusPopupCarry;
+			if( popupAmountInt > 0 )
+			{
+				m_sCounters[i].fBonusPopupCarry -= popupAmountInt;
+
+				int popupSlot = -1;
+				for( int p = 0; p < 12; p++ )
+				{
+					if( !m_sCounterPopups[p].iActive )
+					{
+						popupSlot = p;
+						break;
+					}
+					if( popupSlot < 0 || m_sCounterPopups[p].fStart < m_sCounterPopups[popupSlot].fStart )
+						popupSlot = p;
+				}
+
+				if( popupSlot >= 0 )
+				{
+					int seed = (int)( curTime * 100.0f ) + popupSlot * 17 + i * 31 + popupAmountInt * 7;
+					m_sCounterPopups[popupSlot].iActive = true;
+					m_sCounterPopups[popupSlot].iCounter = i;
+					m_sCounterPopups[popupSlot].fStart = curTime;
+					m_sCounterPopups[popupSlot].fLife = 0.95f + ( seed % 7 ) * 0.05f;
+					m_sCounterPopups[popupSlot].iStartX = HudScale( ( seed % 9 ) - 4 );
+					m_sCounterPopups[popupSlot].iStartY = HudScale( ( ( seed / 3 ) % 7 ) - 3 );
+					m_sCounterPopups[popupSlot].iDriftX = HudScale( 12 + ( seed % 15 ) );
+					m_sCounterPopups[popupSlot].iDriftY = HudScale( 22 + ( ( seed / 5 ) % 17 ) );
+					snprintf( m_sCounterPopups[popupSlot].sText, sizeof(m_sCounterPopups[popupSlot].sText), "+%d", popupAmountInt );
+				}
+			}
+		}
 		return 1;
 	}
 
@@ -273,11 +324,31 @@ int CHudCounter::Draw( float flTime )
 		pcent = 100.0f * progress / m_sCounters[i].fTotal;
 		if( pcent > 100 )
 			pcent = 100;
-		if( g_iTeamNumber == 1 && strstr( m_sCounters[i].sName, "ombie" ) )
+		if( !m_sCounters[i].bManual && g_iTeamNumber == 1 && strstr( m_sCounters[i].sName, "ombie" ) )
 			smallProgressFaderBad->GetColor( pcent, r, g, b );
 		else
 			smallProgressFaderGood->GetColor( pcent, r, g, b );
 		UTIL_FillRect( cx + HudScale( 2 ), barTop + HudScale( 2 ), (cw - HudScale( 4 ))/m_sCounters[i].fTotal*progress, SMALL_BAR_HEIGHT - HudScale( 4 ), r, g, b, 255 );
+
+		for( int p = 0; p < 12; p++ )
+		{
+			if( !m_sCounterPopups[p].iActive || m_sCounterPopups[p].iCounter != i )
+				continue;
+
+			float life = curTime - m_sCounterPopups[p].fStart;
+			if( life >= m_sCounterPopups[p].fLife )
+			{
+				m_sCounterPopups[p].iActive = false;
+				continue;
+			}
+
+			float frac = life / m_sCounterPopups[p].fLife;
+			int alpha = (int)( ( 1.0f - frac ) * 255.0f );
+			int px = cx + cw + HudScale( 10 ) + m_sCounterPopups[p].iStartX + (int)( m_sCounterPopups[p].iDriftX * frac );
+			int py = barTop - HudScale( 5 ) + m_sCounterPopups[p].iStartY - (int)( m_sCounterPopups[p].iDriftY * frac );
+			g_font->DrawString( px + HudScale( 1 ), py + HudScale( 1 ), m_sCounterPopups[p].sText, 0, 0, 0, alpha / 2 );
+			g_font->DrawString( px, py, m_sCounterPopups[p].sText, 255, 220, 64, alpha );
+		}
 
 		m_iNumCnts++;		
 	}
